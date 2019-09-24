@@ -1,0 +1,23 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+packages/
+
+# User-specific files
+*.userprefs
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio profiler
+.vs/
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# NuGet Packages
+*.nupkg
+*.nuget.props
+*.nuget.targets
