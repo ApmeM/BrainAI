@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{05DB2824-59E4-43D8-8F96-CCB039528847}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BrainAI</RootNamespace>
+    <AssemblyName>BrainAI</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BehaviorTrees\Actions\BehaviorTreeReference.cs" />
+    <Compile Include="BehaviorTrees\Actions\ExecuteAction.cs" />
+    <Compile Include="BehaviorTrees\Actions\LogAction.cs" />
+    <Compile Include="BehaviorTrees\Behavior.cs" />
+    <Compile Include="BehaviorTrees\BehaviorTree.cs" />
+    <Compile Include="BehaviorTrees\BehaviorTreeBuilder.cs" />
+    <Compile Include="BehaviorTrees\Composites\AbortTypes.cs" />
+    <Compile Include="BehaviorTrees\Composites\Composite.cs" />
+    <Compile Include="BehaviorTrees\Composites\ParallelSelector.cs" />
+    <Compile Include="BehaviorTrees\Composites\ParallelSequence.cs" />
+    <Compile Include="BehaviorTrees\Composites\RandomSelector.cs" />
+    <Compile Include="BehaviorTrees\Composites\RandomSequence.cs" />
+    <Compile Include="BehaviorTrees\Composites\Selector.cs" />
+    <Compile Include="BehaviorTrees\Composites\Sequence.cs" />
+    <Compile Include="BehaviorTrees\Conditionals\ExecuteActionConditional.cs" />
+    <Compile Include="BehaviorTrees\Conditionals\IConditional.cs" />
+    <Compile Include="BehaviorTrees\Conditionals\RandomProbability.cs" />
+    <Compile Include="BehaviorTrees\Decorators\AlwaysFail.cs" />
+    <Compile Include="BehaviorTrees\Decorators\AlwaysSucceed.cs" />
+    <Compile Include="BehaviorTrees\Decorators\ConditionalDecorator.cs" />
+    <Compile Include="BehaviorTrees\Decorators\Decorator.cs" />
+    <Compile Include="BehaviorTrees\Decorators\Inverter.cs" />
+    <Compile Include="BehaviorTrees\Decorators\Repeater.cs" />
+    <Compile Include="BehaviorTrees\Decorators\UntilFail.cs" />
+    <Compile Include="BehaviorTrees\Decorators\UntilSuccess.cs" />
+    <Compile Include="BehaviorTrees\TaskStatus.cs" />
+    <Compile Include="Configuration.cs" />
+    <Compile Include="Config\DefaultLog.cs" />
+    <Compile Include="Config\DefaultRandom.cs" />
+    <Compile Include="Config\ILog.cs" />
+    <Compile Include="Config\IRandom.cs" />
+    <Compile Include="FSM\State.cs" />
+    <Compile Include="FSM\StateMachine.cs" />
+    <Compile Include="GOAP\ActionPlanner.cs" />
+    <Compile Include="GOAP\Agent.cs" />
+    <Compile Include="GOAP\GOAPAction.cs" />
+    <Compile Include="GOAP\GOAPActionT.cs" />
+    <Compile Include="GOAP\GOAPNode.cs" />
+    <Compile Include="GOAP\GOAPStorage.cs" />
+    <Compile Include="GOAP\GOAPWorld.cs" />
+    <Compile Include="GOAP\WorldState.cs" />
+    <Compile Include="IAITurn.cs" />
+    <Compile Include="Pathfinding\AStar\AstarGridGraph.cs" />
+    <Compile Include="Pathfinding\AStar\AStarPathfinder.cs" />
+    <Compile Include="Pathfinding\AStar\IAstarGraph.cs" />
+    <Compile Include="Pathfinding\BreadthFirst\BreadthFirstPathfinder.cs" />
+    <Compile Include="Pathfinding\BreadthFirst\IUnweightedGraph.cs" />
+    <Compile Include="Pathfinding\BreadthFirst\UnweightedGraph.cs" />
+    <Compile Include="Pathfinding\BreadthFirst\UnweightedGridGraph.cs" />
+    <Compile Include="Pathfinding\Dijkstra\IWeightedGraph.cs" />
+    <Compile Include="Pathfinding\Dijkstra\WeightedGridGraph.cs" />
+    <Compile Include="Pathfinding\Dijkstra\WeightedPathfinder.cs" />
+    <Compile Include="Pathfinding\Point.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UtilityAI\Actions\ActionExecutor.cs" />
+    <Compile Include="UtilityAI\Actions\ActionWithOptions.cs" />
+    <Compile Include="UtilityAI\Actions\CompositeAction.cs" />
+    <Compile Include="UtilityAI\Actions\IAction.cs" />
+    <Compile Include="UtilityAI\Actions\IActionOptionAppraisal.cs" />
+    <Compile Include="UtilityAI\Actions\LogAction.cs" />
+    <Compile Include="UtilityAI\Actions\ReasonerAction.cs" />
+    <Compile Include="UtilityAI\Considerations\AllOrNothingConsideration.cs" />
+    <Compile Include="UtilityAI\Considerations\Appraisals\ActionAppraisal.cs" />
+    <Compile Include="UtilityAI\Considerations\Appraisals\IAppraisal.cs" />
+    <Compile Include="UtilityAI\Considerations\FixedScoreConsideration.cs" />
+    <Compile Include="UtilityAI\Considerations\IConsideration.cs" />
+    <Compile Include="UtilityAI\Considerations\SumOfChildrenConsideration.cs" />
+    <Compile Include="UtilityAI\Considerations\ThresholdConsideration.cs" />
+    <Compile Include="UtilityAI\Reasoners\FirstScoreReasoner.cs" />
+    <Compile Include="UtilityAI\Reasoners\HighestScoreReasoner.cs" />
+    <Compile Include="UtilityAI\Reasoners\Reasoner.cs" />
+    <Compile Include="UtilityAI\UtilityAI.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
