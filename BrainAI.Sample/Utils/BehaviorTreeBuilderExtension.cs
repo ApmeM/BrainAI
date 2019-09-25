@@ -1,6 +1,6 @@
 ﻿namespace BrainAI.Sample.Utils
 {
-    using BrainAI.BehaviorTrees;
+    using BrainAI.AI.BehaviorTrees;
 
     public static class BehaviorTreeBuilderExtension
     {

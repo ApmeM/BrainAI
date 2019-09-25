@@ -3,11 +3,11 @@
     using System;
     using System.Collections.Generic;
 
-    using BrainAI.UtilityAI;
-    using BrainAI.UtilityAI.Actions;
-    using BrainAI.UtilityAI.Considerations;
-    using BrainAI.UtilityAI.Considerations.Appraisals;
-    using BrainAI.UtilityAI.Reasoners;
+    using BrainAI.AI.UtilityAI;
+    using BrainAI.AI.UtilityAI.Actions;
+    using BrainAI.AI.UtilityAI.Considerations;
+    using BrainAI.AI.UtilityAI.Considerations.Appraisals;
+    using BrainAI.AI.UtilityAI.Reasoners;
 
     /// <summary>
     /// Utility AI example of miner bob. Utility AI is the most complex of all the AI types to setup. The complexity comes with a lot of power

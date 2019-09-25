@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AI\BehaviorTreeMiner.cs" />
+    <Compile Include="AI\FSMMiner.cs" />
     <Compile Include="AI\GOAPMiner.cs" />
     <Compile Include="AI\MinerState.cs" />
     <Compile Include="AI\UtilityMiner.cs" />

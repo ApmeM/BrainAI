@@ -4,6 +4,7 @@ namespace BrainAI.Sample
 {
     using System.Threading;
 
+    using BrainAI.AI;
     using BrainAI.Sample.AI;
 
     internal class Program
@@ -23,7 +24,13 @@ namespace BrainAI.Sample
                     ai = BehaviorTreeMiner.BuildSelfAbortTree();
                     break;
                 case 3:
+                    ai = BehaviorTreeMiner.BuildLowerPriorityAbortTree();
+                    break;
+                case 4:
                     ai = GOAPMiner.BuildAI();
+                    break;
+                case 5:
+                    ai = FSMMiner.BuildAI();
                     break;
                 default:
                     throw new NotSupportedException($"AI type {aiType.Value} not supported.");
@@ -41,7 +48,9 @@ namespace BrainAI.Sample
             Console.WriteLine("Choose AI Implementation:");
             Console.WriteLine("1 - Utility");
             Console.WriteLine("2 - Behavior tree");
-            Console.WriteLine("3 - GOAP");
+            Console.WriteLine("3 - Behavior tree (lower priority)");
+            Console.WriteLine("4 - GOAP");
+            Console.WriteLine("5 - State machine");
             if (int.TryParse(Console.ReadLine(), out int result))
             {
                 return result;

@@ -3,8 +3,8 @@
     using System;
     using System.Collections.Generic;
 
-    using BrainAI.FSM;
-    using BrainAI.GOAP;
+    using BrainAI.AI.FSM;
+    using BrainAI.AI.GOAP;
 
     /// <summary>
     /// Goal Oriented Action Planning miner bob. Sets up Actions and uses the ActionPlanner to pick the appropriate action based on the world

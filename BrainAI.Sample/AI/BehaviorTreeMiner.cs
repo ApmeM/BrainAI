@@ -2,8 +2,8 @@
 {
     using System;
 
-    using BrainAI.BehaviorTrees;
-    using BrainAI.BehaviorTrees.Composites;
+    using BrainAI.AI.BehaviorTrees;
+    using BrainAI.AI.BehaviorTrees.Composites;
     using BrainAI.Sample.Utils;
 
     /// <summary>

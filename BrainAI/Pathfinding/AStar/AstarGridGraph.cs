@@ -9,13 +9,24 @@
     /// </summary>
     public class AstarGridGraph : IAstarGraph<Point>
     {
-        private readonly List<Point> dirs = new List<Point>
-        {
+        private static readonly Point[] CardinalDirs = {
             new Point( 1, 0 ),
             new Point( 0, -1 ),
             new Point( -1, 0 ),
             new Point( 0, 1 )
         };
+
+        private static readonly Point[] CompassDirs = {
+            new Point( 1, 0 ),
+            new Point( 1, -1 ),
+            new Point( 0, -1 ),
+            new Point( -1, -1 ),
+            new Point( -1, 0 ),
+            new Point( -1, 1 ),
+            new Point( 0, 1 ),
+            new Point( 1, 1 ),
+        };
+
 
         public HashSet<Point> Walls = new HashSet<Point>();
         public HashSet<Point> WeightedNodes = new HashSet<Point>();
@@ -23,12 +34,14 @@
         public int WeightedNodeWeight = 5;
 
         private readonly int width, height;
+        private readonly Point[] dirs;
         private readonly List<Point> neighbors = new List<Point>( 4 );
 
-        public AstarGridGraph( int width, int height )
+        public AstarGridGraph( int width, int height, bool allowDiagonalSearch = false)
         {
             this.width = width;
             this.height = height;
+            this.dirs = allowDiagonalSearch ? CompassDirs : CardinalDirs;
         }
 
         /// <summary>
