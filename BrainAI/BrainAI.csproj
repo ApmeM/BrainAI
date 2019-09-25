@@ -37,7 +37,6 @@
   <ItemGroup>
     <Compile Include="BehaviorTrees\Actions\BehaviorTreeReference.cs" />
     <Compile Include="BehaviorTrees\Actions\ExecuteAction.cs" />
-    <Compile Include="BehaviorTrees\Actions\LogAction.cs" />
     <Compile Include="BehaviorTrees\Behavior.cs" />
     <Compile Include="BehaviorTrees\BehaviorTree.cs" />
     <Compile Include="BehaviorTrees\BehaviorTreeBuilder.cs" />
@@ -45,13 +44,10 @@
     <Compile Include="BehaviorTrees\Composites\Composite.cs" />
     <Compile Include="BehaviorTrees\Composites\ParallelSelector.cs" />
     <Compile Include="BehaviorTrees\Composites\ParallelSequence.cs" />
-    <Compile Include="BehaviorTrees\Composites\RandomSelector.cs" />
-    <Compile Include="BehaviorTrees\Composites\RandomSequence.cs" />
     <Compile Include="BehaviorTrees\Composites\Selector.cs" />
     <Compile Include="BehaviorTrees\Composites\Sequence.cs" />
     <Compile Include="BehaviorTrees\Conditionals\ExecuteActionConditional.cs" />
     <Compile Include="BehaviorTrees\Conditionals\IConditional.cs" />
-    <Compile Include="BehaviorTrees\Conditionals\RandomProbability.cs" />
     <Compile Include="BehaviorTrees\Decorators\AlwaysFail.cs" />
     <Compile Include="BehaviorTrees\Decorators\AlwaysSucceed.cs" />
     <Compile Include="BehaviorTrees\Decorators\ConditionalDecorator.cs" />
@@ -61,11 +57,6 @@
     <Compile Include="BehaviorTrees\Decorators\UntilFail.cs" />
     <Compile Include="BehaviorTrees\Decorators\UntilSuccess.cs" />
     <Compile Include="BehaviorTrees\TaskStatus.cs" />
-    <Compile Include="Configuration.cs" />
-    <Compile Include="Config\DefaultLog.cs" />
-    <Compile Include="Config\DefaultRandom.cs" />
-    <Compile Include="Config\ILog.cs" />
-    <Compile Include="Config\IRandom.cs" />
     <Compile Include="FSM\State.cs" />
     <Compile Include="FSM\StateMachine.cs" />
     <Compile Include="GOAP\ActionPlanner.cs" />
@@ -94,7 +85,6 @@
     <Compile Include="UtilityAI\Actions\CompositeAction.cs" />
     <Compile Include="UtilityAI\Actions\IAction.cs" />
     <Compile Include="UtilityAI\Actions\IActionOptionAppraisal.cs" />
-    <Compile Include="UtilityAI\Actions\LogAction.cs" />
     <Compile Include="UtilityAI\Actions\ReasonerAction.cs" />
     <Compile Include="UtilityAI\Considerations\AllOrNothingConsideration.cs" />
     <Compile Include="UtilityAI\Considerations\Appraisals\ActionAppraisal.cs" />

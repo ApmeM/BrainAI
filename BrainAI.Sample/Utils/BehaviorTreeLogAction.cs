@@ -1,9 +1,13 @@
-﻿namespace BrainAI.BehaviorTrees.Actions
+﻿namespace BrainAI.Sample.Utils
 {
+    using System;
+
+    using BrainAI.BehaviorTrees;
+
     /// <summary>
     /// simple task which will output the specified text and return success. It can be used for debugging.
     /// </summary>
-    public class LogAction<T> : Behavior<T>
+    public class BehaviorTreeLogAction<T> : Behavior<T>
     {
         /// <summary>
         /// text to log
@@ -16,7 +20,7 @@
         public bool IsError;
 
 
-        public LogAction( string text )
+        public BehaviorTreeLogAction( string text )
         {
             this.Text = text;
         }
@@ -24,10 +28,10 @@
 
         public override TaskStatus Update( T context )
         {
-            if( this.IsError )
-                Configuration.Log.Error( this.Text );
+            if (this.IsError)
+                Console.WriteLine($"ERROR: {this.Text}");
             else
-                Configuration.Log.Info( this.Text );
+                Console.WriteLine($"INFO: {this.Text}");
 
             return TaskStatus.Success;
         }

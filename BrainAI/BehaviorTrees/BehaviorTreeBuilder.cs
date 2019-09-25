@@ -38,8 +38,13 @@
             return new BehaviorTreeBuilder<T>( context );
         }
 
-        private BehaviorTreeBuilder<T> SetChildOnParent( Behavior<T> child )
+        public BehaviorTreeBuilder<T> AddChildBehavior( Behavior<T> child )
         {
+            if (this.parentNodeStack.Count == 0)
+            {
+                throw new InvalidOperationException("Can't create an unnested Behavior node. It must be a leaf node.");
+            }
+
             var parent = this.parentNodeStack.Peek();
             if( parent is Composite<T> )
             {
@@ -64,7 +69,7 @@
         private BehaviorTreeBuilder<T> PushParentNode( Behavior<T> composite )
         {
             if( this.parentNodeStack.Count > 0 )
-                this.SetChildOnParent( composite );
+                this.AddChildBehavior( composite );
 
             this.parentNodeStack.Push( composite );
             return this;
@@ -80,12 +85,7 @@
 
         public BehaviorTreeBuilder<T> Action( Func<T,TaskStatus> func )
         {
-            if (this.parentNodeStack.Count == 0)
-            {
-                throw new InvalidOperationException("Can't create an unnested Action node. It must be a leaf node.");
-            }
-
-            return this.SetChildOnParent( new ExecuteAction<T>( func ) );
+            return this.AddChildBehavior( new ExecuteAction<T>( func ) );
         }
 
 
@@ -100,11 +100,7 @@
 
         public BehaviorTreeBuilder<T> Conditional( Func<T,TaskStatus> func )
         {
-            if (this.parentNodeStack.Count == 0)
-            {
-                throw new InvalidOperationException("Can't create an unnested Conditional node. It must be a leaf node.");
-            }
-            return this.SetChildOnParent( new ExecuteActionConditional<T>( func ) );
+            return this.AddChildBehavior( new ExecuteActionConditional<T>( func ) );
         }
 
 
@@ -115,27 +111,13 @@
         {
             return this.Conditional( t => func( t ) ? TaskStatus.Success : TaskStatus.Failure );
         }
-
-
-        public BehaviorTreeBuilder<T> LogAction( string text )
-        {
-            if (this.parentNodeStack.Count == 0)
-            {
-                throw new InvalidOperationException("Can't create an unnested LogAction node. It must be a leaf node.");
-            }
-            return this.SetChildOnParent( new LogAction<T>( text ) );
-        }
         
         /// <summary>
         /// Splice a sub tree into the parent tree.
         /// </summary>
         public BehaviorTreeBuilder<T> SubTree( BehaviorTree<T> subTree )
         {
-            if (this.parentNodeStack.Count == 0)
-            {
-                throw new InvalidOperationException("Can't splice an unnested sub tree, there must be a parent tree.");
-            }
-            return this.SetChildOnParent( new BehaviorTreeReference<T>( subTree ) );
+            return this.AddChildBehavior( new BehaviorTreeReference<T>( subTree ) );
         }
 
         #endregion
@@ -216,24 +198,11 @@
             return this.PushParentNode( new Selector<T>( abortType ) );
         }
 
-
-        public BehaviorTreeBuilder<T> RandomSelector()
-        {
-            return this.PushParentNode( new RandomSelector<T>() );
-        }
-
-
+        
         public BehaviorTreeBuilder<T> Sequence( AbortTypes abortType = AbortTypes.None )
         {
             return this.PushParentNode( new Sequence<T>( abortType ) );
         }
-
-
-        public BehaviorTreeBuilder<T> RandomSequence()
-        {
-            return this.PushParentNode( new RandomSequence<T>() );
-        }
-
 
         public BehaviorTreeBuilder<T> EndComposite()
         {

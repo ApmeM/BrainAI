@@ -29,13 +29,13 @@
                 return this.HasActionPlan();
             }
 
-            Configuration.Log.Info( "---- ActionPlanner plan ----" );
-            Configuration.Log.Info($"plan cost = {nodes[nodes.Count - 1].CostSoFar}\n");
-            Configuration.Log.Info($"{"start".PadRight(15)}\t{this.GetWorldState().Describe(this.Planner)}");
-            for( var i = 0; i < nodes.Count; i++ )
-            {
-                Configuration.Log.Info($"{i}: {nodes[i].Action.GetType().Name.PadRight(15)}\t{nodes[i].WorldState.Describe(this.Planner)}");
-            }
+            //---- ActionPlanner plan ----
+            //plan cost = {nodes[nodes.Count - 1].CostSoFar}
+            //start    {this.GetWorldState().Describe(this.Planner)}
+            //for ( var i = 0; i < nodes.Count; i++ )
+            //{
+                //{i}: {nodes[i].Action.GetType().Name}    {nodes[i].WorldState.Describe(this.Planner)}"
+            //}
 
             return this.HasActionPlan();
         }

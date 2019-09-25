@@ -4,9 +4,10 @@
 
     using BrainAI.BehaviorTrees;
     using BrainAI.BehaviorTrees.Composites;
+    using BrainAI.Sample.Utils;
 
     /// <summary>
-    /// implments our friend miner bob with behavior trees. The same tree is built using self abort and lower priority types to illustrate
+    /// implements our friend miner bob with behavior trees. The same tree is built using self abort and lower priority types to illustrate
     /// different ways of using behavior trees.
     /// </summary>
     public class BehaviorTreeMiner
@@ -97,34 +98,34 @@
             // sleep is most important
             builder.ConditionalDecorator( m => m.MinerState.Fatigue >= MinerState.MAX_FATIGUE, false );
             builder.Sequence()
-                .LogAction( "--- tired! gotta go home" )
+                .LogAction( "--- Tired! Gotta go home" )
                 .Action( m => m.GoToLocation( MinerState.Location.Home ) )
-                .LogAction( "--- prep me my bed!" )
+                .LogAction( "--- Prep me my bed!" )
                 .Action( m => m.Sleep() )
                 .EndComposite();
 
             // thirst is next most important
             builder.ConditionalDecorator( m => m.MinerState.Thirst >= MinerState.MAX_THIRST, false );
             builder.Sequence()
-                .LogAction( "--- thirsty! time for a drink" )
+                .LogAction( "--- Thirsty! Time for a drink" )
                 .Action( m => m.GoToLocation( MinerState.Location.Saloon ) )
-                .LogAction( "--- get me a drink!" )
+                .LogAction( "--- Get me a drink!" )
                 .Action( m => m.Drink() )
                 .EndComposite();
 
             // dropping off gold is next
             builder.ConditionalDecorator( m => m.MinerState.Gold >= MinerState.MAX_GOLD, false );
             builder.Sequence()
-                .LogAction( "--- bags are full! gotta drop this off at the bank." )
+                .LogAction( "--- Bags are full! Gotta drop this off at the bank." )
                 .Action( m => m.GoToLocation( MinerState.Location.Bank ) )
-                .LogAction( "--- take me gold!" )
+                .LogAction( "--- Take me gold!" )
                 .Action( m => m.DepositGold() )
                 .EndComposite();
 
             // fetching gold is last
             builder.Sequence()
                 .Action( m => m.GoToLocation( MinerState.Location.Mine ) )
-                .LogAction( "--- time to get me some gold!" )
+                .LogAction( "--- Time to get me some gold!" )
                 .Action( m => m.DigForGold() )
                 .EndComposite();
 
@@ -144,34 +145,34 @@
             // sleep is most important
             builder.Sequence( AbortTypes.LowerPriority )
                 .Conditional( m => m.MinerState.Fatigue >= MinerState.MAX_FATIGUE )
-                .LogAction( "--- tired! gotta go home" )
+                .LogAction( "--- Tired! Gotta go home" )
                 .Action( m => m.GoToLocation( MinerState.Location.Home ) )
-                .LogAction( "--- prep me my bed!" )
+                .LogAction( "--- Prep me my bed!" )
                 .Action( m => m.Sleep() )
                 .EndComposite();
 
             // thirst is next most important
             builder.Sequence( AbortTypes.LowerPriority )
                 .Conditional( m => m.MinerState.Thirst >= MinerState.MAX_THIRST )
-                .LogAction( "--- thirsty! time for a drink" )
+                .LogAction( "--- Thirsty! Time for a drink" )
                 .Action( m => m.GoToLocation( MinerState.Location.Saloon ) )
-                .LogAction( "--- get me a drink!" )
+                .LogAction( "--- Get me a drink!" )
                 .Action( m => m.Drink() )
                 .EndComposite();
 
             // dropping off gold is next
             builder.Sequence( AbortTypes.LowerPriority )
                 .Conditional( m => m.MinerState.Gold >= MinerState.MAX_GOLD )
-                .LogAction( "--- bags are full! gotta drop this off at the bank." )
+                .LogAction( "--- Bags are full! Gotta drop this off at the bank." )
                 .Action( m => m.GoToLocation( MinerState.Location.Bank ) )
-                .LogAction( "--- take me gold!" )
+                .LogAction( "--- Take me gold!" )
                 .Action( m => m.DepositGold() )
                 .EndComposite();
 
             // fetching gold is last
             builder.Sequence()
                 .Action( m => m.GoToLocation( MinerState.Location.Mine ) )
-                .LogAction( "--- time to get me some gold!" )
+                .LogAction( "--- Time to get me some gold!" )
                 .Action( m => m.DigForGold() )
                 .EndComposite();
 
