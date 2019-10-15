@@ -78,7 +78,15 @@
     <Compile Include="Pathfinding\Dijkstra\IWeightedGraph.cs" />
     <Compile Include="Pathfinding\Dijkstra\WeightedGridGraph.cs" />
     <Compile Include="Pathfinding\Dijkstra\WeightedPathfinder.cs" />
+    <Compile Include="Pathfinding\Fields\Fading\LinearDistanceFading.cs" />
+    <Compile Include="Pathfinding\Fields\Fading\NoDistanceFading.cs" />
+    <Compile Include="Pathfinding\Fields\Fading\WallDistanceFading.cs" />
+    <Compile Include="Pathfinding\Fields\Fading\NPowDistanceFading.cs" />
+    <Compile Include="Pathfinding\Fields\Fading\TripleDistanceFading.cs" />
     <Compile Include="Pathfinding\Point.cs" />
+    <Compile Include="Pathfinding\Fields\Fading\IFading.cs" />
+    <Compile Include="Pathfinding\Fields\Fading\QuadDistanceFading.cs" />
+    <Compile Include="Pathfinding\Fields\InfluenceMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AI\UtilityAI\Actions\ActionExecutor.cs" />
     <Compile Include="AI\UtilityAI\Actions\ActionWithOptions.cs" />
