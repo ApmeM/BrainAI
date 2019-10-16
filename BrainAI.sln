@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29306.81
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrainAI", "BrainAI\BrainAI.csproj", "{05DB2824-59E4-43D8-8F96-CCB039528847}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrainAI", "BrainAI\BrainAI.csproj", "{05DB2824-59E4-43D8-8F96-CCB039528847}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrainAI.Sample", "BrainAI.Sample\BrainAI.Sample.csproj", "{8B3738F4-C0FB-4047-8BBF-DD8B6AB276D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrainAI.Sample", "BrainAI.Sample\BrainAI.Sample.csproj", "{8B3738F4-C0FB-4047-8BBF-DD8B6AB276D9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
