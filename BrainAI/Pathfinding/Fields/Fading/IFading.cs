@@ -2,6 +2,6 @@
 {
     public interface IFading
     {
-        Point GetForce(Point chargePoint, float chargeValue, Point atPosition);
+        Point GetForce(Point vector, float chargeValue);
     }
 }
