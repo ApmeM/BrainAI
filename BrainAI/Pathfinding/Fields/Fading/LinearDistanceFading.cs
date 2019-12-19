@@ -4,6 +4,13 @@
 
     public class LinearDistanceFading : IFading
     {
+        private readonly double distanceEffectValue;
+
+        public LinearDistanceFading(double distanceEffectValue)
+        {
+            this.distanceEffectValue = distanceEffectValue;
+        }
+
         public Point GetForce(Point vector, float chargeValue)
         {
             var vectorX = vector.X;
@@ -14,11 +21,11 @@
             double affectPower;
             if (chargeValue > 0)
             {
-                affectPower = chargeValue - Math.Min(chargeValue, dist);
+                affectPower = chargeValue - Math.Min(chargeValue, dist * this.distanceEffectValue);
             }
             else
             {
-                affectPower = chargeValue + Math.Min(-chargeValue, dist);
+                affectPower = chargeValue + Math.Min(-chargeValue, dist * this.distanceEffectValue);
             }
 
             return new Point(
