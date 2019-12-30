@@ -43,9 +43,8 @@
 
         public static List<T> Search<T>( IUnweightedGraph<T> graph, T start, T goal )
         {
-            Dictionary<T, T> cameFrom;
-            var foundPath = Search( graph, start, goal, out cameFrom );
-            return foundPath ? AStarPathfinder.RecontructPath( cameFrom, start, goal ) : null;
+            var foundPath = Search( graph, start, goal, out var cameFrom );
+            return foundPath ? PathConstructor.RecontructPath( cameFrom, start, goal ) : null;
         }
     }
 }

@@ -1,6 +1,8 @@
-﻿namespace BrainAI.Pathfinding.Fields.Fading
+﻿namespace BrainAI.InfluenceMap.Fading
 {
     using System;
+
+    using BrainAI.Pathfinding;
 
     public class NPowDistanceFading : IFading
     {
@@ -18,7 +20,7 @@
 
             var quadDist = vectorX * vectorX + vectorY * vectorY;
             var dist = Math.Sqrt(quadDist);
-            var affectPower = chargeValue / Math.Pow(quadDist, pow / 2);
+            var affectPower = chargeValue / Math.Pow(quadDist, this.pow / 2);
 
             return new Point(
                 (int)(vectorX / dist * affectPower),

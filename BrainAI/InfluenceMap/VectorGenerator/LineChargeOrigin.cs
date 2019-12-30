@@ -1,16 +1,18 @@
-﻿namespace BrainAI.Pathfinding.Fields.Fading
+﻿namespace BrainAI.InfluenceMap.VectorGenerator
 {
     using System;
+
+    using BrainAI.Pathfinding;
 
     public class LineChargeOrigin : IChargeOrigin
     {
 
         public LineChargeOrigin(Point p1, Point p2)
         {
-            P1 = p1;
-            P2 = p2;
-            V = new Point(p2.X - p1.X, p2.Y - p1.Y);
-            VP = new Point(V.Y, -V.X);
+            this.P1 = p1;
+            this.P2 = p2;
+            this.V = new Point(p2.X - p1.X, p2.Y - p1.Y);
+            this.VP = new Point(this.V.Y, -this.V.X);
         }
 
         public Point P1 { get; set; }
@@ -21,21 +23,21 @@
 
         public Point GetVector(Point toPoint)
         {
-            var x1 = P1.X;
-            var y1 = P1.Y;
-            var x2 = P2.X;
-            var y2 = P2.Y;
+            var x1 = this.P1.X;
+            var y1 = this.P1.Y;
+            var x2 = this.P2.X;
+            var y2 = this.P2.Y;
             var x3 = toPoint.X;
             var y3 = toPoint.Y;
-            var x4 = toPoint.X + VP.X;
-            var y4 = toPoint.Y + VP.Y;
+            var x4 = toPoint.X + this.VP.X;
+            var y4 = toPoint.Y + this.VP.Y;
 
             var length = ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
             float x, y;
             if (Math.Abs(length) < 0.000001)
             {
-                x = P1.X;
-                y = P1.Y;
+                x = this.P1.X;
+                y = this.P1.Y;
             }
             else
             {
@@ -48,7 +50,7 @@
 
         public override string ToString()
         {
-            return $"Line ({P1} - {P2})";
+            return $"Line ({this.P1} - {this.P2})";
         }
     }
 }

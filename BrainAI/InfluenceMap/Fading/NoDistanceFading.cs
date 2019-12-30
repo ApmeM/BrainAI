@@ -1,6 +1,8 @@
-﻿namespace BrainAI.Pathfinding.Fields.Fading
+﻿namespace BrainAI.InfluenceMap.Fading
 {
     using System;
+
+    using BrainAI.Pathfinding;
 
     public class NoDistanceFading : IFading
     {

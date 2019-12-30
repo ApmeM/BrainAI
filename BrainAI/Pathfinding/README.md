@@ -104,34 +104,3 @@ graph.Walls.Add(new Point(5, 5))
 // calculate the path
 var path = graph.Search( new Point( 3, 4 ), new Point( 7, 7 ) );
 ```
-
-
-
-## Influence map
-Influence map based on vector implementation.
-Usage of influence map in ai implementation provide easy way to avoid obstacles on the way or prevent colliding with danger objects.
-
-Below is an example of using the `InfluenceMap`. 
-
-
-```csharp
-
-// Initialize influence map
-var influenceMap = new InfluenceMap();
-
-// Add some obstacles that should be avoided but their effect should be on a very close distance
-influenceMap.Charges.Add( new InfluenceMap.Charge { Point = new Point(70, 10), Value = -5120000, Fading = InfluenceMap.QuadQuadDistanceFading });
-influenceMap.Charges.Add( new InfluenceMap.Charge { Point = new Point(30, 50), Value = -5120000, Fading = InfluenceMap.QuadQuadDistanceFading });
-
-// Add bonus that should attract bot from everywhere on a map
-influenceMap.Charges.Add( new InfluenceMap.Charge { Point = new Point(30, 30), Value = 320,      Fading = InfluenceMap.ConstantFading });
-
-// Add map border that is pushing bot away (vectors are just describing perpendicular to the wall and it direction does not metter. Use Value to attract or push away.)
-influenceMap.Charges.Add( new InfluenceMap.Charge { Point = new Point(0,     0), Value = -640000,  Fading = new WallDistanceFading( 0,  1) });
-influenceMap.Charges.Add( new InfluenceMap.Charge { Point = new Point(0,     0), Value = -640000,  Fading = new WallDistanceFading( 1,  0) });
-influenceMap.Charges.Add( new InfluenceMap.Charge { Point = new Point(100, 100), Value = -640000,  Fading = new WallDistanceFading( 1,  0) });
-influenceMap.Charges.Add( new InfluenceMap.Charge { Point = new Point(100, 100), Value = -640000,  Fading = new WallDistanceFading( 0,  1) });
-
-// calculate the vector
-var direction = influenceMap.FindForceDirection( new Point( 3, 4 ) );
-```

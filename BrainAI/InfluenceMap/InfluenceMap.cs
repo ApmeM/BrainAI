@@ -1,8 +1,10 @@
-﻿namespace BrainAI.Pathfinding.Fields
+﻿namespace BrainAI.InfluenceMap
 {
     using System.Collections.Generic;
 
-    using BrainAI.Pathfinding.Fields.Fading;
+    using BrainAI.InfluenceMap.Fading;
+    using BrainAI.InfluenceMap.VectorGenerator;
+    using BrainAI.Pathfinding;
 
     public class InfluenceMap
     {
@@ -36,7 +38,7 @@
 
             public override string ToString()
             {
-                return $"{Name ?? "Charge"} at {Origin} with {Value}";
+                return $"{this.Name ?? "Charge"} at {this.Origin} with {this.Value}";
             }
         }
     }

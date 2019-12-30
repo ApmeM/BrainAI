@@ -1,6 +1,8 @@
-﻿namespace BrainAI.Pathfinding.Fields.Fading
+﻿namespace BrainAI.InfluenceMap.Fading
 {
     using System;
+
+    using BrainAI.Pathfinding;
 
     public class ConstantInRadiusFading : IFading
     {
@@ -13,7 +15,7 @@
 
         public Point GetForce(Point vector, float chargeValue)
         {
-            var quadRadius = radius * radius;
+            var quadRadius = this.radius * this.radius;
 
             var vectorX = vector.X;
             var vectorY = vector.Y;
