@@ -2,8 +2,6 @@
 {
     using System.Collections.Generic;
 
-    using BrainAI.Pathfinding.AStar;
-
     /// <summary>
     /// calculates paths given an IUnweightedGraph and start/goal positions
     /// </summary>
@@ -45,6 +43,56 @@
         {
             var foundPath = Search( graph, start, goal, out var cameFrom );
             return foundPath ? PathConstructor.RecontructPath( cameFrom, start, goal ) : null;
+        }
+
+        public static bool Search<T>( IUnweightedGraph<T> graph, T start, HashSet<T> goals, out Dictionary<T,T> cameFrom )
+        {
+            var foundPath = false;
+            var frontier = new Queue<T>();
+            frontier.Enqueue( start );
+
+            cameFrom = new Dictionary<T,T>();
+            cameFrom.Add( start, start );
+
+            while( frontier.Count > 0 )
+            {
+                var current = frontier.Dequeue();
+                if(goals.Contains(current))
+                {
+                    foundPath = true;
+                    break;
+                }
+
+                foreach( var next in graph.GetNeighbors( current ) )
+                {
+                    if( !cameFrom.ContainsKey( next ) )
+                    {
+                        frontier.Enqueue( next );
+                        cameFrom.Add( next, current );
+                    }
+                }
+            }
+
+            return foundPath;
+        }
+        
+        public static List<T> Search<T>( IUnweightedGraph<T> graph, T start, HashSet<T> goals )
+        {
+            var foundPath = Search( graph, start, goals, out var cameFrom );
+            if (!foundPath)
+            {
+                return null;
+            }
+
+            foreach (var goal in goals)
+            {
+                if (cameFrom.ContainsKey(goal))
+                {
+                    return PathConstructor.RecontructPath(cameFrom, start, goal);
+                }
+            }
+
+            return null;
         }
     }
 }
