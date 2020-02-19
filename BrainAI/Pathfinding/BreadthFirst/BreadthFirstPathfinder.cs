@@ -94,6 +94,45 @@
 
             return null;
         }
+
+
+        public static void Search<T>(IUnweightedGraph<T> graph, T start, int length, out Dictionary<T, T> cameFrom)
+        {
+            var frontier = new Queue<T>();
+            frontier.Enqueue(start);
+
+            cameFrom = new Dictionary<T, T>();
+            cameFrom.Add(start, start);
+
+            var forNextLevel = 1;
+
+            while (frontier.Count > 0)
+            {
+                var current = frontier.Dequeue();
+
+                foreach (var next in graph.GetNeighbors(current))
+                {
+                    if (!cameFrom.ContainsKey(next))
+                    {
+                        frontier.Enqueue(next);
+                        cameFrom.Add(next, current);
+                    }
+                }
+
+                forNextLevel--;
+                if (forNextLevel == 0)
+                {
+                    forNextLevel = frontier.Count;
+                    length--;
+
+                    if (length == 0)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
     }
 }
 

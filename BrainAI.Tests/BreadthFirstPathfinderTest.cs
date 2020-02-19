@@ -87,5 +87,49 @@ namespace BrainAI.Tests
             var result = BreadthFirstPathfinder.Search(target, new Point(1, 1), new Point(2, 2));
             Assert.AreEqual(null, result);
         }
+
+        [Test]
+        public void Search_Distance_DictionaryContainsOnlyFound()
+        {
+            /*
+             _#__
+             #0#_
+             ____
+             ____
+            */
+            var target = new UnweightedGridGraph(10, 10);
+            target.Walls.Add(new Point(2, 1));
+            target.Walls.Add(new Point(1, 0));
+            target.Walls.Add(new Point(0, 1));
+            BreadthFirstPathfinder.Search(target, new Point(1, 1), 2, out var comefrom);
+            Assert.AreEqual(5, comefrom.Count());
+            Assert.IsTrue(comefrom.ContainsKey(new Point(1, 1)));
+            Assert.IsTrue(comefrom.ContainsKey(new Point(1, 2)));
+            Assert.IsTrue(comefrom.ContainsKey(new Point(1, 3)));
+            Assert.IsTrue(comefrom.ContainsKey(new Point(2, 2)));
+            Assert.IsTrue(comefrom.ContainsKey(new Point(0, 2)));
+        }
+
+        [Test]
+        public void Search_DistanceNoWay_ContainsOnlyReachable()
+        {
+            /*
+             _#__
+             #0#_
+             #_#_
+             _#__
+            */
+            var target = new UnweightedGridGraph(10, 10);
+            target.Walls.Add(new Point(2, 1));
+            target.Walls.Add(new Point(2, 2));
+            target.Walls.Add(new Point(0, 2));
+            target.Walls.Add(new Point(1, 3));
+            target.Walls.Add(new Point(1, 0));
+            target.Walls.Add(new Point(0, 1));
+            BreadthFirstPathfinder.Search(target, new Point(1, 1), 2, out var comefrom);
+            Assert.AreEqual(2, comefrom.Count());
+            Assert.IsTrue(comefrom.ContainsKey(new Point(1, 1)));
+            Assert.IsTrue(comefrom.ContainsKey(new Point(1, 2)));
+        }
     }
 }
