@@ -1,0 +1,50 @@
+name: .NET Core NuGet Pack
+
+on:
+  push:
+    tags: v*
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v1
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 2.2.108
+
+    - name: Setup Nuget.exe
+      uses: warrenbuckley/Setup-Nuget@v1
+
+    - name: Build with dotnet
+      run: dotnet build --configuration Release
+
+    - name: Test with nunit
+      run: dotnet test --verbosity normal
+
+    - name: Pack with nuget
+      run: |
+           mkdir ./artifacts
+           nuget pack BrainAI/BrainAI.nuspec -OutputDirectory ./artifacts -Version $Env:GITHUB_REF.substring(11)
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: artifacts
+        path: ./artifacts
+
+    - name: Setup nuget config
+      run: nuget.exe sources add -name github -source "https://nuget.pkg.github.com/apmem/index.json" -username ${{ github.actor }} -password ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload to GitHub Packages
+      run: |
+           for f in ./artifacts/*.nupkg
+           do
+             nuget push $f -Source "github"
+           done
+      shell: bash
