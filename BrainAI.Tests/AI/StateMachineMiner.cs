@@ -1,11 +1,11 @@
-﻿namespace BrainAI.Sample.AI
+﻿namespace BrainAI.Tests.AI
 {
     using System;
 
     using BrainAI.AI;
     using BrainAI.AI.FSM;
 
-    public class FSMMiner
+    public class StateMachineMiner
     {
         public static IAITurn BuildAI()
         {

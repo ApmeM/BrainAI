@@ -1,4 +1,4 @@
-﻿namespace BrainAI.Sample.AI
+﻿namespace BrainAI.Tests.AI
 {
     public class MinerState
     {

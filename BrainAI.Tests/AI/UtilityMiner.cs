@@ -1,4 +1,4 @@
-﻿namespace BrainAI.Sample.AI
+﻿namespace BrainAI.Tests.AI
 {
     using System;
     using System.Collections.Generic;

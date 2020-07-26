@@ -1,10 +1,9 @@
-﻿namespace BrainAI.Sample.AI
+﻿namespace BrainAI.Tests.AI
 {
     using System;
 
     using BrainAI.AI.BehaviorTrees;
     using BrainAI.AI.BehaviorTrees.Composites;
-    using BrainAI.Sample.Utils;
 
     /// <summary>
     /// implements our friend miner bob with behavior trees. The same tree is built using self abort and lower priority types to illustrate
@@ -179,6 +178,46 @@
             builder.EndComposite();
 
             return builder.Build();
+        }
+    }
+    public static class BehaviorTreeBuilderExtension
+    {
+        public static BehaviorTreeBuilder<T> LogAction<T>(this BehaviorTreeBuilder<T> builder, string text)
+        {
+            return builder.AddChildBehavior(new BehaviorTreeLogAction<T>(text));
+        }
+    }
+
+    /// <summary>
+    /// simple task which will output the specified text and return success. It can be used for debugging.
+    /// </summary>
+    public class BehaviorTreeLogAction<T> : Behavior<T>
+    {
+        /// <summary>
+        /// text to log
+        /// </summary>
+        public string Text;
+
+        /// <summary>
+        /// is this text an error
+        /// </summary>
+        public bool IsError;
+
+
+        public BehaviorTreeLogAction(string text)
+        {
+            this.Text = text;
+        }
+
+
+        public override TaskStatus Update(T context)
+        {
+            if (this.IsError)
+                Console.WriteLine($"ERROR: {this.Text}");
+            else
+                Console.WriteLine($"INFO: {this.Text}");
+
+            return TaskStatus.Success;
         }
     }
 }
