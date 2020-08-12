@@ -27,21 +27,21 @@
 
         public HashSet<Point> Walls = new HashSet<Point>();
 
-        private readonly int width, height;
+        public readonly int Width, Height;
         private readonly Point[] dirs;
         private readonly List<Point> neighbors = new List<Point>( 4 );
 
 
         public UnweightedGridGraph( int width, int height, bool allowDiagonalSearch = false )
         {
-            this.width = width;
-            this.height = height;
+            this.Width = width;
+            this.Height = height;
             this.dirs = allowDiagonalSearch ? CompassDirs : CardinalDirs;
         }
 
         public bool IsNodeInBounds( Point node )
         {
-            return 0 <= node.X && node.X < this.width && 0 <= node.Y && node.Y < this.height;
+            return 0 <= node.X && node.X < this.Width && 0 <= node.Y && node.Y < this.Height;
         }
 
 
