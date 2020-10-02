@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>BrainAI-BridgeNet</id>
+    <version>1.0.0</version>
+    <title>BrainAI for Bridge.Net</title>
+    <authors>ApmeM</authors>
+    <owners>ApmeM</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>BrainAI is a set of helper classes to add AI to your game.</description>
+    <copyright>Copyright © ApmeM 2019</copyright>
+    <dependencies>
+      <group targetFramework="net48">
+        <dependency id="Retyped.dom" version="2.8.6733" />
+        <dependency id="Bridge" version="17.6.0" />
+      </group>
+    </dependencies>
+    <repository type="git" url="https://github.com/ApmeM/BrainAI.git" />        
+  </metadata>
+  <files>
+     <file src="bin\Release\net48\BrainAI.dll" target="lib/net48" />
+     <file src="bin\Release\net48\bridge\**\*.*" target="content" /> 
+  </files>
+</package>

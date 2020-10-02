@@ -1,0 +1,46 @@
+name: Build
+
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md' 
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v1
+
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 2.2.108
+
+    - name: Setup msbuild
+      uses: microsoft/setup-msbuild@v1.0.1
+
+    - name: Setup nuget
+      uses: nuget/setup-nuget@v1
+      with:
+        nuget-version: 'latest'
+
+    - name: Build with dotnet
+      run: dotnet build --configuration Release
+
+    - name: Test with nunit
+      run: dotnet test --verbosity normal
+
+    - name: Remove File
+      run: Remove-Item –path ./BrainAI/obj –recurse
+
+    - name: Restore packages with nuget
+      run: msbuild ./BrainAI/BrainAI-BridgeNet.csproj /restore /property:Configuration=Release
+
+    - name: Build with msbuild
+      run: msbuild ./BrainAI/BrainAI-BridgeNet.csproj /property:Configuration=Release

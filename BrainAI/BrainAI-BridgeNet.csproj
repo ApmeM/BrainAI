@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Authors>ApmeM</Authors>
+    <Company>ApmeM</Company>
+    <Copyright>Copyright ©  2019</Copyright>
+    <Configurations>Debug;Release</Configurations>
+    <TargetFramework>net48</TargetFramework>
+    <TargetFrameworks>net48</TargetFrameworks> 
+    <DefineConstants>Bridge</DefineConstants> 
+    <AssemblyName>BrainAI</AssemblyName> 
+    <RootNamespace>BrainAI</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="obj\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <None Remove="obj\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Retyped.dom" Version="2.8.6733" />
+    <PackageReference Include="Bridge" Version="17.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+    <_Parameter1>BrainAI.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>
