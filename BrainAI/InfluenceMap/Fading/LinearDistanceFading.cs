@@ -19,20 +19,27 @@
             var vectorY = vector.Y;
 
             var quadDist = vectorX * vectorX + vectorY * vectorY;
-            var dist = Math.Sqrt(quadDist);
-            double affectPower;
-            if (chargeValue > 0)
-            {
-                affectPower = chargeValue - Math.Min(chargeValue, dist * this.distanceEffectValue);
-            }
-            else
-            {
-                affectPower = chargeValue + Math.Min(-chargeValue, dist * this.distanceEffectValue);
-            }
+            var dist = (float)Math.Sqrt(quadDist);
+            var affectPower = GetPower(dist, chargeValue);
 
             return new Point(
                 (int)(vectorX / dist * affectPower),
                 (int)(vectorY / dist * affectPower));
+        }
+
+        public float GetPower(float distance, float chargeValue)
+        {
+            float affectPower;
+            if (chargeValue > 0)
+            {
+                affectPower = chargeValue - (float)Math.Min(chargeValue, distance * this.distanceEffectValue);
+            }
+            else
+            {
+                affectPower = chargeValue + (float)Math.Min(-chargeValue, distance * this.distanceEffectValue);
+            }
+
+            return affectPower;
         }
     }
 }

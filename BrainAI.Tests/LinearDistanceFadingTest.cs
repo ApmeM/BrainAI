@@ -1,11 +1,9 @@
-﻿using BrainAI.InfluenceMap.Fading;
-using BrainAI.Pathfinding;
-using BrainAI.Pathfinding.BreadthFirst;
-using NUnit.Framework;
-using System.Linq;
-
-namespace BrainAI.Tests
+﻿namespace BrainAI.Tests
 {
+    using BrainAI.InfluenceMap.Fading;
+    using BrainAI.Pathfinding;
+    using NUnit.Framework;
+
     [TestFixture]
     public class LinearDistanceFadingTest
     {

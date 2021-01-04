@@ -6,14 +6,8 @@
     using BrainAI.InfluenceMap.VectorGenerator;
     using BrainAI.Pathfinding;
 
-    public class InfluenceMap
+    public class VectorInfluenceMap
     {
-        public static readonly IFading NoDistanceFading = new NoDistanceFading();
-        public static readonly IFading LinearDistanceFading = new LinearDistanceFading(1);
-        public static readonly IFading DistanceFading = new NPowDistanceFading(1);
-        public static readonly IFading QuadDistanceFading = new NPowDistanceFading(2);
-        public static readonly IFading TripleDistanceFading = new NPowDistanceFading(3);
-
         public readonly List<Charge> Charges = new List<Charge>();
 
         public Point FindForceDirection(Point atPosition)
