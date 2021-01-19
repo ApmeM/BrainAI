@@ -1,4 +1,4 @@
-#BrainAI
+BrainAI
 ==========
 BrainAI is a set of helper classes to add AI to your game.
 
@@ -6,6 +6,7 @@ BrainAI is a set of helper classes to add AI to your game.
 - [Pathfinding](BrainAI/Pathfinding/README.md)
 - [InfluenceMap](BrainAI/InfluenceMap/README.md)
 
-##Credits
+Credits
+==========
 
 - [**Nez**](https://github.com/prime31/Nez) - ![GitHub stars](https://img.shields.io/github/stars/prime31/Nez.svg) - 2D game engine.
