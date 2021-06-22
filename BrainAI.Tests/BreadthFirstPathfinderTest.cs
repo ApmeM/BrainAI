@@ -131,5 +131,21 @@ namespace BrainAI.Tests
             Assert.IsTrue(comefrom.ContainsKey(new Point(1, 1)));
             Assert.IsTrue(comefrom.ContainsKey(new Point(1, 2)));
         }
+
+        [Test]
+        public void Search_DistanceZero_ContainsOnlyOneItem()
+        {
+            /*
+             _#__
+             _0__
+             ____
+             ____
+            */
+            var target = new UnweightedGridGraph(10, 10);
+            target.Walls.Add(new Point(1, 0));
+            BreadthFirstPathfinder.Search(target, new Point(1, 1), 0, out var comefrom);
+            Assert.AreEqual(1, comefrom.Count());
+            Assert.IsTrue(comefrom.ContainsKey(new Point(1, 1)));
+        }
     }
 }

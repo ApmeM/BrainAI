@@ -106,7 +106,7 @@
 
             var forNextLevel = 1;
 
-            while (frontier.Count > 0)
+            while (frontier.Count > 0 && length > 0)
             {
                 var current = frontier.Dequeue();
 
@@ -124,11 +124,6 @@
                 {
                     forNextLevel = frontier.Count;
                     length--;
-
-                    if (length == 0)
-                    {
-                        break;
-                    }
                 }
             }
         }
