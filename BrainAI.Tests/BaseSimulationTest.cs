@@ -21,53 +21,85 @@ namespace BrainAI.Tests
 
         class TicTacToePlayer : IPlayer<GameState, int>
         {
-            private readonly FieldState playerValue;
-            private readonly FieldState opponentValue;
+            public readonly FieldState playerValue;
 
-            public int ScoreRequested = 0;
-
-            public TicTacToePlayer(FieldState playerValue, FieldState opponentValue)
+            public TicTacToePlayer(FieldState playerValue)
             {
                 this.playerValue = playerValue;
-                this.opponentValue = opponentValue;
             }
 
             public List<int> AvailableActions(GameState state)
             {
-                if (Score(state) != 0) {
-                    return null;
-                }
-
-                var actions = state.Field.Cast<FieldState>()
+                return state.Field.Cast<FieldState>()
                     .Select((FieldState a, int b) => new Tuple<FieldState, int>(a, b))
                     .Where(a => a.Item1 == FieldState._)
                     .Select(a => a.Item2)
                     .ToList();
-
-                if (actions.Count == 0){
-                    return null;
-                }
-
-                return actions;
             }
+        }
 
-            public GameState ApplyAction(GameState state, int selectedAction)
+        class TicTacToeGame : IGame<GameState, int>
+        {
+            public int ScoreRequested = 0;
+
+            public GameState ApplyAction(GameState state, params Tuple<IPlayer<GameState, int>, int>[] selectedActions)
             {
+                var xCount = state.Field.Cast<FieldState>()
+                    .Select((FieldState a, int b) => new Tuple<FieldState, int>(a, b))
+                    .Where(a => a.Item1 == FieldState.X)
+                    .Select(a => a.Item2)
+                    .Count();
+                var oCount = state.Field.Cast<FieldState>()
+                    .Select((FieldState a, int b) => new Tuple<FieldState, int>(a, b))
+                    .Where(a => a.Item1 == FieldState.O)
+                    .Select(a => a.Item2)
+                    .Count();
+                var _Count = state.Field.Cast<FieldState>()
+                    .Select((FieldState a, int b) => new Tuple<FieldState, int>(a, b))
+                    .Where(a => a.Item1 == FieldState._)
+                    .Select(a => a.Item2)
+                    .Count();
+
+                var playerAction = selectedActions.Length == 1 ? selectedActions[0] :
+                                                xCount == oCount ? selectedActions[0] : 
+                                                selectedActions[1];
+
+                var selectedAction = playerAction.Item2;
+                var player = (TicTacToePlayer)playerAction.Item1;
                 var result = new GameState();
                 result.Field = state.Field.ToArray();
-                result.Field[selectedAction] = this.playerValue;
+                if (result.Field[selectedAction] == FieldState._)
+                {
+                    result.Field[selectedAction] = player.playerValue;
+                }
+
                 return result;
             }
 
-            public int Score(GameState state)
+            public List<int> AllAvailableActions()
             {
-                ScoreRequested ++;
-                if (CheckWinner(state, this.playerValue))
+                return new List<int>{
+                    0,1,2,3,4,5,6,7,8
+                };
+            }
+
+            public bool IsGameOver(GameState state)
+            {
+                return state.Field.All(a => a != FieldState._) || CheckWinner(state, FieldState.X) || CheckWinner(state, FieldState.O);
+            }
+
+            public int Score(GameState state, IPlayer<GameState, int> player)
+            {
+                ScoreRequested++;
+
+                if (CheckWinner(state, ((TicTacToePlayer)player).playerValue))
                 {
                     return 100;
                 }
 
-                if (CheckWinner(state, this.opponentValue))
+                var opponentValue = ((TicTacToePlayer)player).playerValue == FieldState.X ? FieldState.O : FieldState.X;
+
+                if (CheckWinner(state, opponentValue))
                 {
                     return -100;
                 }
@@ -102,9 +134,10 @@ namespace BrainAI.Tests
                 }
             };
 
-            var gamePlayer = new TicTacToePlayer(FieldState.X, FieldState.O);
+            var game = new TicTacToeGame();
+            var gamePlayer = new TicTacToePlayer(FieldState.X);
             var target = new MinimaxSimulation<GameState, int>();
-            var result = target.Minimax(1, gameState, gamePlayer, gamePlayer);
+            var result = target.Minimax(1, gameState, game, gamePlayer, gamePlayer);
 
             Assert.AreEqual(2, result);
         }
@@ -122,10 +155,11 @@ namespace BrainAI.Tests
                 }
             };
 
-            var gamePlayerX = new TicTacToePlayer(FieldState.X, FieldState.O);
-            var gamePlayerO = new TicTacToePlayer(FieldState.O, FieldState.X);
+            var game = new TicTacToeGame();
+            var gamePlayerX = new TicTacToePlayer(FieldState.X);
+            var gamePlayerO = new TicTacToePlayer(FieldState.O);
             var target = new MinimaxSimulation<GameState, int>();
-            var result = target.Minimax(20, gameState, gamePlayerO, gamePlayerX);
+            var result = target.Minimax(20, gameState, game, gamePlayerO, gamePlayerX);
 
             Assert.AreEqual(4, result);
         }
@@ -143,10 +177,11 @@ namespace BrainAI.Tests
                 }
             };
 
-            var gamePlayerX = new TicTacToePlayer(FieldState.X, FieldState.O);
-            var gamePlayerO = new TicTacToePlayer(FieldState.O, FieldState.X);
+            var game = new TicTacToeGame();
+            var gamePlayerX = new TicTacToePlayer(FieldState.X);
+            var gamePlayerO = new TicTacToePlayer(FieldState.O);
             var target = new MinimaxSimulation<GameState, int>();
-            var result = target.Minimax(20, gameState, gamePlayerX, gamePlayerO);
+            var result = target.Minimax(20, gameState, game, gamePlayerX, gamePlayerO);
 
             Assert.AreEqual(7, result);
         }
@@ -164,12 +199,39 @@ namespace BrainAI.Tests
                 }
             };
 
-            var gamePlayerX = new TicTacToePlayer(FieldState.X, FieldState.O);
-            var gamePlayerO = new TicTacToePlayer(FieldState.O, FieldState.X);
+            var game = new TicTacToeGame();
+            var gamePlayerX = new TicTacToePlayer(FieldState.X);
+            var gamePlayerO = new TicTacToePlayer(FieldState.O);
             var target = new MinimaxSimulation<GameState, int>();
-            var result = target.Minimax(20, gameState, gamePlayerX, gamePlayerO);
 
-            Assert.AreEqual(140, gamePlayerO.ScoreRequested + gamePlayerX.ScoreRequested);
+            game.ScoreRequested = 0;
+            var result = target.Minimax(20, gameState, game, gamePlayerX, gamePlayerO);
+            Assert.AreEqual(39, game.ScoreRequested);
+            game.ScoreRequested = 0;
+            var resultFullSearch = target.MinimaxFullSearch(20, gameState, game, gamePlayerX, gamePlayerO);
+            Assert.AreEqual(92, game.ScoreRequested);
+        }
+
+        [Test]
+        public void Aaa()
+        {
+            var gameState = new GameState
+            {
+                Field = new FieldState[]
+                {
+                    FieldState.X, FieldState.O, FieldState.X,
+                    FieldState._, FieldState.O, FieldState._,
+                    FieldState._, FieldState._, FieldState._,
+                }
+            };
+
+            var game = new TicTacToeGame();
+            var gamePlayerX = new TicTacToePlayer(FieldState.X);
+            var gamePlayerO = new TicTacToePlayer(FieldState.O);
+            var target = new SmitsimaxSimulation<GameState, int>(0.5f);
+
+            var result = target.Minimax(10, 500, gameState, game, gamePlayerX, gamePlayerO);
+            Assert.AreEqual(7, result);
         }
     }
 }
