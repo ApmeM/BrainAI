@@ -20,7 +20,7 @@
 
         public void Tick()
         {
-            var action = this.rootReasoner.Select( this.context );
+            var action = this.rootReasoner.SelectBestAction( this.context );
             action?.Execute( this.context );
         }
     }

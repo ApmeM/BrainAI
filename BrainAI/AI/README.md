@@ -126,16 +126,12 @@ A great overview of utility AI is [available here](http://www.gdcvault.com/play/
 
 
 ## Reasoner
-Selects the best Consideration from a list of Considerations attached to the Reasoner. The root of a utility AI.
-
-
-## Consideration
-Houses a list of Appraisals and an Action. Calculates a score that represents numerically the utility of its Action.
+Selects the best Action from a list of Actions and its Appraisals attached to the Reasoner. The root of a utility AI.
 
 
 ## Appraisal
-One or more Appraisals can be added to a Consideration. They calculate and return a score which is used by the Consideration.
+Appraisals calculate and return a score which is used by the Reasoner to determine the action.
 
 
 ## Action
-The action that the AI executes when a specific Consideration is selected.
+The action that the AI executes when a specific consideration is selected.

@@ -3,29 +3,25 @@
     using BrainAI.AI.UtilityAI.Actions;
 
     /// <summary>
-    /// The first Consideration to score above the threshold
+    /// The Consideration with the lowest score is selected
     /// </summary>
-    public class FirstScoreReasoner<T> : Reasoner<T>
+    public class LowestScoreReasoner<T> : Reasoner<T>
     {
-        private readonly float threshold;
-
-        public FirstScoreReasoner(float threshold)
-        {
-            this.threshold = threshold;
-        }
-
         public override IAction<T> SelectBestAction(T context)
         {
+            Consideration consideration = null;
+            float lowestScore = float.MaxValue;
             for( var i = 0; i < this.Considerations.Count; i++ )
             {
                 var score = this.Considerations[i].Appraisal.GetScore( context );
-                if( score >= threshold )
+                if( score < lowestScore )
                 {
-                    return this.Considerations[i].Action;
+                    lowestScore = score;
+                    consideration = this.Considerations[i];
                 }
             }
 
-            return null;
+            return consideration?.Action;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace BrainAI.AI.UtilityAI.Considerations.Appraisals
+﻿namespace BrainAI.AI.UtilityAI.Appraisals
 {
     using System;
 
@@ -7,16 +7,16 @@
     /// </summary>
     public class ActionAppraisal<T> : IAppraisal<T>
     {
-        private readonly Func<T,float> appraisalAction;
+        private readonly Func<T, float> appraisalAction;
 
-        public ActionAppraisal( Func<T,float> appraisalAction )
+        public ActionAppraisal(Func<T, float> appraisalAction)
         {
             this.appraisalAction = appraisalAction;
         }
 
-        public float GetScore( T context )
+        public float GetScore(T context)
         {
-            return this.appraisalAction( context );
+            return appraisalAction(context);
         }
     }
 }

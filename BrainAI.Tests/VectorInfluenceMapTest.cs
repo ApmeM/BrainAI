@@ -13,12 +13,11 @@
         public void FindForceDirection_SinglePointOfAttraction_DirectToIt()
         {
             var target = new VectorInfluenceMap();
-            target.Charges.Add(new VectorInfluenceMap.Charge
-            {
-                Origin = new PointChargeOrigin(new Point(0, 0)),
-                Value = 10,
-                Fading = DefaultFadings.NoDistanceFading
-            });
+            target.AddCharge(
+                "default", 
+                new PointChargeOrigin(new Point(0, 0)),
+                DefaultFadings.NoDistanceFading,
+                10);
 
             var force = target.FindForceDirection(new Point(10, 0));
 
@@ -29,19 +28,17 @@
         public void FindForceDirection_MultiplePointsOfAttraction_SumOfDirections()
         {
             var target = new VectorInfluenceMap();
-            target.Charges.Add(new VectorInfluenceMap.Charge
-            {
-                Origin = new PointChargeOrigin(new Point(0, 0)),
-                Value = 10,
-                Fading = DefaultFadings.NoDistanceFading
-            });
+            target.AddCharge(
+                "default", 
+                new PointChargeOrigin(new Point(0, 0)),
+                DefaultFadings.NoDistanceFading,
+                10);
 
-            target.Charges.Add(new VectorInfluenceMap.Charge
-            {
-                Origin = new PointChargeOrigin(new Point(10, 10)),
-                Value = 10,
-                Fading = DefaultFadings.NoDistanceFading
-            });
+            target.AddCharge(
+                "default", 
+                new PointChargeOrigin(new Point(10, 10)),
+                DefaultFadings.NoDistanceFading,
+                10);
 
             var force = target.FindForceDirection(new Point(10, 0));
 

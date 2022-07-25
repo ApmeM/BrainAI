@@ -1,11 +1,11 @@
-﻿namespace BrainAI.AI.UtilityAI.Considerations.Appraisals
+﻿namespace BrainAI.AI.UtilityAI.Appraisals
 {
     /// <summary>
     /// scorer for use with a Consideration
     /// </summary>
     public interface IAppraisal<T>
     {
-        float GetScore( T context );
+        float GetScore(T context);
     }
 }
 

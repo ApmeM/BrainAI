@@ -5,8 +5,7 @@
 
     using BrainAI.AI.UtilityAI;
     using BrainAI.AI.UtilityAI.Actions;
-    using BrainAI.AI.UtilityAI.Considerations;
-    using BrainAI.AI.UtilityAI.Considerations.Appraisals;
+    using BrainAI.AI.UtilityAI.Appraisals;
     using BrainAI.AI.UtilityAI.Reasoners;
 
     /// <summary>
@@ -78,37 +77,34 @@
 
         public static UtilityAI<UtilityMinerState> BuildAI()
         {
-            var reasoner = new FirstScoreReasoner<UtilityMinerState>();
+            var reasoner = new FirstScoreReasoner<UtilityMinerState>(1);
 
             // sleep is most important
             // AllOrNothingQualifier with required threshold of 1 so all scorers must score
             //  - we have to be home to sleep
             //  - we have to have some fatigue
-            var fatigueConsideration = new AllOrNothingConsideration<UtilityMinerState>(1);
+            var fatigueConsideration = new AllOrNothingAppraisal<UtilityMinerState>(1);
             fatigueConsideration.Appraisals.Add(new ActionAppraisal<UtilityMinerState>(c => c.MinerState.CurrentLocation == MinerState.Location.Home ? 1 : 0));
             fatigueConsideration.Appraisals.Add(new ActionAppraisal<UtilityMinerState>(c => c.MinerState.Fatigue > 0 ? 1 : 0));
-            fatigueConsideration.Action = new ActionExecutor<UtilityMinerState>( c => c.Sleep() );
-            reasoner.AddConsideration( fatigueConsideration );
+            reasoner.Add( fatigueConsideration, new ActionAction<UtilityMinerState>( c => c.Sleep() ) );
 
             // thirst is next
             // AllOrNothingQualifier with required threshold of 1 so all scorers must score
             //  - we have to be at the saloon to drink
             //  - we have to be thirsty
-            var thirstConsideration = new AllOrNothingConsideration<UtilityMinerState>(1);
+            var thirstConsideration = new AllOrNothingAppraisal<UtilityMinerState>(1);
             thirstConsideration.Appraisals.Add(new ActionAppraisal<UtilityMinerState>( c => c.MinerState.CurrentLocation == MinerState.Location.Saloon ? 1 : 0));
             thirstConsideration.Appraisals.Add(new ActionAppraisal<UtilityMinerState>(c => c.MinerState.Thirst > 0 ? 1 : 0));
-            thirstConsideration.Action = new ActionExecutor<UtilityMinerState>( c => c.Drink() );
-            reasoner.AddConsideration( thirstConsideration );
+            reasoner.Add( thirstConsideration, new ActionAction<UtilityMinerState>( c => c.Drink() ) );
 
             // depositing gold is next
             // AllOrNothingQualifier with required threshold of 1 so all scorers must score
             //  - we have to be at the bank to deposit gold
             //  - we have to have gold to deposit
-            var goldConsideration = new AllOrNothingConsideration<UtilityMinerState>(1);
+            var goldConsideration = new AllOrNothingAppraisal<UtilityMinerState>(1);
             goldConsideration.Appraisals.Add( new ActionAppraisal<UtilityMinerState>( c => c.MinerState.CurrentLocation == MinerState.Location.Bank ? 1 : 0 ));
             goldConsideration.Appraisals.Add( new ActionAppraisal<UtilityMinerState>( c => c.MinerState.Gold > 0 ? 1 : 0 ) );
-            goldConsideration.Action = new ActionExecutor<UtilityMinerState>( c => c.DepositGold() );
-            reasoner.AddConsideration( goldConsideration );
+            reasoner.Add( goldConsideration, new ActionAction<UtilityMinerState>( c => c.DepositGold() ) );
 
             // decide where to go. this will override mining and send us elsewhere if a scorer scores
             // AllOrNothingQualifier with required threshold of 0 so we get a sum of all scorers
@@ -117,91 +113,64 @@
             //  - if we are at max gold score
             //  - if we are not at the mine score
             // Action has a scorer to score all the locations. It then moves to the location that scored highest.
-            var moveConsideration = new AllOrNothingConsideration<UtilityMinerState>(0);
+            var moveConsideration = new AllOrNothingAppraisal<UtilityMinerState>(0);
             moveConsideration.Appraisals.Add(new ActionAppraisal<UtilityMinerState>(c => c.MinerState.Fatigue >= MinerState.MAX_FATIGUE ? 1 : 0));
             moveConsideration.Appraisals.Add(new ActionAppraisal<UtilityMinerState>(c => c.MinerState.Thirst >= MinerState.MAX_THIRST ? 1 : 0));
             moveConsideration.Appraisals.Add(new ActionAppraisal<UtilityMinerState>(c => c.MinerState.Gold >= MinerState.MAX_GOLD ? 1 : 0));
             moveConsideration.Appraisals.Add(new ActionAppraisal<UtilityMinerState>(c => c.MinerState.CurrentLocation != MinerState.Location.Mine ? 1 : 0));
-            var moveAction = new MoveToBestLocation();
-            moveAction.Appraisals.Add( new ChooseBestLocation() );
-            moveConsideration.Action = moveAction;
-            reasoner.AddConsideration( moveConsideration );
+            
+            reasoner.Add( moveConsideration, new MoveToBestLocation());
 
             // mining is last
             // AllOrNothingQualifier with required threshold of 1 so all scorers must score
             //  - we have to be at the mine to dig for gold
             //  - we have to not be at our max gold
-            var mineConsideration = new AllOrNothingConsideration<UtilityMinerState>(1);
+            var mineConsideration = new AllOrNothingAppraisal<UtilityMinerState>(1);
             mineConsideration.Appraisals.Add(new ActionAppraisal<UtilityMinerState>(c => c.MinerState.CurrentLocation == MinerState.Location.Mine ? 1 : 0));
             mineConsideration.Appraisals.Add(new ActionAppraisal<UtilityMinerState>(c => c.MinerState.Gold >= MinerState.MAX_GOLD ? 0 : 1));
-            mineConsideration.Action = new ActionExecutor<UtilityMinerState>( c => c.DigForGold() );
-            reasoner.AddConsideration( mineConsideration );
+            reasoner.Add( mineConsideration, new ActionAction<UtilityMinerState>( c => c.DigForGold() ) );
 
             // default, fall-through action is to head to the mine
-            reasoner.DefaultConsideration.Action = new ActionExecutor<UtilityMinerState>( c => c.GoToLocation( MinerState.Location.Mine ) );
+            reasoner.Add(
+                new FixedScoreAppraisal<UtilityMinerState>(1), 
+                new ActionAction<UtilityMinerState>( c => c.GoToLocation( MinerState.Location.Mine ) ));
 
             return new UtilityAI<UtilityMinerState>( new UtilityMinerState(), reasoner );
         }
     }
     
-    public class ChooseBestLocation : IActionOptionAppraisal<UtilityMiner.UtilityMinerState,MinerState.Location>
+    public class MoveToBestLocation : IAction<UtilityMiner.UtilityMinerState>
     {
-        /// <summary>
-        /// Action Appraisal that will score locations providing the highest score to the best location to visit
-        /// </summary>
-        /// <returns>The score.</returns>
-        /// <param name="context">Context.</param>
-        /// <param name="option">Option.</param>
-        public float GetScore(UtilityMiner.UtilityMinerState context, MinerState.Location option )
+        public void Execute(UtilityMiner.UtilityMinerState context )
         {
-            if( option == MinerState.Location.Home )
-                return context.MinerState.Fatigue >= MinerState.MAX_FATIGUE ? 20 : 0;
-
-            if( option == MinerState.Location.Saloon )
-                return context.MinerState.Thirst >= MinerState.MAX_THIRST ? 15 : 0;
-
-            if( option == MinerState.Location.Bank )
+            if (context.MinerState.Fatigue >= MinerState.MAX_FATIGUE)
             {
-                if( context.MinerState.Gold >= MinerState.MAX_GOLD )
-                    return 10;
-
-                // if we are scoring the bank and we are not at the mine we'll use a curve. the main gist of this is that if we are not at the mine
-                // and we are carrying a decent amount of gold drop it off at the bank before heading to the mine again.
-                if( context.MinerState.CurrentLocation != MinerState.Location.Mine )
-                {
-                    // normalize our current gold value to 0-1
-                    var gold = context.MinerState.Gold / (double)MinerState.MAX_GOLD;
-                    var score = Math.Pow( gold, 2 );
-                    return (float)score * 10;
-                }
-
-                return 0;
+                context.GoToLocation( MinerState.Location.Home );
+                return;
+            }
+            if (context.MinerState.Thirst >= MinerState.MAX_THIRST)
+            {
+                context.GoToLocation( MinerState.Location.Saloon );
+                return;
+            }
+            if (context.MinerState.Gold >= MinerState.MAX_GOLD)
+            {
+                context.GoToLocation( MinerState.Location.Bank );
+                return;
             }
 
-            return 5;
-        }
+            if( context.MinerState.CurrentLocation != MinerState.Location.Mine )
+            {
+                // normalize our current gold value to 0-1
+                var gold = context.MinerState.Gold / (double)MinerState.MAX_GOLD;
+                var score = Math.Pow( gold, 2 );
+                if(score > 0.5){
+                    context.GoToLocation( MinerState.Location.Bank );
+                    return;
+                }
+            }
 
-    }
-    /// <summary>
-    /// ActionWithOptions lets an Action setup an Appraisal that will score a list of options. In our miner bob example, the options
-    /// are the locations and the Appraisal will score the best location to go to.
-    /// </summary>
-    public class MoveToBestLocation : ActionWithOptions<UtilityMiner.UtilityMinerState, MinerState.Location>
-    {
-        private readonly List<MinerState.Location> locations = new List<MinerState.Location>()
-        {
-            MinerState.Location.Bank,
-            MinerState.Location.Home,
-            MinerState.Location.Mine,
-            MinerState.Location.Saloon
-        };
-
-
-        public override void Execute(UtilityMiner.UtilityMinerState context )
-        {
-            var location = this.GetBestOption( context, this.locations );
-
-            context.GoToLocation( location );
+            context.GoToLocation( MinerState.Location.Mine );
         }
 
     }

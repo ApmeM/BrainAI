@@ -1,19 +1,19 @@
 ﻿namespace BrainAI.AI.UtilityAI.Reasoners
 {
-    using BrainAI.AI.UtilityAI.Considerations;
+    using BrainAI.AI.UtilityAI.Actions;
 
     /// <summary>
     /// The Consideration with the highest score is selected
     /// </summary>
     public class HighestScoreReasoner<T> : Reasoner<T>
     {
-        protected override IConsideration<T> SelectBestConsideration( T context )
+        public override IAction<T> SelectBestAction(T context)
         {
-            var highestScore = this.DefaultConsideration.GetScore( context );
-            IConsideration<T> consideration = null;
+            Consideration consideration = null;
+            float highestScore = float.MinValue;
             for( var i = 0; i < this.Considerations.Count; i++ )
             {
-                var score = this.Considerations[i].GetScore( context );
+                var score = this.Considerations[i].Appraisal.GetScore( context );
                 if( score > highestScore )
                 {
                     highestScore = score;
@@ -21,10 +21,7 @@
                 }
             }
 
-            if( consideration == null )
-                return this.DefaultConsideration;
-
-            return consideration;
+            return consideration?.Action;
         }
     }
 }

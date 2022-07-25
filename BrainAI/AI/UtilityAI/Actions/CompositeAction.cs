@@ -9,6 +9,16 @@
     {
         public readonly List<IAction<T>> Actions = new List<IAction<T>>();
 
+        public CompositeAction()
+        {
+            
+        }
+
+        public CompositeAction(params IAction<T>[] actions)
+        {
+            this.Actions.AddRange(actions);
+        }
+
         public void Execute( T context )
         {
             for (var i = 0; i < this.Actions.Count; i++)

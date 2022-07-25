@@ -12,6 +12,7 @@ packages/
 
 # Visual Studio profiler
 .vs/
+.vscode/
 *.psess
 *.vsp
 *.vspx

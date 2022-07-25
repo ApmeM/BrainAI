@@ -16,7 +16,7 @@
 
         void IAction<T>.Execute( T context )
         {
-            var action = this.reasoner.Select( context );
+            var action = this.reasoner.SelectBestAction( context );
             action?.Execute( context );
         }
     }
