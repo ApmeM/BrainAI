@@ -39,7 +39,7 @@ namespace BrainAI.Simulations
         {
             if (depth == 0 || game.IsGameOver(currentState))
             {
-                return new ValueTuple<TAction, int>(default(TAction), game.Score(currentState, maximizingPlayer));
+                return new ValueTuple<TAction, int>(default(TAction), maximizingPlayer.Score(currentState));
             }
 
             var availableActions = currentPlayer.AvailableActions(currentState);

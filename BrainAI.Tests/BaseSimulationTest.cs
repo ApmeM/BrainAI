@@ -17,10 +17,25 @@ namespace BrainAI.Tests
         struct GameState
         {
             public FieldState[] Field;
+
+            public bool CheckWinner(FieldState fieldState)
+            {
+                return
+                    this.Field[0] == fieldState && this.Field[1] == fieldState && this.Field[2] == fieldState ||
+                    this.Field[0] == fieldState && this.Field[3] == fieldState && this.Field[6] == fieldState ||
+                    this.Field[0] == fieldState && this.Field[4] == fieldState && this.Field[8] == fieldState ||
+                    this.Field[1] == fieldState && this.Field[4] == fieldState && this.Field[7] == fieldState ||
+                    this.Field[2] == fieldState && this.Field[5] == fieldState && this.Field[8] == fieldState ||
+                    this.Field[3] == fieldState && this.Field[4] == fieldState && this.Field[5] == fieldState ||
+                    this.Field[4] == fieldState && this.Field[2] == fieldState && this.Field[6] == fieldState ||
+                    this.Field[6] == fieldState && this.Field[7] == fieldState && this.Field[8] == fieldState;
+            }
         }
+
 
         class TicTacToePlayer : IPlayer<GameState, int>
         {
+            public int ScoreRequested = 0;
             public readonly FieldState playerValue;
 
             public TicTacToePlayer(FieldState playerValue)
@@ -36,12 +51,29 @@ namespace BrainAI.Tests
                     .Select(a => a.Item2)
                     .ToList();
             }
+
+            public int Score(GameState state)
+            {
+                ScoreRequested++;
+
+                if (state.CheckWinner(this.playerValue))
+                {
+                    return 100;
+                }
+
+                var opponentValue = this.playerValue == FieldState.X ? FieldState.O : FieldState.X;
+
+                if (state.CheckWinner(opponentValue))
+                {
+                    return -100;
+                }
+
+                return 0;
+            }
         }
 
         class TicTacToeGame : IGame<GameState, int>
         {
-            public int ScoreRequested = 0;
-
             public GameState ApplyAction(GameState state, params Tuple<IPlayer<GameState, int>, int>[] selectedActions)
             {
                 var xCount = state.Field.Cast<FieldState>()
@@ -85,39 +117,7 @@ namespace BrainAI.Tests
 
             public bool IsGameOver(GameState state)
             {
-                return state.Field.All(a => a != FieldState._) || CheckWinner(state, FieldState.X) || CheckWinner(state, FieldState.O);
-            }
-
-            public int Score(GameState state, IPlayer<GameState, int> player)
-            {
-                ScoreRequested++;
-
-                if (CheckWinner(state, ((TicTacToePlayer)player).playerValue))
-                {
-                    return 100;
-                }
-
-                var opponentValue = ((TicTacToePlayer)player).playerValue == FieldState.X ? FieldState.O : FieldState.X;
-
-                if (CheckWinner(state, opponentValue))
-                {
-                    return -100;
-                }
-
-                return 0;
-            }
-
-            private bool CheckWinner(GameState state, FieldState fieldState)
-            {
-                return
-                    state.Field[0] == fieldState && state.Field[1] == fieldState && state.Field[2] == fieldState ||
-                    state.Field[0] == fieldState && state.Field[3] == fieldState && state.Field[6] == fieldState ||
-                    state.Field[0] == fieldState && state.Field[4] == fieldState && state.Field[8] == fieldState ||
-                    state.Field[1] == fieldState && state.Field[4] == fieldState && state.Field[7] == fieldState ||
-                    state.Field[2] == fieldState && state.Field[5] == fieldState && state.Field[8] == fieldState ||
-                    state.Field[3] == fieldState && state.Field[4] == fieldState && state.Field[5] == fieldState ||
-                    state.Field[4] == fieldState && state.Field[2] == fieldState && state.Field[6] == fieldState ||
-                    state.Field[6] == fieldState && state.Field[7] == fieldState && state.Field[8] == fieldState;
+                return state.Field.All(a => a != FieldState._) || state.CheckWinner(FieldState.X) || state.CheckWinner(FieldState.O);
             }
         }
 
@@ -204,12 +204,14 @@ namespace BrainAI.Tests
             var gamePlayerO = new TicTacToePlayer(FieldState.O);
             var target = new MinimaxSimulation<GameState, int>();
 
-            game.ScoreRequested = 0;
+            gamePlayerX.ScoreRequested = 0;
+            gamePlayerO.ScoreRequested = 0;
             var result = target.Minimax(20, gameState, game, gamePlayerX, gamePlayerO);
-            Assert.AreEqual(39, game.ScoreRequested);
-            game.ScoreRequested = 0;
+            Assert.AreEqual(39, gamePlayerX.ScoreRequested + gamePlayerO.ScoreRequested);
+            gamePlayerX.ScoreRequested = 0;
+            gamePlayerO.ScoreRequested = 0;
             var resultFullSearch = target.MinimaxFullSearch(20, gameState, game, gamePlayerX, gamePlayerO);
-            Assert.AreEqual(92, game.ScoreRequested);
+            Assert.AreEqual(92, gamePlayerX.ScoreRequested + gamePlayerO.ScoreRequested);
         }
 
         [Test]

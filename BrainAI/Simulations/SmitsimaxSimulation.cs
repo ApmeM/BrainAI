@@ -76,7 +76,7 @@ namespace BrainAI.Simulations
 
                 for (int playerId = 0; playerId < players.Length; ++playerId)
                 {
-                    int score = game.Score(currentState, players[playerId]);
+                    int score = players[playerId].Score(currentState);
 
                     // Backpropagate
                     while (currentNodes[playerId].Parent != null)
