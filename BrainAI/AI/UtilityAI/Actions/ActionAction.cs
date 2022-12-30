@@ -7,17 +7,35 @@
     /// </summary>
     public class ActionAction<T> : IAction<T>
     {
+        private readonly Action<T> enter;
         private readonly Action<T> action;
+        private readonly Action<T> exit;
 
-
-        public ActionAction( Action<T> action )
+        public ActionAction(Action<T> action)
         {
             this.action = action;
         }
 
-        public void Execute( T context )
+        public ActionAction(Action<T> action, Action<T> enter, Action<T> exit)
         {
-            this.action( context );
+            this.enter = enter;
+            this.action = action;
+            this.exit = exit;
+        }
+
+        public void Enter(T context)
+        {
+            this.enter?.Invoke(context);
+        }
+
+        public void Execute(T context)
+        {
+            this.action(context);
+        }
+
+        public void Exit(T context)
+        {
+            this.exit?.Invoke(context);
         }
     }
 }

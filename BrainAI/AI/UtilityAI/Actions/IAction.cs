@@ -2,7 +2,9 @@
 {
     public interface IAction<T>
     {
-        void Execute( T context );
+        void Enter(T context);
+        void Execute(T context);
+        void Exit(T context);
     }
 }
 

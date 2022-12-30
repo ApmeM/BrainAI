@@ -11,7 +11,7 @@
 
         public CompositeAction()
         {
-            
+
         }
 
         public CompositeAction(params IAction<T>[] actions)
@@ -19,11 +19,27 @@
             this.Actions.AddRange(actions);
         }
 
-        public void Execute( T context )
+        public void Enter(T context)
         {
             for (var i = 0; i < this.Actions.Count; i++)
             {
-                this.Actions[i].Execute( context );
+                this.Actions[i].Enter(context);
+            }
+        }
+
+        public void Execute(T context)
+        {
+            for (var i = 0; i < this.Actions.Count; i++)
+            {
+                this.Actions[i].Execute(context);
+            }
+        }
+
+        public void Exit(T context)
+        {
+            for (var i = 0; i < this.Actions.Count; i++)
+            {
+                this.Actions[i].Exit(context);
             }
         }
     }

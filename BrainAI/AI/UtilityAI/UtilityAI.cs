@@ -9,18 +9,17 @@
         /// </summary>
         private readonly T context;
 
-        private readonly Reasoner<T> rootReasoner;
+        private readonly IAction<T> rootAction;
 
         public UtilityAI( T context, Reasoner<T> rootSelector )
         {
-            this.rootReasoner = rootSelector;
+            this.rootAction = new ReasonerAction<T>(rootSelector);
             this.context = context;
         }
 
         public void Tick()
         {
-            var action = this.rootReasoner.SelectBestAction( this.context );
-            action?.Execute( this.context );
+            this.rootAction.Execute(this.context);
         }
     }
 }

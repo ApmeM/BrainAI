@@ -137,6 +137,10 @@
     
     public class MoveToBestLocation : IAction<UtilityMiner.UtilityMinerState>
     {
+        public void Enter(UtilityMiner.UtilityMinerState context)
+        {
+        }
+
         public void Execute(UtilityMiner.UtilityMinerState context )
         {
             if (context.MinerState.Fatigue >= MinerState.MAX_FATIGUE)
@@ -169,6 +173,9 @@
             context.GoToLocation( MinerState.Location.Mine );
         }
 
+        public void Exit(UtilityMiner.UtilityMinerState context)
+        {
+        }
     }
 }
 
