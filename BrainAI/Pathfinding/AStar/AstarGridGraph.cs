@@ -1,8 +1,6 @@
-﻿namespace BrainAI.Pathfinding.AStar
+﻿namespace BrainAI.Pathfinding
 {
     using System;
-
-    using BrainAI.Pathfinding.Dijkstra;
 
     /// <summary>
     /// basic static grid graph for use with A*. Add walls to the walls HashSet and weighted nodes to the weightedNodes HashSet. This provides

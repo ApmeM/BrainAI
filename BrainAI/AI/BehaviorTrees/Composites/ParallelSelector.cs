@@ -1,4 +1,4 @@
-﻿namespace BrainAI.AI.BehaviorTrees.Composites
+﻿namespace BrainAI.AI.BehaviorTrees
 {
     /// <summary>
     /// Similar to the selector task, the ParallelSelector task will return success as soon as a child task returns success. The difference
@@ -6,7 +6,7 @@
     /// success the parallel selector task will end all of the child tasks and return success. If every child task returns failure then the
     /// ParallelSelector task will return failure.
     /// </summary>
-    public class ParallelSelector<T> : Composite<T>
+    public class ParallelSelectorComposite<T> : Composite<T>
     {
         public override TaskStatus Update( T context )
         {

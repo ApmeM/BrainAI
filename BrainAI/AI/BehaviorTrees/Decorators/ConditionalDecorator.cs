@@ -1,7 +1,5 @@
-﻿namespace BrainAI.AI.BehaviorTrees.Decorators
+﻿namespace BrainAI.AI.BehaviorTrees
 {
-    using BrainAI.AI.BehaviorTrees.Conditionals;
-
     /// <summary>
     /// decorator that will only run its child if a condition is met. By default, the condition will be reevaluated every tick.
     /// </summary>

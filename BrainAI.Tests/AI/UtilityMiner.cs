@@ -1,12 +1,8 @@
 ﻿namespace BrainAI.Tests.AI
 {
     using System;
-    using System.Collections.Generic;
 
     using BrainAI.AI.UtilityAI;
-    using BrainAI.AI.UtilityAI.Actions;
-    using BrainAI.AI.UtilityAI.Appraisals;
-    using BrainAI.AI.UtilityAI.Reasoners;
 
     /// <summary>
     /// Utility AI example of miner bob. Utility AI is the most complex of all the AI types to setup. The complexity comes with a lot of power

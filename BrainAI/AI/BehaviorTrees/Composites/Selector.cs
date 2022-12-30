@@ -1,12 +1,12 @@
-﻿namespace BrainAI.AI.BehaviorTrees.Composites
+﻿namespace BrainAI.AI.BehaviorTrees
 {
     /// <summary>
     /// The selector task is similar to an "or" operation. It will return success as soon as one of its child tasks return success. If a
     /// child task returns failure then it will sequentially run the next task. If no child task returns success then it will return failure.
     /// </summary>
-    public class Selector<T> : Composite<T>
+    public class SelectorComposite<T> : Composite<T>
     {
-        public Selector( AbortTypes abortType = AbortTypes.None )
+        public SelectorComposite( AbortTypes abortType = AbortTypes.None )
         {
             this.AbortType = abortType;
         }

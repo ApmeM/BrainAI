@@ -1,4 +1,4 @@
-﻿namespace BrainAI.AI.BehaviorTrees.Composites
+﻿namespace BrainAI.AI.BehaviorTrees
 {
     /// <summary>
     /// the parallel task will run each child task until a child task returns failure. The difference is that the parallel task will run all of
@@ -6,7 +6,7 @@
     /// success once all of its children tasks have returned success. If one tasks returns failure the parallel task will end all of the child
     /// tasks and return failure.
     /// </summary>
-    public class ParallelSequence<T> : Composite<T>
+    public class ParallelSequenceComposite<T> : Composite<T>
     {
         public override TaskStatus Update( T context )
         {

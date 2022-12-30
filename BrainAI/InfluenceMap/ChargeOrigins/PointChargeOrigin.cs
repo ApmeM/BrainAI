@@ -1,4 +1,4 @@
-﻿namespace BrainAI.InfluenceMap.VectorGenerator
+﻿namespace BrainAI.InfluenceMap
 {
     using BrainAI.Pathfinding;
 

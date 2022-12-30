@@ -1,7 +1,5 @@
-﻿namespace BrainAI.AI.UtilityAI.Reasoners
+﻿namespace BrainAI.AI.UtilityAI
 {
-    using BrainAI.AI.UtilityAI.Actions;
-
     /// <summary>
     /// The Consideration with the highest score is selected
     /// </summary>

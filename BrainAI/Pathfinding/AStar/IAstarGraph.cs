@@ -1,7 +1,5 @@
-﻿namespace BrainAI.Pathfinding.AStar
+﻿namespace BrainAI.Pathfinding
 {
-    using BrainAI.Pathfinding.Dijkstra;
-
     /// <summary>
     /// interface for a graph that can be fed to the AStarPathfinder.search method
     /// </summary>

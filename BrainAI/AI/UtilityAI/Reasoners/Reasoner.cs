@@ -1,8 +1,6 @@
-﻿namespace BrainAI.AI.UtilityAI.Reasoners
+﻿namespace BrainAI.AI.UtilityAI
 {
     using System.Collections.Generic;
-    using BrainAI.AI.UtilityAI.Appraisals;
-    using BrainAI.AI.UtilityAI.Actions;
 
     /// <summary>
     /// the root of UtilityAI.

@@ -1,4 +1,4 @@
-﻿namespace BrainAI.AI.BehaviorTrees.Decorators
+﻿namespace BrainAI.AI.BehaviorTrees
 {
     public abstract class Decorator<T> : Behavior<T>
     {

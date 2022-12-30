@@ -1,12 +1,12 @@
-﻿namespace BrainAI.AI.BehaviorTrees.Composites
+﻿namespace BrainAI.AI.BehaviorTrees
 {
     /// <summary>
     /// The sequence task is similar to an "and" operation. It will return failure as soon as one of its child tasks return failure. If a
     /// child task returns success then it will sequentially run the next task. If all child tasks return success then it will return success.
     /// </summary>
-    public class Sequence<T> : Composite<T>
+    public class SequenceComposite<T> : Composite<T>
     {
-        public Sequence( AbortTypes abortType = AbortTypes.None )
+        public SequenceComposite( AbortTypes abortType = AbortTypes.None )
         {
             this.AbortType = abortType;
         }

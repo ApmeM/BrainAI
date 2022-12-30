@@ -2,8 +2,6 @@
 {
     using System.Collections.Generic;
 
-    using BrainAI.InfluenceMap.Fading;
-    using BrainAI.InfluenceMap.VectorGenerator;
     using BrainAI.Pathfinding;
 
     public class VectorInfluenceMap

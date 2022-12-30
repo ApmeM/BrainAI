@@ -1,4 +1,4 @@
-﻿namespace BrainAI.AI.BehaviorTrees.Actions
+﻿namespace BrainAI.AI.BehaviorTrees
 {
     /// <summary>
     /// runs an entire BehaviorTree as a child and returns success

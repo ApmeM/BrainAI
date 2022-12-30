@@ -1,9 +1,6 @@
-﻿namespace BrainAI.AI.BehaviorTrees.Composites
+﻿namespace BrainAI.AI.BehaviorTrees
 {
     using System.Collections.Generic;
-
-    using BrainAI.AI.BehaviorTrees.Conditionals;
-    using BrainAI.AI.BehaviorTrees.Decorators;
 
     /// <summary>
     /// any Composite nodes must subclass this. Provides storage for children and helpers to deal with AbortTypes

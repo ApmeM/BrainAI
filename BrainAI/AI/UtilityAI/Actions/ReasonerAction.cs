@@ -1,7 +1,5 @@
-﻿namespace BrainAI.AI.UtilityAI.Actions
+﻿namespace BrainAI.AI.UtilityAI
 {
-    using BrainAI.AI.UtilityAI.Reasoners;
-
     /// <summary>
     /// Action that calls through to another Reasoner
     /// </summary>

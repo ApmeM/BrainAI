@@ -1,4 +1,4 @@
-﻿namespace BrainAI.Pathfinding.BreadthFirst
+﻿namespace BrainAI.Pathfinding
 {
     using System.Collections.Generic;
 

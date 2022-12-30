@@ -1,5 +1,4 @@
 ﻿using BrainAI.Pathfinding;
-using BrainAI.Pathfinding.BreadthFirst;
 using NUnit.Framework;
 using System.Linq;
 

@@ -1,4 +1,4 @@
-﻿namespace BrainAI.AI.UtilityAI.Appraisals
+﻿namespace BrainAI.AI.UtilityAI
 {
     /// <summary>
     /// always returns a fixed score. Serves double duty as a default Consideration.

@@ -1,9 +1,7 @@
-﻿namespace BrainAI.Pathfinding.AStar
+﻿namespace BrainAI.Pathfinding
 {
     using System;
     using System.Collections.Generic;
-
-    using BrainAI.Pathfinding.Utils;
 
     /// <summary>
     /// calculates paths given an IAstarGraph and start/goal positions

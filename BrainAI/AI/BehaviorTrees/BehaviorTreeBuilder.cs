@@ -3,11 +3,6 @@
     using System;
     using System.Collections.Generic;
 
-    using BrainAI.AI.BehaviorTrees.Actions;
-    using BrainAI.AI.BehaviorTrees.Composites;
-    using BrainAI.AI.BehaviorTrees.Conditionals;
-    using BrainAI.AI.BehaviorTrees.Decorators;
-
     /// <summary>
     /// helper for building a BehaviorTree using a fluent API. Leaf nodes need to first have a parent added. Parents can be Composites or
     /// Decorators. Decorators are automatically closed when a leaf node is added. Composites must have endComposite called to close them.
@@ -143,37 +138,37 @@
 
         public BehaviorTreeBuilder<T> AlwaysFail()
         {
-            return this.PushParentNode( new AlwaysFail<T>() );
+            return this.PushParentNode( new AlwaysFailDecorator<T>() );
         }
 
 
         public BehaviorTreeBuilder<T> AlwaysSucceed()
         {
-            return this.PushParentNode( new AlwaysSucceed<T>() );
+            return this.PushParentNode( new AlwaysSucceedDecorator<T>() );
         }
 
 
         public BehaviorTreeBuilder<T> Inverter()
         {
-            return this.PushParentNode( new Inverter<T>() );
+            return this.PushParentNode( new InverterDecorator<T>() );
         }
 
 
         public BehaviorTreeBuilder<T> Repeater( int count )
         {
-            return this.PushParentNode( new Repeater<T>( count ) );
+            return this.PushParentNode( new RepeaterDecorator<T>( count ) );
         }
 
 
         public BehaviorTreeBuilder<T> UntilFail()
         {
-            return this.PushParentNode( new UntilFail<T>() );
+            return this.PushParentNode( new UntilFailDecorator<T>() );
         }
 
 
         public BehaviorTreeBuilder<T> UntilSuccess()
         {
-            return this.PushParentNode( new UntilSuccess<T>() );
+            return this.PushParentNode( new UntilSuccessDecorator<T>() );
         }
 
         #endregion
@@ -183,25 +178,25 @@
 
         public BehaviorTreeBuilder<T> Parallel()
         {
-            return this.PushParentNode( new ParallelSequence<T>() );
+            return this.PushParentNode( new ParallelSequenceComposite<T>() );
         }
 
 
         public BehaviorTreeBuilder<T> ParallelSelector()
         {
-            return this.PushParentNode( new ParallelSelector<T>() );
+            return this.PushParentNode( new ParallelSelectorComposite<T>() );
         }
 
 
         public BehaviorTreeBuilder<T> Selector( AbortTypes abortType = AbortTypes.None )
         {
-            return this.PushParentNode( new Selector<T>( abortType ) );
+            return this.PushParentNode( new SelectorComposite<T>( abortType ) );
         }
 
         
         public BehaviorTreeBuilder<T> Sequence( AbortTypes abortType = AbortTypes.None )
         {
-            return this.PushParentNode( new Sequence<T>( abortType ) );
+            return this.PushParentNode( new SequenceComposite<T>( abortType ) );
         }
 
         public BehaviorTreeBuilder<T> EndComposite()

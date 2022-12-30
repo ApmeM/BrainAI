@@ -1,8 +1,6 @@
 ﻿namespace BrainAI.Tests
 {
     using BrainAI.InfluenceMap;
-    using BrainAI.InfluenceMap.Fading;
-    using BrainAI.InfluenceMap.VectorGenerator;
     using BrainAI.Pathfinding;
     using NUnit.Framework;
 

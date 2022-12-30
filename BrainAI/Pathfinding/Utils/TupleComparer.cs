@@ -1,4 +1,4 @@
-﻿namespace BrainAI.Pathfinding.Utils
+﻿namespace BrainAI.Pathfinding
 {
     using System;
     using System.Collections.Generic;

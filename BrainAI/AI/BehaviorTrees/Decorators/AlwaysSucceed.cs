@@ -1,9 +1,9 @@
-﻿namespace BrainAI.AI.BehaviorTrees.Decorators
+﻿namespace BrainAI.AI.BehaviorTrees
 {
     /// <summary>
     /// will always return success except when the child task is running
     /// </summary>
-    public class AlwaysSucceed<T> : Decorator<T>
+    public class AlwaysSucceedDecorator<T> : Decorator<T>
     {
         public override TaskStatus Update( T context )
         {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BrainAI.AI.UtilityAI.Appraisals
+namespace BrainAI.AI.UtilityAI
 {
     /// <summary>
     /// Scores by summing the score of all child Appraisals

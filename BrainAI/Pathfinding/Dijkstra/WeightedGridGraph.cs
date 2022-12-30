@@ -1,8 +1,6 @@
-﻿namespace BrainAI.Pathfinding.Dijkstra
+﻿namespace BrainAI.Pathfinding
 {
     using System.Collections.Generic;
-
-    using BrainAI.Pathfinding.BreadthFirst;
 
     /// <summary>
     /// basic grid graph with support for one type of weighted node

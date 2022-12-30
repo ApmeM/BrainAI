@@ -1,10 +1,10 @@
-﻿namespace BrainAI.AI.BehaviorTrees.Decorators
+﻿namespace BrainAI.AI.BehaviorTrees
 {
     /// <summary>
     /// will repeat execution of its child task until the child task has been run a specified number of times. It has the option of
     /// continuing to execute the child task even if the child task returns a failure.
     /// </summary>
-    public class Repeater<T> : Decorator<T>
+    public class RepeaterDecorator<T> : Decorator<T>
     {
         /// <summary>
         /// The number of times to repeat the execution of its child task
@@ -24,14 +24,14 @@
         private int iterationCount;
 
 
-        public Repeater( int count, bool endOnFailure = false )
+        public RepeaterDecorator( int count, bool endOnFailure = false )
         {
             this.Count = count;
             this.EndOnFailure = endOnFailure;
         }
 
 
-        public Repeater( bool repeatForever, bool endOnFailure = false )
+        public RepeaterDecorator( bool repeatForever, bool endOnFailure = false )
         {
             this.RepeatForever = repeatForever;
             this.EndOnFailure = endOnFailure;

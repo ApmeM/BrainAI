@@ -1,4 +1,4 @@
-﻿namespace BrainAI.AI.UtilityAI.Actions
+﻿namespace BrainAI.AI.UtilityAI
 {
     using System.Collections.Generic;
 

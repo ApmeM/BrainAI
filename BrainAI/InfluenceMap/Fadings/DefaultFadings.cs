@@ -1,4 +1,4 @@
-﻿namespace BrainAI.InfluenceMap.Fading
+﻿namespace BrainAI.InfluenceMap
 {
     public static class DefaultFadings
     {

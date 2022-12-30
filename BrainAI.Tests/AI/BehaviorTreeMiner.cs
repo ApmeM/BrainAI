@@ -3,7 +3,6 @@
     using System;
 
     using BrainAI.AI.BehaviorTrees;
-    using BrainAI.AI.BehaviorTrees.Composites;
 
     /// <summary>
     /// implements our friend miner bob with behavior trees. The same tree is built using self abort and lower priority types to illustrate

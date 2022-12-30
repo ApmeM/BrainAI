@@ -1,4 +1,4 @@
-﻿namespace BrainAI.AI.BehaviorTrees.Actions
+﻿namespace BrainAI.AI.BehaviorTrees
 {
     using System;
 

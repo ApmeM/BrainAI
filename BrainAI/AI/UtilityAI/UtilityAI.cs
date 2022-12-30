@@ -1,7 +1,6 @@
 ﻿namespace BrainAI.AI.UtilityAI
 {
     using BrainAI.AI;
-    using BrainAI.AI.UtilityAI.Reasoners;
 
     public class UtilityAI<T> : IAITurn
     {

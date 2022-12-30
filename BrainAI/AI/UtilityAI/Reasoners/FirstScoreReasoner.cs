@@ -1,7 +1,5 @@
-﻿namespace BrainAI.AI.UtilityAI.Reasoners
+﻿namespace BrainAI.AI.UtilityAI
 {
-    using BrainAI.AI.UtilityAI.Actions;
-
     /// <summary>
     /// The first Consideration to score above the threshold
     /// </summary>

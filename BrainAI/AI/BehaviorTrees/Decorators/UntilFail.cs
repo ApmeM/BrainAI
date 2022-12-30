@@ -1,9 +1,9 @@
-﻿namespace BrainAI.AI.BehaviorTrees.Decorators
+﻿namespace BrainAI.AI.BehaviorTrees
 {
     /// <summary>
     /// will keep executing its child task until the child task returns failure
     /// </summary>
-    public class UntilFail<T> : Decorator<T>
+    public class UntilFailDecorator<T> : Decorator<T>
     {
         public override TaskStatus Update( T context )
         {

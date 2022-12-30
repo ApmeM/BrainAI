@@ -1,9 +1,9 @@
-﻿namespace BrainAI.AI.BehaviorTrees.Decorators
+﻿namespace BrainAI.AI.BehaviorTrees
 {
     /// <summary>
     /// inverts the result of the child node
     /// </summary>
-    public class Inverter<T> : Decorator<T>
+    public class InverterDecorator<T> : Decorator<T>
     {
         public override TaskStatus Update( T context )
         {

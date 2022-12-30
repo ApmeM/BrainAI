@@ -1,4 +1,4 @@
-﻿namespace BrainAI.AI.UtilityAI.Appraisals
+﻿namespace BrainAI.AI.UtilityAI
 {
     using System;
 

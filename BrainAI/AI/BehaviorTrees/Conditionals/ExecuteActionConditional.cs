@@ -1,8 +1,6 @@
-﻿namespace BrainAI.AI.BehaviorTrees.Conditionals
+﻿namespace BrainAI.AI.BehaviorTrees
 {
     using System;
-
-    using BrainAI.AI.BehaviorTrees.Actions;
 
     /// <summary>
     /// wraps an ExecuteAction so that it can be used as a Conditional

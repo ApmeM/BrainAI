@@ -1,7 +1,5 @@
-﻿namespace BrainAI.AI.UtilityAI.Actions
+﻿namespace BrainAI.AI.UtilityAI
 {
-    using System;
-
     /// <summary>
     /// No action to excute
     /// </summary>
