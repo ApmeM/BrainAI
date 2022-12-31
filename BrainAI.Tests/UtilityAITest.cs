@@ -17,7 +17,7 @@
         }
 
         [Test]
-        public void Utility_Tick1_EnterAndExecuteFirstAction()
+        public void UtilityAI_Tick1_EnterAndExecuteFirstAction()
         {
             var context = new Context();
 
@@ -36,7 +36,7 @@
         }
 
         [Test]
-        public void Utility_Tick2_ExitFirstActionAndEnterAndExecuteSecondAction()
+        public void UtilityAI_Tick2_ExitFirstActionAndEnterAndExecuteSecondAction()
         {
             var context = new Context
             {
@@ -57,6 +57,40 @@
             Assert.AreEqual(1, context.enter2);
             Assert.AreEqual(0, context.exit2);
             Assert.AreEqual(2, context.i);
+        }
+
+        [Test]
+        [TestCase(0,0,0)]
+        [TestCase(0,1,1)]
+        [TestCase(1,0,1)]
+        [TestCase(1,1,1)]
+        public void FirstAfterThresholdAppraisal_ActAsBoolOrOperator(float v1, float v2, float res)
+        {
+            var target = new MaxAppraisal<Context>(
+                new FixedAppraisal<Context>(v1),
+                new FixedAppraisal<Context>(v2)
+            );
+
+            var score = target.GetScore(new Context());
+
+            Assert.AreEqual(res, score);
+        }
+
+        [Test]
+        [TestCase(0,0,0)]
+        [TestCase(0,1,0)]
+        [TestCase(1,0,0)]
+        [TestCase(1,1,1)]
+        public void FirstOrNothingAppraisal_ActAsBoolAndOperation(float v1, float v2, float res)
+        {
+            var target = new MultAppraisal<Context>(
+                new FixedAppraisal<Context>(v1),
+                new FixedAppraisal<Context>(v2)
+            );
+
+            var score = target.GetScore(new Context());
+
+            Assert.AreEqual(res, score);
         }
     }
 }

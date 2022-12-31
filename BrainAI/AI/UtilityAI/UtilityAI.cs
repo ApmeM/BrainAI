@@ -10,10 +10,11 @@
         private readonly T context;
 
         private readonly IAction<T> rootAction;
+        private IAction<T> lastAction;
 
         public UtilityAI( T context, Reasoner<T> rootSelector )
         {
-            this.rootAction = new ReasonerAction<T>(rootSelector);
+            this.rootAction = new ReasonerAction<T>(rootSelector, (a)=>lastAction = a, ()=>lastAction);
             this.context = context;
         }
 

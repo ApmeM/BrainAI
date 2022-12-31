@@ -1,7 +1,7 @@
 ﻿namespace BrainAI.AI.UtilityAI
 {
     /// <summary>
-    /// The first Consideration to score above the threshold
+    /// Selects first action with score above the threshold
     /// </summary>
     public class FirstScoreReasoner<T> : Reasoner<T>
     {

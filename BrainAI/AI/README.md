@@ -53,10 +53,10 @@ The `BehaviorTreeBuilder` is a great way to reduce the barrier of entry to using
 ## Composites
 Composites are parent nodes in a behavior tree. They house 1 or more children and execute them in different ways.
 
-- **Sequence<T>:** returns failure as soon as one of its children returns failure. If a child returns success it will sequentially run the next child in the next tick of the tree.
-- **Selector<T>:** returns success as soon as one of its child tasks return success. If a child task returns failure then it will sequentially run the next child in the next tick.
-- **Parallel<T>:** runs each child until a child returns failure. It differs from `Sequence` only in that it runs all children every tick
-- **ParallelSelector<T>:** like a `Selector` except it will run all children every tick
+- **SequenceComposite<T>:** returns failure as soon as one of its children returns failure. If a child returns success it will sequentially run the next child in the next tick of the tree.
+- **SelectorComposite<T>:** returns success as soon as one of its child tasks return success. If a child task returns failure then it will sequentially run the next child in the next tick.
+- **ParallelComposite<T>:** runs each child until a child returns failure. It differs from `Sequence` only in that it runs all children every tick
+- **ParallelSelectorComposite<T>:** like a `Selector` except it will run all children every tick
 
 
 ## Conditionals
@@ -68,13 +68,13 @@ Conditionals are binary success/failure nodes. They are identified by the ICondi
 ## Decorators
 Decorators are wrapper tasks that have a single child. They can modify the behavior of the child task in various ways such as inverting the result, running it until failure, etc.
 
-- **AlwaysFail<T>:** always returns failure regardless of the child result
-- **AlwaysSucceed<T>:** always returns success regardless of the child result
+- **AlwaysFailDecorator<T>:** always returns failure regardless of the child result
+- **AlwaysSucceedDecorator<T>:** always returns success regardless of the child result
 - **ConditionalDecorator<T>:** wraps a Conditional and will only run its child if a condition is met
-- **Inverter<T>:** inverts the result of its child
-- **Repeater<T>:** repeats its child task a specified number of times
-- **UntilFail<T>:** keeps executing its child task until it returns failure
-- **UntilSuccess<T>:** keeps executing its child task until it returns success
+- **InverterDecorator<T>:** inverts the result of its child
+- **RepeaterDecorator<T>:** repeats its child task a specified number of times
+- **UntilFailDecorator<T>:** keeps executing its child task until it returns failure
+- **UntilSuccessDecorator<T>:** keeps executing its child task until it returns success
 
 
 ## Actions
@@ -128,10 +128,28 @@ A great overview of utility AI is [available here](http://www.gdcvault.com/play/
 ## Reasoner
 Selects the best Action from a list of Actions and its Appraisals attached to the Reasoner. The root of a utility AI.
 
+- **FirstScoreReasoner<T>:** Selects first action which score more than specified threshold
+- **HighestScoreReasoner<T>:** Selects action with maximum score
+- **LowestScoreReasoner<T>:** Selects action with minimum score
+- **Reasoner<T>:** Base class for custom implementations
+
 
 ## Appraisal
 Appraisals calculate and return a score which is used by the Reasoner to determine the action.
 
+- **ActionAppraisal<T>:** Func wrapper for use as an Appraisal without having to create a subclass.
+- **FirstAppraisal<T>:** Returns first score that is above then threshold.
+- **FixedAppraisal<T>:** Always returns a fixed score.
+- **MaxAppraisal<T>:**  Return max score of child appraisals. For binary child appraisals (that returns 1 or 0) can be used as boolean 'OR' operator.
+- **MultiAppraisal<T>:** Scores by multiplying the score of all child Appraisals. For binary child appraisals (that returns 1 or 0) can be used as boolean 'AND' operator if threshold is set to 0.
+- **SumAppraisal<T>:** Scores if all child Appraisals score above the threshold. If threshold not specified - float.MinValue is used.
+- **IAppraisal<T>:** Base interface for custom implementations
+
 
 ## Action
 The action that the AI executes when a specific consideration is selected.
+
+- **FirstScoreReasoner<T>:** Selects first action with score above the threshold
+- **HighestScoreReasoner<T>:** Selects the action with the highest score.
+- **LowestScoreReasoner<T>:** Selects the action with the lowest score.
+

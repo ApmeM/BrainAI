@@ -1,7 +1,7 @@
 ﻿namespace BrainAI.AI.UtilityAI
 {
     /// <summary>
-    /// The Consideration with the highest score is selected
+    /// Selects the action with the highest score.
     /// </summary>
     public class HighestScoreReasoner<T> : Reasoner<T>
     {

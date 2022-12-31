@@ -1,7 +1,7 @@
 ﻿namespace BrainAI.AI.UtilityAI
 {
     /// <summary>
-    /// The Consideration with the lowest score is selected
+    /// Selects the action with the lowest score.
     /// </summary>
     public class LowestScoreReasoner<T> : Reasoner<T>
     {

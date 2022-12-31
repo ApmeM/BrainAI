@@ -3,7 +3,7 @@
     using System;
 
     /// <summary>
-    /// wraps a Func for use as an Appraisal without having to create a subclass
+    /// Func wrapper for use as an Appraisal without having to create a subclass.
     /// </summary>
     public class ActionAppraisal<T> : IAppraisal<T>
     {

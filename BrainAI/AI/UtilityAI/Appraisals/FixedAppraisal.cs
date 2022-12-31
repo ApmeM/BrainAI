@@ -1,13 +1,13 @@
 ﻿namespace BrainAI.AI.UtilityAI
 {
     /// <summary>
-    /// always returns a fixed score. Serves double duty as a default Consideration.
+    /// Always returns a fixed score.
     /// </summary>
-    public class FixedScoreAppraisal<T> : IAppraisal<T>
+    public class FixedAppraisal<T> : IAppraisal<T>
     {
         public float Score;
 
-        public FixedScoreAppraisal(float score)
+        public FixedAppraisal(float score)
         {
             Score = score;
         }
