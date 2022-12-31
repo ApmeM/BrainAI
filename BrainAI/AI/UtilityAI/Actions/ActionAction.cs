@@ -16,7 +16,7 @@
             this.action = action;
         }
 
-        public ActionAction(Action<T> action, Action<T> enter, Action<T> exit)
+        public ActionAction(Action<T> enter, Action<T> action, Action<T> exit)
         {
             this.enter = enter;
             this.action = action;

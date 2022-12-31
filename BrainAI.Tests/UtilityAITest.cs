@@ -22,8 +22,8 @@
             var context = new Context();
 
             var reasoner = new LowestScoreReasoner<Context>();
-            reasoner.Add(new ActionAppraisal<Context>(a => a.i), new ActionAction<Context>(c => c.i++, c => c.enter1++, c => c.exit1++));
-            reasoner.Add(new ActionAppraisal<Context>(a => 2 - a.i), new ActionAction<Context>(c => { }, c => c.enter2++, c => c.exit2++));
+            reasoner.Add(new ActionAppraisal<Context>(a => a.i), new ActionAction<Context>(c => c.enter1++, c => c.i++, c => c.exit1++));
+            reasoner.Add(new ActionAppraisal<Context>(a => 2 - a.i), new ActionAction<Context>(c => c.enter2++, c => { }, c => c.exit2++));
             var target = new UtilityAI<Context>(context, reasoner);
 
             target.Tick();
@@ -44,8 +44,8 @@
             };
 
             var reasoner = new LowestScoreReasoner<Context>();
-            reasoner.Add(new ActionAppraisal<Context>(a => a.i), new ActionAction<Context>(c => c.i++, c => c.enter1++, c => c.exit1++));
-            reasoner.Add(new ActionAppraisal<Context>(a => 2 - a.i), new ActionAction<Context>(c => { }, c => c.enter2++, c => c.exit2++));
+            reasoner.Add(new ActionAppraisal<Context>(a => a.i), new ActionAction<Context>(c => c.enter1++, c => c.i++, c => c.exit1++));
+            reasoner.Add(new ActionAppraisal<Context>(a => 2 - a.i), new ActionAction<Context>(c => c.enter2++, c => { }, c => c.exit2++));
             var target = new UtilityAI<Context>(context, reasoner);
 
             target.Tick();
