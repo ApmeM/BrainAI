@@ -3,62 +3,63 @@
     using System;
     using System.Collections.Generic;
 
-    /// <summary>
-    /// calculates paths given an IAstarGraph and start/goal positions
-    /// </summary>
-    public static class AStarPathfinder
+    public class AStarPathfinder<T>
     {
-        public static bool Search<T>( IAstarGraph<T> graph, T start, T goal, out Dictionary<T,T> cameFrom )
+        private readonly Dictionary<T,T> visitedNodes = new Dictionary<T, T>();
+
+        private readonly IAstarGraph<T> graph;
+
+        private readonly List<T> resultPath = new List<T>();
+        
+        private readonly Dictionary<T, int> costSoFar = new Dictionary<T, int>();
+
+        private readonly List<ValueTuple<int, T>> frontier = new List<ValueTuple<int, T>>();
+
+        private readonly TupleComparer<T> comparer = new TupleComparer<T>();
+
+        public AStarPathfinder(IAstarGraph<T> graph)
         {
-            var foundPath = false;
-            cameFrom = new Dictionary<T, T> { { start, start } };
+            this.graph = graph;
+        }
 
-            var costSoFar = new Dictionary<T, int>();
-            var frontier = new List<Tuple<int, T>> { new Tuple<int, T>(0, start) };
+        public IReadOnlyList<T> Search(T start, T goal)
+        {
+            visitedNodes.Clear();
+            visitedNodes[start] = start;
 
+            frontier.Clear();
+            frontier.Add(new ValueTuple<int, T>(0, start));
+
+            costSoFar.Clear();
             costSoFar[start] = 0;
 
-            while( frontier.Count > 0 )
+            while (frontier.Count > 0)
             {
                 var current = frontier[0];
                 frontier.RemoveAt(0);
 
-                if ( current.Item2.Equals( goal ) )
+                if (current.Item2.Equals(goal))
                 {
-                    foundPath = true;
-                    break;
+                    PathConstructor.RecontructPath(visitedNodes, start, goal, resultPath);
+                    return resultPath;
                 }
 
-                foreach( var next in graph.GetNeighbors( current.Item2) )
+                foreach (var next in graph.GetNeighbors(current.Item2))
                 {
-                    var newCost = costSoFar[current.Item2] + graph.Cost( current.Item2, next );
-                    if( !costSoFar.ContainsKey( next ) || newCost < costSoFar[next] )
+                    var newCost = costSoFar[current.Item2] + graph.Cost(current.Item2, next);
+                    if (!costSoFar.ContainsKey(next) || newCost < costSoFar[next])
                     {
                         costSoFar[next] = newCost;
-                        var priority = newCost + graph.Heuristic( next, goal );
-                        frontier.Add(new Tuple<int, T>(priority, next));
-                        cameFrom[next] = current.Item2;
+                        var priority = newCost + graph.Heuristic(next, goal);
+                        frontier.Add(new ValueTuple<int, T>(priority, next));
+                        visitedNodes[next] = current.Item2;
                     }
                 }
 
-                frontier.Sort(new TupleComparer<T>());
+                frontier.Sort(comparer);
             }
-
-            return foundPath;
-        }
-        
-        /// <summary>
-        /// gets a path from start to goal if possible. If no path is found null is returned.
-        /// </summary>
-        /// <param name="graph">Graph.</param>
-        /// <param name="start">Start.</param>
-        /// <param name="goal">Goal.</param>
-        /// <typeparam name="T">The 1st type parameter.</typeparam>
-        public static List<T> Search<T>( IAstarGraph<T> graph, T start, T goal )
-        {
-            var foundPath = Search( graph, start, goal, out var cameFrom );
-            return foundPath ? PathConstructor.RecontructPath( cameFrom, start, goal ) : null;
+            
+            return null;
         }
     }
 }
-

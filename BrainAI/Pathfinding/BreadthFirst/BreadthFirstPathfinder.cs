@@ -5,104 +5,88 @@
     /// <summary>
     /// calculates paths given an IUnweightedGraph and start/goal positions
     /// </summary>
-    public static class BreadthFirstPathfinder
+    public class BreadthFirstPathfinder<T>
     {
-        public static bool Search<T>( IUnweightedGraph<T> graph, T start, T goal, out Dictionary<T,T> cameFrom )
+        private readonly Dictionary<T, T> visitedNodes = new Dictionary<T, T>();
+
+        private readonly IUnweightedGraph<T> graph;
+
+        private readonly List<T> resultPath = new List<T>();
+
+        private readonly Queue<T> frontier = new Queue<T>();
+
+        public BreadthFirstPathfinder(IUnweightedGraph<T> graph)
         {
-            var foundPath = false;
-            var frontier = new Queue<T>();
-            frontier.Enqueue( start );
+            this.graph = graph;
+        }
 
-            cameFrom = new Dictionary<T,T>();
-            cameFrom.Add( start, start );
+        public IReadOnlyList<T> Search(T start, T goal)
+        {
+            frontier.Clear();
+            frontier.Enqueue(start);
 
-            while( frontier.Count > 0 )
+            visitedNodes.Clear();
+            visitedNodes.Add(start, start);
+
+            while (frontier.Count > 0)
             {
                 var current = frontier.Dequeue();
-                if( current.Equals( goal ) )
+                if (current.Equals(goal))
                 {
-                    foundPath = true;
-                    break;
+                    PathConstructor.RecontructPath(visitedNodes, start, goal, resultPath);
+                    return resultPath;
                 }
 
-                foreach( var next in graph.GetNeighbors( current ) )
+                foreach (var next in graph.GetNeighbors(current))
                 {
-                    if( !cameFrom.ContainsKey( next ) )
+                    if (!visitedNodes.ContainsKey(next))
                     {
-                        frontier.Enqueue( next );
-                        cameFrom.Add( next, current );
+                        frontier.Enqueue(next);
+                        visitedNodes.Add(next, current);
                     }
-                }
-            }
-
-            return foundPath;
-        }
-
-
-        public static List<T> Search<T>( IUnweightedGraph<T> graph, T start, T goal )
-        {
-            var foundPath = Search( graph, start, goal, out var cameFrom );
-            return foundPath ? PathConstructor.RecontructPath( cameFrom, start, goal ) : null;
-        }
-
-        public static bool Search<T>( IUnweightedGraph<T> graph, T start, HashSet<T> goals, out Dictionary<T,T> cameFrom )
-        {
-            var foundPath = false;
-            var frontier = new Queue<T>();
-            frontier.Enqueue( start );
-
-            cameFrom = new Dictionary<T,T>();
-            cameFrom.Add( start, start );
-
-            while( frontier.Count > 0 )
-            {
-                var current = frontier.Dequeue();
-                if(goals.Contains(current))
-                {
-                    foundPath = true;
-                    break;
-                }
-
-                foreach( var next in graph.GetNeighbors( current ) )
-                {
-                    if( !cameFrom.ContainsKey( next ) )
-                    {
-                        frontier.Enqueue( next );
-                        cameFrom.Add( next, current );
-                    }
-                }
-            }
-
-            return foundPath;
-        }
-        
-        public static List<T> Search<T>( IUnweightedGraph<T> graph, T start, HashSet<T> goals )
-        {
-            var foundPath = Search( graph, start, goals, out var cameFrom );
-            if (!foundPath)
-            {
-                return null;
-            }
-
-            foreach (var goal in goals)
-            {
-                if (cameFrom.ContainsKey(goal))
-                {
-                    return PathConstructor.RecontructPath(cameFrom, start, goal);
                 }
             }
 
             return null;
         }
 
-
-        public static void Search<T>(IUnweightedGraph<T> graph, T start, int length, out Dictionary<T, T> cameFrom)
+        public IReadOnlyList<T> Search(T start, HashSet<T> goals)
         {
-            var frontier = new Queue<T>();
+            frontier.Clear();
             frontier.Enqueue(start);
 
-            cameFrom = new Dictionary<T, T>();
-            cameFrom.Add(start, start);
+            visitedNodes.Clear();
+            visitedNodes.Add(start, start);
+
+            while (frontier.Count > 0)
+            {
+                var current = frontier.Dequeue();
+                if (goals.Contains(current))
+                {
+                    PathConstructor.RecontructPath(visitedNodes, start, current, resultPath);
+                    return resultPath;
+                }
+
+                foreach (var next in graph.GetNeighbors(current))
+                {
+                    if (!visitedNodes.ContainsKey(next))
+                    {
+                        frontier.Enqueue(next);
+                        visitedNodes.Add(next, current);
+                    }
+                }
+            }
+            
+            return null;
+        }
+
+        public IReadOnlyDictionary<T, T> Search(T start, int length)
+        {
+            frontier.Clear();
+            frontier.Enqueue(start);
+
+            visitedNodes.Clear();
+            visitedNodes.Add(start, start);
 
             var forNextLevel = 1;
 
@@ -112,10 +96,10 @@
 
                 foreach (var next in graph.GetNeighbors(current))
                 {
-                    if (!cameFrom.ContainsKey(next))
+                    if (!visitedNodes.ContainsKey(next))
                     {
                         frontier.Enqueue(next);
-                        cameFrom.Add(next, current);
+                        visitedNodes.Add(next, current);
                     }
                 }
 
@@ -126,8 +110,8 @@
                     length--;
                 }
             }
-        }
 
+            return visitedNodes;
+        }
     }
 }
-

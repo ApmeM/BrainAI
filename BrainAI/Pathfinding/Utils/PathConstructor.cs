@@ -4,9 +4,14 @@
 
     public class PathConstructor
     {
-        public static List<T> RecontructPath<T>(Dictionary<T, T> cameFrom, T start, T goal)
+        public static void RecontructPath<T>(Dictionary<T, T> cameFrom, T start, T goal, List<T> path)
         {
-            var path = new List<T>();
+            path.Clear();
+            if (!cameFrom.ContainsKey(goal))
+            {
+                return;
+            }
+
             var current = goal;
             path.Add(goal);
 
@@ -16,8 +21,6 @@
                 path.Add(current);
             }
             path.Reverse();
-
-            return path;
         }
     }
 }

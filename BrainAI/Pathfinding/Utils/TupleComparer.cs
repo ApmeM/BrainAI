@@ -3,9 +3,9 @@
     using System;
     using System.Collections.Generic;
 
-    internal class TupleComparer<T> : IComparer<Tuple<int, T>>
+    internal class TupleComparer<T> : IComparer<ValueTuple<int, T>>
     {
-        public int Compare(Tuple<int, T> x, Tuple<int, T> y)
+        public int Compare(ValueTuple<int, T> x, ValueTuple<int, T> y)
         {
             return x.Item1 - y.Item1;
         }
