@@ -43,7 +43,7 @@ graph.Edges["d"] = new string[] { "e", "a" }; // d→e, d→a
 graph.Edges["e"] = new string[] { "b" }; // e→b
 
 // calculate a path from "c" to "e". The result is c→a→b→d→e, which we can confirm by looking at the edge comments above.
-var path = BreadthFirstPathfinder.Search( graph, "c", "e" );
+var path = new BreadthFirstPathfinder(graph).Search("c", "e" );
 ```
 
 
@@ -72,7 +72,7 @@ graph.Walls.Add(new Point(4, 5))
 graph.Walls.Add(new Point(5, 5))
 
 // calculate the path
-var path = graph.Search( new Point( 3, 4 ), new Point( 7, 7 ) );
+var path = new WeightedPathfinder(graph).Search( new Point( 3, 4 ), new Point( 7, 7 ) );
 ```
 
 
@@ -102,5 +102,5 @@ graph.Walls.Add(new Point(4, 5))
 graph.Walls.Add(new Point(5, 5))
 
 // calculate the path
-var path = graph.Search( new Point( 3, 4 ), new Point( 7, 7 ) );
+var path = new AstarPathfinder(graph).Search( new Point( 3, 4 ), new Point( 7, 7 ) );
 ```
