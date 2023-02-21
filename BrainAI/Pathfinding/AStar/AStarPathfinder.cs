@@ -3,7 +3,7 @@
     using System;
     using System.Collections.Generic;
 
-    public class AStarPathfinder<T>
+    public class AStarPathfinder<T> : IPathfinder<T>
     {
         private readonly Dictionary<T,T> visitedNodes = new Dictionary<T, T>();
 

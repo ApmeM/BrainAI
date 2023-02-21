@@ -6,7 +6,7 @@
     /// <summary>
     /// calculates paths given an IWeightedGraph and start/goal positions
     /// </summary>
-    public class WeightedPathfinder<T>
+    public class WeightedPathfinder<T> : IPathfinder<T>
     {
         private readonly Dictionary<T,T> visitedNodes = new Dictionary<T, T>();
 
