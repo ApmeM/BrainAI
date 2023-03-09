@@ -18,7 +18,7 @@
 
         private readonly List<ValueTuple<int, T>> frontier = new List<ValueTuple<int, T>>();
 
-        private readonly TupleComparer<T> comparer = new TupleComparer<T>();
+        private static readonly Comparison<(int, T)> Comparison = (x, y) => x.Item1 - y.Item1;
 
         public WeightedPathfinder(IWeightedGraph<T> graph)
         {
@@ -41,7 +41,7 @@
                 var current = frontier[0];
                 frontier.RemoveAt(0);
 
-                if ( current.Item2.Equals( goal ) )
+                if (EqualityComparer<T>.Default.Equals(current.Item2, goal))
                 {
                     PathConstructor.RecontructPath(visitedNodes, start, goal, resultPath);
                     return resultPath;
@@ -59,7 +59,7 @@
                     }
                 }
 
-                frontier.Sort(comparer);
+                frontier.Sort(Comparison);
             }
 
             return null;

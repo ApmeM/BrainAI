@@ -12,7 +12,7 @@
         /// </summary>
         /// <returns>The neighbors.</returns>
         /// <param name="node">Node.</param>
-        IEnumerable<T> GetNeighbors( T node );
+        List<T> GetNeighbors( T node );
     }
 }
 

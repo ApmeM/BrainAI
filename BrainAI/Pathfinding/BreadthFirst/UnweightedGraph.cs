@@ -8,9 +8,9 @@
     /// </summary>
     public class UnweightedGraph<T> : IUnweightedGraph<T>
     {
-        public Dictionary<T,T[]> Edges = new Dictionary<T,T[]>();
+        public Dictionary<T,List<T>> Edges = new Dictionary<T,List<T>>();
 
-        public IEnumerable<T> GetNeighbors( T node )
+        public List<T> GetNeighbors( T node )
         {
             return this.Edges[node];
         }

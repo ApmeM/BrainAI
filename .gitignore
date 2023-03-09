@@ -22,3 +22,6 @@ packages/
 *.nupkg
 *.nuget.props
 *.nuget.targets
+
+# Idea
+.idea/

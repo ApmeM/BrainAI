@@ -51,7 +51,7 @@
         }
 
 
-        IEnumerable<Point> IUnweightedGraph<Point>.GetNeighbors( Point node )
+        List<Point> IUnweightedGraph<Point>.GetNeighbors( Point node )
         {
             this.neighbors.Clear();
 

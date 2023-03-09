@@ -31,7 +31,7 @@
             while (frontier.Count > 0)
             {
                 var current = frontier.Dequeue();
-                if (current.Equals(goal))
+                if (EqualityComparer<T>.Default.Equals(current, goal))
                 {
                     PathConstructor.RecontructPath(visitedNodes, start, goal, resultPath);
                     return resultPath;
