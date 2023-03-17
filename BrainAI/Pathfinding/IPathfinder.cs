@@ -4,6 +4,6 @@ namespace BrainAI.Pathfinding
 
     public interface IPathfinder<T>
     {
-        IReadOnlyList<T> Search(T start, T goal);
+        List<T> Search(T start, T goal);
     }
 }

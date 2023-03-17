@@ -15,7 +15,7 @@
             var current = goal;
             path.Add(goal);
 
-            while (!current.Equals(start))
+            while (!EqualityComparer<T>.Default.Equals(current, start))
             {
                 current = cameFrom[current];
                 path.Add(current);

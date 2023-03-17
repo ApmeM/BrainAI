@@ -25,7 +25,7 @@
             this.graph = graph;
         }
 
-        public IReadOnlyList<T> Search(T start, T goal)
+        public List<T> Search(T start, T goal)
         {
             visitedNodes.Clear();
             visitedNodes[start] = start;
