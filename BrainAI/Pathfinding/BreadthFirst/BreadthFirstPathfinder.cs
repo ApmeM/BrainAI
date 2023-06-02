@@ -1,13 +1,16 @@
 ﻿namespace BrainAI.Pathfinding
 {
+    using System;
     using System.Collections.Generic;
 
     /// <summary>
     /// calculates paths given an IUnweightedGraph and start/goal positions
     /// </summary>
-    public class BreadthFirstPathfinder<T> : IPathfinder<T>
+    public class BreadthFirstPathfinder<T> : IPathfinder<T>, IMultiTargetPathfinder<T>
     {
         private readonly Dictionary<T, T> visitedNodes = new Dictionary<T, T>();
+
+        private readonly HashSet<T> tmpGoals = new HashSet<T>();
 
         private readonly IUnweightedGraph<T> graph;
 
@@ -22,65 +25,36 @@
 
         public List<T> Search(T start, T goal)
         {
-            frontier.Clear();
-            frontier.Enqueue(start);
-
-            visitedNodes.Clear();
-            visitedNodes.Add(start, start);
-
-            while (frontier.Count > 0)
-            {
-                var current = frontier.Dequeue();
-                if (EqualityComparer<T>.Default.Equals(current, goal))
-                {
-                    PathConstructor.RecontructPath(visitedNodes, start, goal, resultPath);
-                    return resultPath;
-                }
-
-                foreach (var next in graph.GetNeighbors(current))
-                {
-                    if (!visitedNodes.ContainsKey(next))
-                    {
-                        frontier.Enqueue(next);
-                        visitedNodes.Add(next, current);
-                    }
-                }
-            }
-
-            return null;
+            tmpGoals.Clear();
+            tmpGoals.Add(goal);
+            return Search(start, tmpGoals);
         }
 
-        public IReadOnlyList<T> Search(T start, HashSet<T> goals)
+        public List<T> Search(T start, HashSet<T> goals)
         {
-            frontier.Clear();
-            frontier.Enqueue(start);
-
-            visitedNodes.Clear();
-            visitedNodes.Add(start, start);
-
-            while (frontier.Count > 0)
+            var (target, result) = InnerSearch(start, goals, int.MaxValue);
+            if (!result)
             {
-                var current = frontier.Dequeue();
-                if (goals.Contains(current))
-                {
-                    PathConstructor.RecontructPath(visitedNodes, start, current, resultPath);
-                    return resultPath;
-                }
-
-                foreach (var next in graph.GetNeighbors(current))
-                {
-                    if (!visitedNodes.ContainsKey(next))
-                    {
-                        frontier.Enqueue(next);
-                        visitedNodes.Add(next, current);
-                    }
-                }
+                return null;
             }
-            
-            return null;
+            PathConstructor.RecontructPath(visitedNodes, start, target, resultPath);
+            return resultPath;
         }
 
-        public IReadOnlyDictionary<T, T> Search(T start, int length)
+        public Dictionary<T, T> Search(T start, int maxPathWeight)
+        {
+            tmpGoals.Clear();
+            InnerSearch(start, tmpGoals, maxPathWeight);
+            return visitedNodes;
+        }
+
+        public Dictionary<T, T> Search(T start, HashSet<T> goals, int maxPathWeight)
+        {
+            InnerSearch(start, goals, maxPathWeight);
+            return visitedNodes;
+        }
+
+        public ValueTuple<T, bool> InnerSearch(T start, HashSet<T> goals, int maxPathWeight)
         {
             frontier.Clear();
             frontier.Enqueue(start);
@@ -90,9 +64,14 @@
 
             var forNextLevel = 1;
 
-            while (frontier.Count > 0 && length > 0)
+            while (frontier.Count > 0 && maxPathWeight > 0)
             {
                 var current = frontier.Dequeue();
+
+                if (goals.Contains(current))
+                {
+                    return (current, true);
+                }
 
                 foreach (var next in graph.GetNeighbors(current))
                 {
@@ -107,11 +86,11 @@
                 if (forNextLevel == 0)
                 {
                     forNextLevel = frontier.Count;
-                    length--;
+                    maxPathWeight--;
                 }
             }
 
-            return visitedNodes;
+            return (default(T), false);
         }
     }
 }

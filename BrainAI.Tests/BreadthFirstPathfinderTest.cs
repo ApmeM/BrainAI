@@ -1,5 +1,6 @@
 ﻿using BrainAI.Pathfinding;
 using NUnit.Framework;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace BrainAI.Tests
@@ -149,6 +150,22 @@ namespace BrainAI.Tests
             var comefrom = pathfinder.Search(new Point(1, 1), 0);
             Assert.AreEqual(1, comefrom.Count());
             Assert.IsTrue(comefrom.ContainsKey(new Point(1, 1)));
+        }
+
+        [Test]
+        public void Search_MultiGoals_PathFound()
+        {
+            /*
+             ____
+             _01_
+             _#2_
+            */
+            graph.Walls.Add(new Point(1, 2));
+            var result = pathfinder.Search(new Point(1, 1), new HashSet<Point> { new Point(3, 2), new Point(2, 2) });
+            Assert.AreEqual(3, result.Count());
+            Assert.AreEqual(new Point(1, 1), result[0]);
+            Assert.AreEqual(new Point(2, 1), result[1]);
+            Assert.AreEqual(new Point(2, 2), result[2]);
         }
     }
 }
