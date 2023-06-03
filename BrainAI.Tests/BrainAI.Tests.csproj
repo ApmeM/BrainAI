@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Authors>ApmeM</Authors>
     <Company>ApmeM</Company>
     <Copyright>Copyright ©  2019</Copyright>

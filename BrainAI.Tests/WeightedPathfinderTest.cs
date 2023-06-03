@@ -9,7 +9,7 @@ namespace BrainAI.Tests
     public class WeightedPathfinderTest
     {
         private WeightedGridGraph graph;
-        private WeightedPathfinder<Point> pathfinder;
+        private IMultiTargetPathfinder<Point> pathfinder;
 
         [SetUp]
         public void Setup()
@@ -107,13 +107,13 @@ namespace BrainAI.Tests
             graph.Walls.Add(new Point(2, 1));
             graph.Walls.Add(new Point(1, 0));
             graph.Walls.Add(new Point(0, 1));
-            var comefrom = pathfinder.Search(new Point(1, 1), 2);
-            Assert.AreEqual(5, comefrom.Count());
-            Assert.IsTrue(comefrom.ContainsKey(new Point(1, 1)));
-            Assert.IsTrue(comefrom.ContainsKey(new Point(1, 2)));
-            Assert.IsTrue(comefrom.ContainsKey(new Point(1, 3)));
-            Assert.IsTrue(comefrom.ContainsKey(new Point(2, 2)));
-            Assert.IsTrue(comefrom.ContainsKey(new Point(0, 2)));
+            pathfinder.Search(new Point(1, 1), 2);
+            Assert.AreEqual(5, pathfinder.VisitedNodes.Count());
+            Assert.IsTrue(pathfinder.VisitedNodes.ContainsKey(new Point(1, 1)));
+            Assert.IsTrue(pathfinder.VisitedNodes.ContainsKey(new Point(1, 2)));
+            Assert.IsTrue(pathfinder.VisitedNodes.ContainsKey(new Point(1, 3)));
+            Assert.IsTrue(pathfinder.VisitedNodes.ContainsKey(new Point(2, 2)));
+            Assert.IsTrue(pathfinder.VisitedNodes.ContainsKey(new Point(0, 2)));
         }
 
         [Test]
@@ -131,10 +131,10 @@ namespace BrainAI.Tests
             graph.Walls.Add(new Point(1, 3));
             graph.Walls.Add(new Point(1, 0));
             graph.Walls.Add(new Point(0, 1));
-            var comefrom = pathfinder.Search(new Point(1, 1), 2);
-            Assert.AreEqual(2, comefrom.Count());
-            Assert.IsTrue(comefrom.ContainsKey(new Point(1, 1)));
-            Assert.IsTrue(comefrom.ContainsKey(new Point(1, 2)));
+            pathfinder.Search(new Point(1, 1), 2);
+            Assert.AreEqual(2, pathfinder.VisitedNodes.Count());
+            Assert.IsTrue(pathfinder.VisitedNodes.ContainsKey(new Point(1, 1)));
+            Assert.IsTrue(pathfinder.VisitedNodes.ContainsKey(new Point(1, 2)));
         }
 
         [Test]
@@ -147,9 +147,9 @@ namespace BrainAI.Tests
              ____
             */
             graph.Walls.Add(new Point(1, 0));
-            var comefrom = pathfinder.Search(new Point(1, 1), 0);
-            Assert.AreEqual(1, comefrom.Count());
-            Assert.IsTrue(comefrom.ContainsKey(new Point(1, 1)));
+            pathfinder.Search(new Point(1, 1), 0);
+            Assert.AreEqual(1, pathfinder.VisitedNodes.Count());
+            Assert.IsTrue(pathfinder.VisitedNodes.ContainsKey(new Point(1, 1)));
         }
 
         [Test]
@@ -166,6 +166,27 @@ namespace BrainAI.Tests
             Assert.AreEqual(new Point(1, 1), result[0]);
             Assert.AreEqual(new Point(2, 1), result[1]);
             Assert.AreEqual(new Point(2, 2), result[2]);
+        }
+
+        [Test]
+        public void ContinueSearch_MultiGoals_PathFound()
+        {
+            /*
+             ____
+             _01_
+             _#2_
+             __3_
+            */
+            graph.Walls.Add(new Point(1, 2));
+            var result = pathfinder.Search(new Point(1, 1), new HashSet<Point> { new Point(2, 3), new Point(2, 2) });
+            Assert.AreEqual(3, result.Count());
+            var secondResult = pathfinder.ContinueSearch();
+            Assert.AreEqual(4, secondResult.Count());
+
+            Assert.AreEqual(new Point(1, 1), secondResult[0]);
+            Assert.AreEqual(new Point(2, 1), secondResult[1]);
+            Assert.AreEqual(new Point(2, 2), secondResult[2]);
+            Assert.AreEqual(new Point(2, 3), secondResult[3]);
         }
     }
 }

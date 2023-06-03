@@ -8,9 +8,11 @@
     /// </summary>
     public class WeightedPathfinder<T> : IPathfinder<T>, IMultiTargetPathfinder<T>
     {
-        private readonly Dictionary<T, T> visitedNodes = new Dictionary<T, T>();
+        public Dictionary<T, T> VisitedNodes { get; } = new Dictionary<T, T>();
 
         private readonly HashSet<T> tmpGoals = new HashSet<T>();
+
+        private T searchStart;
 
         private readonly IWeightedGraph<T> graph;
 
@@ -29,60 +31,87 @@
 
         public List<T> Search(T start, T goal)
         {
-            tmpGoals.Clear();
+            this.PrepareSearch();
+            this.StartNewSearch(start);
+
             tmpGoals.Add(goal);
-            return Search(start, tmpGoals);
+
+            return ContinueSearch();
         }
 
         public List<T> Search(T start, HashSet<T> goals)
         {
-            var (target, result) = InnerSearch(start, goals, int.MaxValue);
-            if (!result)
+            this.PrepareSearch();
+            this.StartNewSearch(start);
+
+            foreach (var goal in goals)
+            {
+                this.tmpGoals.Add(goal);
+            }
+
+            return ContinueSearch();
+        }
+
+        public void Search(T start, int maxPathWeight)
+        {
+            this.PrepareSearch();
+            this.StartNewSearch(start);
+
+            InternalSearch(maxPathWeight);
+        }
+
+        public List<T> Search(T start, HashSet<T> goals, int maxPathWeight)
+        {
+            this.PrepareSearch();
+            this.StartNewSearch(start);
+
+            foreach (var goal in goals)
+            {
+                this.tmpGoals.Add(goal);
+            }
+
+            return ContinueSearch(maxPathWeight);
+        }
+
+        public List<T> ContinueSearch()
+        {
+            if (tmpGoals.Count == 0)
             {
                 return null;
             }
-            PathConstructor.RecontructPath(visitedNodes, start, target, resultPath);
-            return resultPath;
+            
+            return ContinueSearch(int.MaxValue);
         }
 
-        public Dictionary<T, T> Search(T start, int maxPathWeight)
+        public List<T> ContinueSearch(int maxPathWeight)
         {
-            tmpGoals.Clear();
-            InnerSearch(start, tmpGoals, maxPathWeight);
-            return visitedNodes;
+            var (target, result) = InternalSearch(maxPathWeight);
+            return this.BuildPath(target, result);
         }
 
-        public Dictionary<T, T> Search(T start, HashSet<T> goals, int maxPathWeight)
+        private ValueTuple<T, bool> InternalSearch(int additionalDepth)
         {
-            InnerSearch(start, goals, maxPathWeight);
-            return visitedNodes;
-        }
-
-        public ValueTuple<T, bool> InnerSearch(T start, HashSet<T> goals, int maxPathWeight)
-        {
-            visitedNodes.Clear();
-            visitedNodes[start] = start;
-
-            frontier.Clear();
-            frontier.Add(new ValueTuple<int, T>(0, start));
-
-            costSoFar.Clear();
-            costSoFar[start] = 0;
+            if (frontier.Count > 0 && additionalDepth < int.MaxValue - frontier[0].Item1)
+            {
+                additionalDepth += frontier[0].Item1;
+            }
 
             while (frontier.Count > 0)
             {
                 var current = frontier[0];
-                frontier.RemoveAt(0);
 
-                if (current.Item1 >= maxPathWeight)
+                if (current.Item1 >= additionalDepth)
                 {
                     break;
                 }
 
-                if (goals.Contains(current.Item2))
+                if (tmpGoals.Contains(current.Item2))
                 {
+                    tmpGoals.Remove(current.Item2);
                     return (current.Item2, true);
                 }
+
+                frontier.RemoveAt(0);
 
                 foreach (var next in graph.GetNeighbors(current.Item2))
                 {
@@ -92,7 +121,7 @@
                         costSoFar[next] = newCost;
                         var priority = newCost;
                         frontier.Add(new ValueTuple<int, T>(priority, next));
-                        visitedNodes[next] = current.Item2;
+                        VisitedNodes[next] = current.Item2;
                     }
                 }
 
@@ -100,6 +129,33 @@
             }
 
             return (default(T), false);
+        }
+
+        private void PrepareSearch()
+        {
+            this.frontier.Clear();
+            this.VisitedNodes.Clear();
+            this.tmpGoals.Clear();
+            this.costSoFar.Clear();
+        }
+
+        private void StartNewSearch(T start)
+        {
+            this.searchStart = start;
+            this.frontier.Add(new ValueTuple<int, T>(0, start));
+            this.VisitedNodes.Add(start, start);
+            this.costSoFar[start] = 0;
+        }
+
+        private List<T> BuildPath(T target, bool result)
+        {
+            if (!result)
+            {
+                return null;
+            }
+
+            PathConstructor.RecontructPath(VisitedNodes, searchStart, target, resultPath);
+            return resultPath;
         }
     }
 }

@@ -12,6 +12,8 @@ namespace BrainAI.Pathfinding
         /// Method is NOT thread safe. In case of parallel usage the result might be unpredictable.
         /// Result list is the same instance for all method calls. 
         /// Be sure you copy the result before next search or the result will be lost.
+        ///
+        /// WARNING: if there is no path to the goal on infinity map this method fails to infinity loop.
         List<T> Search(T start, T goal);
     }
 }

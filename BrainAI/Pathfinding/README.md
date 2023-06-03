@@ -17,6 +17,12 @@ In the simplest case the nodes can be a `Point` (see `UnweightedGridGraph`, `Wei
 If your nodes need a bunch of precomputed data you can use any class that you want for them. 
 This allows you to precompute (offline or at map load time) any data that you might need for the actual path search.
 
+# Features
+
+- Multiple pathfinding algorythms: BFS, Dijkstra and A*
+- Ability to split search process across multiple calls for BFS and Dijkstra
+- Minimum memory allocations during search.
+
 ## Breadth First Search
 Often called flood fill when used on a grid, Breadth First Search uses an expanding frontier that radiates out from the start position visiting all neighbor nodes on the way. 
 When it reaches the goal it stops the search and returns the path. 

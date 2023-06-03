@@ -8,9 +8,11 @@
     /// </summary>
     public class BreadthFirstPathfinder<T> : IPathfinder<T>, IMultiTargetPathfinder<T>
     {
-        private readonly Dictionary<T, T> visitedNodes = new Dictionary<T, T>();
+        public Dictionary<T, T> VisitedNodes { get; } = new Dictionary<T, T>();
 
         private readonly HashSet<T> tmpGoals = new HashSet<T>();
+
+        private T searchStart;
 
         private readonly IUnweightedGraph<T> graph;
 
@@ -25,60 +27,86 @@
 
         public List<T> Search(T start, T goal)
         {
-            tmpGoals.Clear();
+            this.PrepareSearch();
+            this.StartNewSearch(start);
+
             tmpGoals.Add(goal);
-            return Search(start, tmpGoals);
+
+            return ContinueSearch();
         }
 
         public List<T> Search(T start, HashSet<T> goals)
         {
-            var (target, result) = InnerSearch(start, goals, int.MaxValue);
-            if (!result)
+            this.PrepareSearch();
+            this.StartNewSearch(start);
+
+            foreach (var goal in goals)
+            {
+                this.tmpGoals.Add(goal);
+            }
+
+            return ContinueSearch();
+        }
+
+        public void Search(T start, int maxPathWeight)
+        {
+            this.PrepareSearch();
+            this.StartNewSearch(start);
+
+            InternalSearch(maxPathWeight);
+        }
+
+        public List<T> Search(T start, HashSet<T> goals, int maxPathWeight)
+        {
+            this.PrepareSearch();
+            this.StartNewSearch(start);
+
+            foreach (var goal in goals)
+            {
+                this.tmpGoals.Add(goal);
+            }
+
+            return ContinueSearch(maxPathWeight);
+        }
+
+        public List<T> ContinueSearch()
+        {
+            if (tmpGoals.Count == 0)
             {
                 return null;
             }
-            PathConstructor.RecontructPath(visitedNodes, start, target, resultPath);
-            return resultPath;
+
+            return ContinueSearch(int.MaxValue);
         }
 
-        public Dictionary<T, T> Search(T start, int maxPathWeight)
+        public List<T> ContinueSearch(int maxPathWeight)
         {
-            tmpGoals.Clear();
-            InnerSearch(start, tmpGoals, maxPathWeight);
-            return visitedNodes;
+            var (target, result) = InternalSearch(maxPathWeight);
+            return this.BuildPath(target, result);
         }
 
-        public Dictionary<T, T> Search(T start, HashSet<T> goals, int maxPathWeight)
+        private ValueTuple<T, bool> InternalSearch(int additionalDepth)
         {
-            InnerSearch(start, goals, maxPathWeight);
-            return visitedNodes;
-        }
+            var forNextLevel = frontier.Count;
 
-        public ValueTuple<T, bool> InnerSearch(T start, HashSet<T> goals, int maxPathWeight)
-        {
-            frontier.Clear();
-            frontier.Enqueue(start);
-
-            visitedNodes.Clear();
-            visitedNodes.Add(start, start);
-
-            var forNextLevel = 1;
-
-            while (frontier.Count > 0 && maxPathWeight > 0)
+            while (frontier.Count > 0 && additionalDepth > 0)
             {
-                var current = frontier.Dequeue();
+                var current = frontier.Peek();
 
-                if (goals.Contains(current))
+                if (tmpGoals.Contains(current))
                 {
+                    tmpGoals.Remove(current);
                     return (current, true);
                 }
 
+                frontier.Dequeue();
+
                 foreach (var next in graph.GetNeighbors(current))
                 {
-                    if (!visitedNodes.ContainsKey(next))
+                    if (!VisitedNodes.ContainsKey(next))
                     {
                         frontier.Enqueue(next);
-                        visitedNodes.Add(next, current);
+                        VisitedNodes.Add(next, current);
                     }
                 }
 
@@ -86,11 +114,36 @@
                 if (forNextLevel == 0)
                 {
                     forNextLevel = frontier.Count;
-                    maxPathWeight--;
+                    additionalDepth--;
                 }
             }
 
             return (default(T), false);
+        }
+
+        private void PrepareSearch()
+        {
+            this.frontier.Clear();
+            this.VisitedNodes.Clear();
+            this.tmpGoals.Clear();
+        }
+
+        private void StartNewSearch(T start)
+        {
+            this.searchStart = start;
+            this.frontier.Enqueue(start);
+            this.VisitedNodes.Add(start, start);
+        }
+
+        private List<T> BuildPath(T target, bool result)
+        {
+            if (!result)
+            {
+                return null;
+            }
+
+            PathConstructor.RecontructPath(VisitedNodes, searchStart, target, resultPath);
+            return resultPath;
         }
     }
 }
