@@ -1,4 +1,4 @@
-name: Build
+name: Build and test
 
 on:
   push:
@@ -6,41 +6,80 @@ on:
       - '**.md'
   pull_request:
     paths-ignore:
-      - '**.md' 
+      - '**.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  packages: write
 
 jobs:
   build:
-
-    runs-on: windows-latest
-
+    runs-on: ubuntu-latest
     steps:
-    - name: checkout
-      uses: actions/checkout@v1
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
+        with:
+          fetch-depth: 0
 
-    - name: Setup dotnet
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 2.2.108
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 2.2.108
+          source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        
+      - name: Restore packages
+        run: dotnet restore
+      
+      - name: Build
+        run: dotnet build
+      
+      - name: Test
+        run: dotnet test
+      
+      - name: Pack for version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: dotnet pack -c Release -p:PackageVersion=${GITHUB_REF:11}
 
-    - name: Setup msbuild
-      uses: microsoft/setup-msbuild@v1.0.2
+      - name: Pack without version
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        run: dotnet pack -c Release -p:PackageVersion=1.0.0.0
 
-    - name: Setup nuget
-      uses: nuget/setup-nuget@v1
-      with:
-        nuget-version: 'latest'
+      - name: Upload windows artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: nuget
+          path: ./BrainAI/bin/Release/BrainAI.*.nupkg
 
-    - name: Build with dotnet
-      run: dotnet build --configuration Release
 
-    - name: Test with nunit
-      run: dotnet test --verbosity normal
+  pack:
+    needs: build
+    name: deploy
+    runs-on: windows-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: nuget
+          path: ./artifacts
 
-    - name: Remove File
-      run: Remove-Item –path ./BrainAI/obj –recurse
+      - name: Setup nuget
+        uses: nuget/setup-nuget@v1
+        with:
+          nuget-version: 'latest'
 
-    - name: Restore packages with nuget
-      run: msbuild ./BrainAI/BrainAI-BridgeNet.csproj /restore /property:Configuration=Release
+      - name: Setup nuget config
+        run: nuget.exe sources add -name github -source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -username ${{ github.actor }} -password ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build with msbuild
-      run: msbuild ./BrainAI/BrainAI-BridgeNet.csproj /property:Configuration=Release
+      - name: Upload to GitHub Packages
+        run: |
+            for f in ./artifacts/*.nupkg
+            do
+              nuget push $f -Source "github"
+            done
+        shell: bash

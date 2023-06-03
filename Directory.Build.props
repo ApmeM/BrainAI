@@ -1,6 +1,0 @@
-<Project>
-  <PropertyGroup>
-    <MSBuildProjectExtensionsPath>obj\$(TargetFramework)\$(Configuration)\</MSBuildProjectExtensionsPath>
-    <BaseIntermediateOutputPath>obj\$(TargetFramework)\$(Configuration)\</BaseIntermediateOutputPath>
-  </PropertyGroup>
-</Project>
