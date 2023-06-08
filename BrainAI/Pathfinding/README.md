@@ -23,6 +23,38 @@ This allows you to precompute (offline or at map load time) any data that you mi
 - Ability to split search process across multiple calls for BFS and Dijkstra
 - Minimum memory allocations during search.
 
+## Benchmark result
+
+The benchmarks located under BrainAI.Benchmarks folder are executed with the command
+
+```
+dotnet run --project BrainAI.Benchmark -c Release
+```
+
+With the following result:
+
+|      Method | ArrayLength | PathfinderType |         Mean |      Error |     StdDev | Allocated |
+|------------ |------------ |--------------- |-------------:|-----------:|-----------:|----------:|
+| Pathfinding |          10 |            BFS |     32.68 us |   0.161 us |   0.134 us |         - |
+| Pathfinding |          10 |       Dijkstra |     73.44 us |   0.777 us |   0.726 us |         - |
+| Pathfinding |          10 |          AStar |     10.98 us |   0.053 us |   0.047 us |         - |
+| Pathfinding |          50 |            BFS |  1,189.91 us |   5.490 us |   5.136 us |       2 B |
+| Pathfinding |          50 |       Dijkstra |  6,251.81 us | 122.144 us | 135.763 us |       6 B |
+| Pathfinding |          50 |          AStar |    206.38 us |   4.122 us |   3.856 us |         - |
+| Pathfinding |         100 |            BFS |  6,280.97 us |  37.989 us |  35.535 us |       6 B |
+| Pathfinding |         100 |       Dijkstra | 48,897.32 us | 507.291 us | 423.611 us |      74 B |
+| Pathfinding |         100 |          AStar |    861.86 us |   7.253 us |   6.057 us |       1 B |
+
+Note those allocated bytes probably related to dotnet behavior: https://github.com/dotnet/BenchmarkDotNet/pull/1543
+
+## Common issues
+
+To reduce memory allocations during search do not forget to override GethashCode, Equals and IEquatable<T> for your struct that is used instead of Point.
+Without overriding dotnet will use those methods from object and will require boxing that will allocate memory and require garbage collection to execute.
+See [question](https://stackoverflow.com/questions/76412110/c-sharp-hashset-allocate-memory-on-each-add-even-within-capacity/76420468) on stack overflow.
+
+# Detailed description
+
 ## Breadth First Search
 Often called flood fill when used on a grid, Breadth First Search uses an expanding frontier that radiates out from the start position visiting all neighbor nodes on the way. 
 When it reaches the goal it stops the search and returns the path. 

@@ -1,6 +1,8 @@
-﻿namespace BrainAI.Pathfinding
+﻿using System;
+
+namespace BrainAI.Pathfinding
 {
-    public struct Point
+    public struct Point : IEquatable<Point> 
     {
         public Point(int x, int y)
         {
@@ -14,6 +16,21 @@
         public override string ToString()
         {
             return $"{nameof(X)}: {X}, {nameof(Y)}: {Y}";
+        }
+
+        public override int GetHashCode()
+        {
+            return X.GetHashCode() ^ Y.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (obj is Point other) && this.Equals(other);
+        }
+
+        public bool Equals(Point obj)
+        {
+            return this.X == obj.X && this.Y == obj.Y;
         }
     }
 }

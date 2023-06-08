@@ -1,6 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using BenchmarkDotNet.Attributes;
 using BrainAI.Pathfinding;
 
 [MemoryDiagnoser]
@@ -24,9 +23,9 @@ public class Program
     [Params(PathfinderTypes.BFS, PathfinderTypes.Dijkstra, PathfinderTypes.AStar)]
     public PathfinderTypes PathfinderType { get; set; }
 
-    private IPathfinder<Point> pathfinder;
+    private IPathfinder<Point>? pathfinder;
 
-    [IterationSetup]
+    [GlobalSetup]
     public void Setup()
     {
         var graph = new AstarGridGraph(ArrayLength, ArrayLength, true);
@@ -43,11 +42,10 @@ public class Program
                 this.pathfinder = new AStarPathfinder<Point>(graph);
                 break;
         }
-        this.pathfinder.Search(new Point(0, 0), new Point(ArrayLength - 1, ArrayLength - 1));
     }
 
     [Benchmark]
-    public void Struct()
+    public void Pathfinding()
     {
         this.pathfinder.Search(new Point(0, 0), new Point(ArrayLength - 1, ArrayLength - 1));
     }
