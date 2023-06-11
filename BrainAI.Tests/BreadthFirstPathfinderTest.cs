@@ -9,7 +9,7 @@ namespace BrainAI.Tests
     public class BreadthFirstPathfinderTest
     {
         private UnweightedGridGraph graph;
-        private IMultiTargetPathfinder<Point> pathfinder;
+        private ICoveragePathfinder<Point> pathfinder;
 
         [SetUp]
         public void Setup()

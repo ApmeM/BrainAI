@@ -1,11 +1,16 @@
 ﻿namespace BrainAI.Pathfinding
 {
     using System;
+    using System.Linq;
     using System.Collections.Generic;
 
     public class AStarPathfinder<T> : IPathfinder<T>
     {
-        private readonly Dictionary<T, T> visitedNodes = new Dictionary<T, T>();
+        public Dictionary<T, T> VisitedNodes { get; } = new Dictionary<T, T>();
+
+        private readonly HashSet<T> tmpGoals = new HashSet<T>();
+
+        private T searchStart;
 
         private readonly IAstarGraph<T> graph;
 
@@ -24,25 +29,85 @@
 
         public List<T> Search(T start, T goal)
         {
-            visitedNodes.Clear();
-            visitedNodes[start] = start;
+            this.PrepareSearch();
+            this.StartNewSearch(start);
 
-            frontier.Clear();
-            frontier.Add(new ValueTuple<int, T>(0, start));
+            tmpGoals.Add(goal);
 
-            costSoFar.Clear();
-            costSoFar[start] = 0;
+            return ContinueSearch();
+        }
+
+        public List<T> Search(T start, HashSet<T> goals)
+        {
+            this.PrepareSearch();
+            this.StartNewSearch(start);
+
+            foreach (var goal in goals)
+            {
+                this.tmpGoals.Add(goal);
+            }
+
+            return ContinueSearch();
+        }
+
+        /// AStar is not really multigoal search as it have a heuristics calculations based on a single target.
+        /// Instead it took first goal from set and tries to get to it. 
+        /// Each ContinueSearch will select next goal from set if previous was reached.
+        public List<T> Search(T start, HashSet<T> goals, int maxPathWeight)
+        {
+            this.PrepareSearch();
+            this.StartNewSearch(start);
+
+            foreach (var goal in goals)
+            {
+                this.tmpGoals.Add(goal);
+            }
+
+            return ContinueSearch(maxPathWeight);
+        }
+
+        public List<T> ContinueSearch()
+        {
+            if (tmpGoals.Count == 0)
+            {
+                return null;
+            }
+
+            return ContinueSearch(int.MaxValue);
+        }
+
+        public List<T> ContinueSearch(int maxPathWeight)
+        {
+            var (target, result) = InternalSearch(maxPathWeight);
+            return this.BuildPath(target, result);
+        }
+
+
+        private ValueTuple<T, bool> InternalSearch(int additionalDepth)
+        {
+            var goal = this.GetFirstGoal();
+            
+            if (frontier.Count > 0 && additionalDepth < int.MaxValue - frontier[0].Item1)
+            {
+                additionalDepth += frontier[0].Item1;
+            }
 
             while (frontier.Count > 0)
             {
                 var current = frontier[0];
-                frontier.RemoveAt(0);
 
-                if (EqualityComparer<T>.Default.Equals(current.Item2, goal))
+                if (current.Item1 - graph.Heuristic(current.Item2, goal) >= additionalDepth)
                 {
-                    PathConstructor.RecontructPath(visitedNodes, start, goal, resultPath);
-                    return resultPath;
+                    break;
                 }
+
+                if (tmpGoals.Contains(current.Item2))
+                {
+                    tmpGoals.Remove(current.Item2);
+                    return (current.Item2, true);
+                }
+
+                frontier.RemoveAt(0);
 
                 foreach (var next in graph.GetNeighbors(current.Item2))
                 {
@@ -52,14 +117,51 @@
                         costSoFar[next] = newCost;
                         var priority = newCost + graph.Heuristic(next, goal);
                         frontier.Add(new ValueTuple<int, T>(priority, next));
-                        visitedNodes[next] = current.Item2;
+                        VisitedNodes[next] = current.Item2;
                     }
                 }
 
                 frontier.Sort(Comparison);
             }
 
-            return null;
+            return (default(T), false);
+        }
+
+        private T GetFirstGoal()
+        {
+            foreach (var g in tmpGoals)
+            {
+                return g;
+            }
+
+            throw new Exception("No goals found.");
+        }
+
+        private void PrepareSearch()
+        {
+            this.frontier.Clear();
+            this.VisitedNodes.Clear();
+            this.tmpGoals.Clear();
+            this.costSoFar.Clear();
+        }
+
+        private void StartNewSearch(T start)
+        {
+            this.searchStart = start;
+            this.VisitedNodes.Add(start, start);
+            this.frontier.Add(new ValueTuple<int, T>(0, start));
+            this.costSoFar[start] = 0;
+        }
+
+        private List<T> BuildPath(T target, bool result)
+        {
+            if (!result)
+            {
+                return null;
+            }
+
+            PathConstructor.RecontructPath(VisitedNodes, searchStart, target, resultPath);
+            return resultPath;
         }
     }
 }

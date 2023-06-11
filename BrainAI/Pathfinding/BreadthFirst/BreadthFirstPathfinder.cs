@@ -6,7 +6,7 @@
     /// <summary>
     /// calculates paths given an IUnweightedGraph and start/goal positions
     /// </summary>
-    public class BreadthFirstPathfinder<T> : IPathfinder<T>, IMultiTargetPathfinder<T>
+    public class BreadthFirstPathfinder<T> : IPathfinder<T>, ICoveragePathfinder<T>
     {
         public Dictionary<T, T> VisitedNodes { get; } = new Dictionary<T, T>();
 

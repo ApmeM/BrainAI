@@ -20,7 +20,7 @@ This allows you to precompute (offline or at map load time) any data that you mi
 # Features
 
 - Multiple pathfinding algorythms: BFS, Dijkstra and A*
-- Ability to split search process across multiple calls for BFS and Dijkstra
+- Ability to split search process across multiple calls
 - Minimum memory allocations during search.
 
 ## Benchmark result
