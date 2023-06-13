@@ -20,7 +20,7 @@
 
         private readonly Dictionary<T, int> costSoFar = new Dictionary<T, int>();
 
-        private readonly List<ValueTuple<int, T>> frontier = new List<ValueTuple<int, T>>();
+        private readonly PriorityQueue<(int, T), int> frontier = new PriorityQueue<(int, T), int>();
 
         private static readonly Comparison<(int, T)> Comparison = (x, y) => x.Item1 - y.Item1;
 
@@ -91,14 +91,14 @@
 
         private ValueTuple<T, bool> InternalSearch(int additionalDepth)
         {
-            if (frontier.Count > 0 && additionalDepth < int.MaxValue - frontier[0].Item1)
+            if (frontier.Count > 0 && additionalDepth < int.MaxValue - frontier.Peek().Item1)
             {
-                additionalDepth += frontier[0].Item1;
+                additionalDepth += frontier.Peek().Item1;
             }
 
             while (frontier.Count > 0)
             {
-                var current = frontier[0];
+                var current = frontier.Peek();
 
                 if (current.Item1 >= additionalDepth)
                 {
@@ -111,7 +111,7 @@
                     return (current.Item2, true);
                 }
 
-                frontier.RemoveAt(0);
+                frontier.Dequeue();
 
                 foreach (var next in graph.GetNeighbors(current.Item2))
                 {
@@ -120,12 +120,10 @@
                     {
                         costSoFar[next] = newCost;
                         var priority = newCost;
-                        frontier.Add(new ValueTuple<int, T>(priority, next));
+                        frontier.Enqueue(new ValueTuple<int, T>(priority, next), priority);
                         VisitedNodes[next] = current.Item2;
                     }
                 }
-
-                frontier.Sort(Comparison);
             }
 
             return (default(T), false);
@@ -142,7 +140,7 @@
         private void StartNewSearch(T start)
         {
             this.searchStart = start;
-            this.frontier.Add(new ValueTuple<int, T>(0, start));
+            this.frontier.Enqueue(new ValueTuple<int, T>(0, start), 0);
             this.VisitedNodes.Add(start, start);
             this.costSoFar[start] = 0;
         }

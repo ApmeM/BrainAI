@@ -33,17 +33,17 @@ dotnet run --project BrainAI.Benchmark -c Release
 
 With the following result:
 
-|      Method | ArrayLength | PathfinderType |         Mean |      Error |     StdDev | Allocated |
-|------------ |------------ |--------------- |-------------:|-----------:|-----------:|----------:|
-| Pathfinding |          10 |            BFS |     32.68 us |   0.161 us |   0.134 us |         - |
-| Pathfinding |          10 |       Dijkstra |     73.44 us |   0.777 us |   0.726 us |         - |
-| Pathfinding |          10 |          AStar |     10.98 us |   0.053 us |   0.047 us |         - |
-| Pathfinding |          50 |            BFS |  1,189.91 us |   5.490 us |   5.136 us |       2 B |
-| Pathfinding |          50 |       Dijkstra |  6,251.81 us | 122.144 us | 135.763 us |       6 B |
-| Pathfinding |          50 |          AStar |    206.38 us |   4.122 us |   3.856 us |         - |
-| Pathfinding |         100 |            BFS |  6,280.97 us |  37.989 us |  35.535 us |       6 B |
-| Pathfinding |         100 |       Dijkstra | 48,897.32 us | 507.291 us | 423.611 us |      74 B |
-| Pathfinding |         100 |          AStar |    861.86 us |   7.253 us |   6.057 us |       1 B |
+|      Method | ArrayLength | PathfinderType |          Mean |       Error |      StdDev |        Median | Allocated |
+|------------ |------------ |--------------- |--------------:|------------:|------------:|--------------:|----------:|
+| Pathfinding |          10 |            BFS |     32.292 us |   0.0706 us |   0.0589 us |     32.284 us |         - |
+| Pathfinding |          10 |       Dijkstra |     81.640 us |   1.5845 us |   3.2008 us |     81.590 us |         - |
+| Pathfinding |          10 |          AStar |      9.367 us |   0.0264 us |   0.0221 us |      9.366 us |         - |
+| Pathfinding |          50 |            BFS |  1,184.628 us |   2.3382 us |   2.0727 us |  1,184.386 us |       2 B |
+| Pathfinding |          50 |       Dijkstra |  2,760.720 us |  37.8106 us |  35.3681 us |  2,751.496 us |       3 B |
+| Pathfinding |          50 |          AStar |     91.371 us |   1.6556 us |   1.5487 us |     92.229 us |         - |
+| Pathfinding |         100 |            BFS |  6,339.231 us |  36.5804 us |  32.4276 us |  6,332.480 us |       6 B |
+| Pathfinding |         100 |       Dijkstra | 15,072.149 us | 299.8539 us | 466.8364 us | 14,818.340 us |      16 B |
+| Pathfinding |         100 |          AStar |    302.692 us |   6.0176 us |  17.1685 us |    302.455 us |         - |
 
 Note those allocated bytes probably related to dotnet behavior: https://github.com/dotnet/BenchmarkDotNet/pull/1543
 
