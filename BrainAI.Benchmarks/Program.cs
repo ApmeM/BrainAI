@@ -28,7 +28,7 @@ public class Program
     [GlobalSetup]
     public void Setup()
     {
-        var graph = new AstarGridGraph(ArrayLength, ArrayLength, true);
+        var graph = new GridGraph(ArrayLength, ArrayLength, true);
 
         switch (this.PathfinderType)
         {

@@ -8,13 +8,13 @@ namespace BrainAI.Tests
     [TestFixture]
     public class WeightedPathfinderTest
     {
-        private WeightedGridGraph graph;
+        private GridGraph graph;
         private ICoveragePathfinder<Point> pathfinder;
 
         [SetUp]
         public void Setup()
         {
-            this.graph = new WeightedGridGraph(10, 10);
+            this.graph = new GridGraph(10, 10);
             this.pathfinder = new WeightedPathfinder<Point>(graph);
         }
 
@@ -27,7 +27,7 @@ namespace BrainAI.Tests
              _#1_
              ____
             */
-            var target = new WeightedGridGraph(10, 10, true);
+            var target = new GridGraph(10, 10, true);
             target.Walls.Add(new Point(1, 2));
             target.Walls.Add(new Point(2, 1));
             target.Walls.Add(new Point(1, 0));
