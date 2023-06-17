@@ -75,5 +75,9 @@
         {
             return !this.Walls.Contains(node);
         }
+
+        public void BeforeSearch(Point nodeStart, HashSet<Point> nodeEnd)
+        {
+        }
     }
 }

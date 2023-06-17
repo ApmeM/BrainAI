@@ -8,8 +8,6 @@
     /// </summary>
     public class EdgesGraph<T> : IWeightedGraph<T>
     {
-        private readonly List<T> neighbors = new List<T>();
-
         public Dictionary<T, List<T>> Edges = new Dictionary<T, List<T>>();
         public Dictionary<(T, T), int> Weights = new Dictionary<(T, T), int>();
 
@@ -23,6 +21,10 @@
         public int Cost(T from, T to)
         {
             return this.Weights.ContainsKey((from, to)) ? this.Weights[(from, to)] : this.DefaultWeight;
+        }
+
+        public void BeforeSearch(T nodeStart, HashSet<T> nodeEnd)
+        {
         }
     }
 }

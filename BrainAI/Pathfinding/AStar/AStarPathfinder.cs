@@ -33,6 +33,7 @@
             this.StartNewSearch(start);
 
             tmpGoals.Add(goal);
+            graph.BeforeSearch(start, tmpGoals);
 
             return ContinueSearch();
         }
@@ -46,6 +47,7 @@
             {
                 this.tmpGoals.Add(goal);
             }
+            graph.BeforeSearch(start, tmpGoals);
 
             return ContinueSearch();
         }
@@ -62,6 +64,7 @@
             {
                 this.tmpGoals.Add(goal);
             }
+            graph.BeforeSearch(start, tmpGoals);
 
             return ContinueSearch(maxPathWeight);
         }
