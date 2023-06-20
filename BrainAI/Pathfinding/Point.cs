@@ -15,7 +15,7 @@ namespace BrainAI.Pathfinding
 
         public override string ToString()
         {
-            return $"{nameof(X)}: {X}, {nameof(Y)}: {Y}";
+            return $"({X} x {Y})";
         }
 
         public override int GetHashCode()

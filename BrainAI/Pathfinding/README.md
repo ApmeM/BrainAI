@@ -22,6 +22,7 @@ This allows you to precompute (offline or at map load time) any data that you mi
 - Multiple pathfinding algorythms: BFS, Dijkstra and A*
 - Ability to split search process across multiple calls
 - Minimum memory allocations during search.
+- Predefined graphs implementations
 
 ## Benchmark result
 
@@ -126,6 +127,14 @@ The `AstarGridGraph` is a concrete implementation that can be used directly or a
 
 Below is an example of using the `AstarGridGraph`. 
 
+# Graphs
+
+3 types of graphs available out of the box:
+
+- GridGraph - Graph represents a 2d array (not really implemente this way). Each point is connected to its neighbours to the left/right/up/down and diagonals (if enabled). Have a natural borders of 0 x 0 to Width x Height. Walls are specified in a HashSet.
+- EdgesGraph - Basic graph with vertices and edges. Each verticle can be connected with any number of other points by the directed edges. This graph can not be used in AStar pathfinder as there is no way to specify heuristic calculation for base type.
+- EdgesPointGraph - Extension for EdgesGraph that as a vertex use Point class. In this case heuristic can easily be calculated with a manhatten distance and can be used in AStar pathfinder.
+- StrightEdgeGraph - graph that can be built using polygon obstacles on a map. Connections between polygon points are built automatically and the final path is built to avoid obstacles intersection.
 
 ```csharp
 
@@ -142,3 +151,4 @@ graph.Walls.Add(new Point(5, 5))
 // calculate the path
 var path = new AstarPathfinder(graph).Search( new Point( 3, 4 ), new Point( 7, 7 ) );
 ```
+
