@@ -11,9 +11,9 @@ namespace BrainAI.Pathfinding
 
         private readonly List<StrightEdgeObstacle> obstacles = new List<StrightEdgeObstacle>();
 
-        private Dictionary<Point, HashSet<Point>> tempConnections = new Dictionary<Point, HashSet<Point>>();
+        private Lookup<Point, Point> tempConnections = new Lookup<Point, Point>();
 
-        private Dictionary<Point, HashSet<Point>> connections = new Dictionary<Point, HashSet<Point>>();
+        private Lookup<Point, Point> connections = new Lookup<Point, Point>();
 
         private readonly List<Point> neighbors = new List<Point>();
 
@@ -43,11 +43,11 @@ namespace BrainAI.Pathfinding
 
                     foreach (var connection in connections[point2])
                     {
-                        connections[connection].Remove(point2);
+                        connections.Remove(connection, point2);
+                        connections.Remove(point2, connection);
                     }
 
                     Log($"Point {point2} is in new obstacle.");
-                    connections.Remove(point2);
                 }
             }
 
@@ -81,13 +81,6 @@ namespace BrainAI.Pathfinding
                     pointsToIgnore.Add(point);
                     break;
                 }
-
-                if (pointsToIgnore.Contains(point))
-                {
-                    continue;
-                }
-
-                connections[point] = new HashSet<Point>();
             }
 
             // Check if the new obstacle obstructs any point connections, and if it does, delete them.
@@ -113,8 +106,8 @@ namespace BrainAI.Pathfinding
                     foreach (var point3 in tmpList)
                     {
                         Log($"New obstacle break connection between {point2} and {point3}");
-                        connections[point2].Remove(point3);
-                        connections[point3].Remove(point2);
+                        connections.Remove(point2, point3);
+                        connections.Remove(point3, point2);
                     }
                 }
             }
@@ -131,24 +124,15 @@ namespace BrainAI.Pathfinding
                     continue;
                 }
 
-                FindConnections(point, obstacle.points, pointIndex, this.connections[point]);
+                FindConnections(point, obstacle.points, pointIndex, this.connections);
 
-                Log($"New point {point} have {this.connections[point].Count} connections: {(string.Join(",", this.connections[point]))}");
-
-                foreach (var connection in this.connections[point])
-                {
-                    if (!connections.ContainsKey(connection))
-                    {
-                        continue;
-                    }
-                    connections[connection].Add(point);
-                }
+                Log($"New point {point} have {this.connections[point].Count()} connections: {(string.Join(",", this.connections[point]))}");
             }
-            Log("Total connections: " + this.connections.Sum(a => a.Value.Count));
-            Log(string.Join("\n", this.connections.Select(a => $"From {a.Key} to " + string.Join(",", a.Value))));
+            Log("Total connections: " + this.connections.Sum(a => a.Count()));
+            Log(string.Join("\n", this.connections.Select(a => $"From {a.Key} to " + string.Join(",", a))));
         }
 
-        private void FindConnections(Point point, List<Point> pointList, int pointIndex, HashSet<Point> reachablepoints)
+        private void FindConnections(Point point, List<Point> pointList, int pointIndex, Lookup<Point, Point> reachablepoints)
         {
             // Test to see if it's ok to ignore this point since it's
             // concave (inward-pointing) or it's contained by an obstacle.
@@ -220,7 +204,8 @@ namespace BrainAI.Pathfinding
 
                     if (found)
                     {
-                        reachablepoints.Add(point2);
+                        reachablepoints.Add(point, point2);
+                        reachablepoints.Add(point2, point);
                     }
                 }
             }
@@ -357,13 +342,13 @@ namespace BrainAI.Pathfinding
         public List<Point> GetNeighbors(Point point)
         {
             this.neighbors.Clear();
-            if (connections.ContainsKey(point))
+            foreach (var p in connections[point])
             {
-                this.neighbors.AddRange(connections[point]);
+                this.neighbors.Add(p);
             }
-            if (tempConnections.ContainsKey(point))
+            foreach (var p in tempConnections[point])
             {
-                this.neighbors.AddRange(tempConnections[point]);
+                this.neighbors.Add(p);
             }
 
             Log($"Neighbours for point {point}: {(string.Join(", ", this.neighbors))}");
@@ -374,35 +359,14 @@ namespace BrainAI.Pathfinding
         {
             this.tempConnections.Clear();
 
-            this.tempConnections[start] = new HashSet<Point>();
             // Connect the startpoint to its reachable points and vice versa
-            this.FindConnections(start, null, 0, this.tempConnections[start]);
-
-            foreach (var point in this.tempConnections[start])
-            {
-                if (!this.tempConnections.ContainsKey(point))
-                {
-                    this.tempConnections[point] = new HashSet<Point>();
-                }
-                this.tempConnections[point].Add(start);
-            }
+            this.FindConnections(start, null, 0, this.tempConnections);
 
             foreach (var end in ends)
             {
                 // Connect the endpoint to its reachable points and vice versa
-
-                this.tempConnections[end] = new HashSet<Point>();
-                this.FindConnections(end, null, 0, this.tempConnections[end]);
-
-                foreach (var point in this.tempConnections[end])
-                {
-                    if (!this.tempConnections.ContainsKey(point))
-                    {
-                        this.tempConnections[point] = new HashSet<Point>();
-                    }
-
-                    this.tempConnections[point].Add(end);
-                }
+                this.FindConnections(end, null, 0, this.tempConnections);
+                Log($"For start found {this.tempConnections[start].Count()} items.");
 
                 var found = false;
                 foreach (var obstacle in this.obstacles)
@@ -418,13 +382,14 @@ namespace BrainAI.Pathfinding
 
                 if (!found)
                 {
-                    this.tempConnections[start].Add(end);
-                    this.tempConnections[end].Add(start);
+                    Log($"End is achieveble from start..");
+                    this.tempConnections.Add(start, end);
+                    this.tempConnections.Add(end, start);
                 }
-                Log($"for end found {this.tempConnections[end].Count} items.");
+                Log($"For end found {this.tempConnections[end].Count()} items.");
             }
-            Log("Total temp connections: " + this.tempConnections.Sum(a => a.Value.Count));
-            Log(string.Join("\n", this.tempConnections.Select(a => $"From {a.Key} to " + string.Join(",", a.Value))));
+            Log("Total temp connections: " + this.tempConnections.Sum(a => a.Count()));
+            Log(string.Join("\n", this.tempConnections.Select(a => $"From {a.Key} to " + string.Join(",", a))));
 
             Log("-=-=-=-=-=-=-");
         }

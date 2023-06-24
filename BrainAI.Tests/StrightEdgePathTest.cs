@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using NUnit.Framework;
 
 namespace BrainAI.Pathfinding
@@ -8,7 +7,7 @@ namespace BrainAI.Pathfinding
     [TestFixture]
     public class PathTest
     {
-        // [Test]
+        [Test]
         public void WithoutObstacles()
         {
             var graph = new StrightEdgeGraph();
