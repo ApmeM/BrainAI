@@ -82,7 +82,7 @@ namespace BrainAI.Pathfinding
             version++;
         }
 
-        private Enumerable Find(TKey key)
+        public Enumerable Find(TKey key)
         {
             if (!bucketReference.ContainsKey(key))
             {
@@ -115,12 +115,11 @@ namespace BrainAI.Pathfinding
                 this.start = start;
             }
 
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return new Enumerator(this.start);
-            }
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-            public IEnumerator<TValue> GetEnumerator()
+            IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() => GetEnumerator();
+
+            public Enumerator GetEnumerator()
             {
                 return new Enumerator(this.start);
             }

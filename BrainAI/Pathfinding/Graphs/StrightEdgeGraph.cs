@@ -41,7 +41,7 @@ namespace BrainAI.Pathfinding
 
                     pointsToIgnore.Add(point2);
 
-                    foreach (var connection in connections[point2])
+                    foreach (var connection in connections.Find(point2))
                     {
                         connections.Remove(connection, point2);
                         connections.Remove(point2, connection);
@@ -94,7 +94,7 @@ namespace BrainAI.Pathfinding
                     }
 
                     tmpList.Clear();
-                    foreach (var point3 in connections[point2])
+                    foreach (var point3 in connections.Find(point2))
                     {
                         if (PointMath.SegmentIntersectCircle(point2, point3, obstacle.center, obstacle.radiusSq) &&
                             PointMath.SegmentIntersectsPolygon(obstacle.points, point2, point3, true))
@@ -126,7 +126,7 @@ namespace BrainAI.Pathfinding
 
                 FindConnections(point, obstacle.points, pointIndex, this.connections);
 
-                Log($"New point {point} have {this.connections[point].Count()} connections: {(string.Join(",", this.connections[point]))}");
+                Log($"New point {point} have {this.connections.Find(point).Count()} connections: {(string.Join(",", this.connections.Find(point)))}");
             }
             Log("Total connections: " + this.connections.Sum(a => a.Count()));
             Log(string.Join("\n", this.connections.Select(a => $"From {a.Key} to " + string.Join(",", a))));
@@ -342,11 +342,11 @@ namespace BrainAI.Pathfinding
         public List<Point> GetNeighbors(Point point)
         {
             this.neighbors.Clear();
-            foreach (var p in connections[point])
+            foreach (var p in connections.Find(point))
             {
                 this.neighbors.Add(p);
             }
-            foreach (var p in tempConnections[point])
+            foreach (var p in tempConnections.Find(point))
             {
                 this.neighbors.Add(p);
             }
@@ -358,7 +358,17 @@ namespace BrainAI.Pathfinding
         public void BeforeSearch(Point start, HashSet<Point> ends)
         {
             this.tempConnections.Clear();
+            
+            // this.tempConnections.Add(start, obstacles[0].points[0]);
+            // foreach (var end in ends)
+            // {
+                // this.tempConnections.Add(obstacles[obstacles.Count - 1].points[0], end);
+                // this.tempConnections.Add(start, end);
+                // this.tempConnections.Add(end, start);
+            // }
+            
 
+            this.tempConnections.Clear();
             // Connect the startpoint to its reachable points and vice versa
             this.FindConnections(start, null, 0, this.tempConnections);
 
