@@ -7,13 +7,11 @@ namespace BrainAI.Pathfinding
 {
     public class StrightEdgeGraph : IAstarGraph<Point>
     {
-        private double smallAmount = 0.0001;
-
         private readonly List<StrightEdgeObstacle> obstacles = new List<StrightEdgeObstacle>();
 
-        private Lookup<Point, Point> tempConnections = new Lookup<Point, Point>();
+        private Lookup<Point, Point> tempConnections = new Lookup<Point, Point>(true);
 
-        private Lookup<Point, Point> connections = new Lookup<Point, Point>();
+        private Lookup<Point, Point> connections = new Lookup<Point, Point>(true);
 
         private readonly List<Point> neighbors = new List<Point>();
 
@@ -39,31 +37,40 @@ namespace BrainAI.Pathfinding
                         continue;
                     }
 
-                    pointsToIgnore.Add(point2);
-
-                    foreach (var connection in connections.Find(point2))
-                    {
-                        connections.Remove(connection, point2);
-                        connections.Remove(point2, connection);
-                    }
 
                     Log($"Point {point2} is in new obstacle.");
+                    pointsToIgnore.Add(point2);
+
+                    tmpList.Clear();
+                    foreach (var connection in connections.Find(point2))
+                    {
+                        tmpList.Add(connection);
+                    }
+
+                    foreach (var point3 in tmpList)
+                    {
+                        Log($"New obstacle break connection between {point2} and {point3}");
+                        connections.Remove(point2, point3);
+                        connections.Remove(point3, point2);
+                    }
                 }
             }
 
-            // Find points that are concave or contained to another obstacle.
+            // Find points that are concave or contained in another obstacle.
             for (int pointIndex = 0; pointIndex < obstacle.points.Count; pointIndex++)
             {
                 Point point = obstacle.points[pointIndex];
                 // Find concave points
-                var pointPrevIndex = (pointIndex + 1) % obstacle.points.Count;
-                var pointNextIndex = (pointIndex - 1 + obstacle.points.Count) % obstacle.points.Count;
+                var pointPrevIndex = (pointIndex - 1 + obstacle.points.Count) % obstacle.points.Count;
+                var pointNextIndex = (pointIndex + 1) % obstacle.points.Count;
 
                 var pointPrev = obstacle.points[pointPrevIndex];
                 var pointNext = obstacle.points[pointNextIndex];
 
-                if (PointMath.RelCCWDouble(point, pointPrev, pointNext) < 0)
+                if (PointMath.DoubledTriangleSquareBy3Dots(point, pointPrev, pointNext) > 0)
                 {
+                    // Polygon is CCW - it is checked in constructor
+                    // But the points is CW, which means the point is concave
                     pointsToIgnore.Add(point);
                     continue;
                 }
@@ -97,7 +104,7 @@ namespace BrainAI.Pathfinding
                     foreach (var point3 in connections.Find(point2))
                     {
                         if (PointMath.SegmentIntersectCircle(point2, point3, obstacle.center, obstacle.radiusSq) &&
-                            PointMath.SegmentIntersectsPolygon(obstacle.points, point2, point3, true))
+                            PointMath.SegmentIntersectsPolygon(obstacle.points, point2, point3, false))
                         {
                             tmpList.Add(point3);
                         }
@@ -112,8 +119,8 @@ namespace BrainAI.Pathfinding
                 }
             }
 
-            this.obstacles.Add(obstacle);
             Log($"Adding new obstacle to the graph.");
+            this.obstacles.Add(obstacle);
 
             // connect the obstacle's points with all nearby points.
             for (int pointIndex = 0; pointIndex < obstacle.points.Count; pointIndex++)
@@ -154,27 +161,34 @@ namespace BrainAI.Pathfinding
                 for (int point2Index = 0; point2Index < obstace2.points.Count; point2Index++)
                 {
                     Point point2 = obstace2.points[point2Index];
-                    // Don't test a 'line' from the exact same points in the same polygon.
-                    // Test to see if it's ok to ignore this point since it's
-                    // concave (inward-pointing) or it's contained by an obstacle.
-                    if (point2.Equals(point) || pointsToIgnore.Contains(point2))
+                    if (point2.Equals(point))
                     {
+                        // Log($"Skipping segment {point} - {point2}: Same point");
                         continue;
                     }
-
-                    // Only connect the points if the connection will be useful.
-                    if (!IsConnectionPossibleAndUseful(point, pointList, pointIndex, point2, obstace2.points, point2Index))
+                    if (pointsToIgnore.Contains(point2))
                     {
+                        // Log($"Skipping segment {point} - {point2}: Point {point2} is in ignore list");
                         continue;
                     }
-
-                    if (PointMath.SegmentIntersectCircle(point, point2, obstace2.center, obstace2.radiusSq) &&
-                        PointMath.SegmentIntersectsPolygon(obstace2.points, point, point2, true))
+                    if (PointMath.IsDirectionInsidePolygon(point2, point, obstace2.points, point2Index))
                     {
+                        // Log($"Skipping segment {point} - {point2}: Directed inside poligon for {point2}");
                         continue;
                     }
-
-                    var pointTopoint2Dist = PointMath.DistanceSquare(point, point2);
+                    if (pointList != null && PointMath.IsDirectionInsidePolygon(point, point2, pointList, pointIndex))
+                    {
+                        // Log($"Skipping segment {point} - {point2}: Directed inside poligon for {point}");
+                        continue;
+                    }
+                    if (
+                        PointMath.SegmentIntersectCircle(point, point2, obstace2.center, obstace2.radiusSq) &&
+                        PointMath.SegmentIntersectsPolygon(obstace2.points, point, point2, true)
+                        )
+                    {
+                        // Log($"Skipping segment {point} - {point2}: Intersects with polygon");
+                        continue;
+                    }
 
                     // Need to test if line from point to point2 intersects any obstacles
                     // Also test if any point is contained in any obstacle.
@@ -186,20 +200,13 @@ namespace BrainAI.Pathfinding
                             continue;
                         }
 
-                        var dist = PointMath.DistanceSquare(point, obstacle3.center) - obstacle3.radiusSq;
-                        if (dist > pointTopoint2Dist)
+                        if (PointMath.SegmentIntersectCircle(point, point2, obstacle3.center, obstacle3.radiusSq) &&
+                            PointMath.SegmentIntersectsPolygon(obstacle3.points, point, point2, true))
                         {
-                            continue;
+                            // Log($"Checking segment {point} - {point2}: Another obstacle intersects.");
+                            found = false;
+                            break;
                         }
-
-                        if (!(PointMath.SegmentIntersectCircle(point, point2, obstacle3.center, obstacle3.radiusSq) &&
-                            PointMath.SegmentIntersectsPolygon(obstacle3.points, point, point2, true)))
-                        {
-                            continue;
-                        }
-
-                        found = false;
-                        break;
                     }
 
                     if (found)
@@ -209,124 +216,6 @@ namespace BrainAI.Pathfinding
                     }
                 }
             }
-        }
-
-        private bool IsConnectionPossibleAndUseful(Point point, Point point2, List<Point> point2List, int point2Index)
-        {
-            // Only connect the points if the connection will be useful.
-            // See the comment in the method makeReachablepoints for a full explanation.
-
-            var point2PrevIndex = (point2Index + 1) % point2List.Count;
-            var point2NextIndex = (point2Index - 1 + point2List.Count) % point2List.Count;
-
-            var point2Prev = point2List[point2PrevIndex];
-            var point2Next = point2List[point2NextIndex];
-
-            var p2LessP2MinusX = point2.X - point2Prev.X;
-            var p2LessP2MinusY = point2.Y - point2Prev.Y;
-            var pLessP2MinusX = point.X - point2Prev.X;
-            var pLessP2MinusY = point.Y - point2Prev.Y;
-
-            var pLessP2X = point.X - point2.X;
-            var pLessP2Y = point.Y - point2.Y;
-            var p2PlusLessP2X = point2Next.X - point2.X;
-            var p2PlusLessP2Y = point2Next.Y - point2.Y;
-
-            if ((pLessP2MinusY * p2LessP2MinusX - pLessP2MinusX * p2LessP2MinusY) * (pLessP2Y * p2PlusLessP2X - pLessP2X * p2PlusLessP2Y) <= 0)
-            {
-                return true;
-            }
-
-            var dotprod = pLessP2MinusX * p2LessP2MinusX + pLessP2MinusY * p2LessP2MinusY;
-            if (PointMath.DistanceSquare(point, point2Prev) - dotprod * dotprod / PointMath.DistanceSquare(point2, point2Prev) < smallAmount)
-            {
-                return true;
-            }
-
-            dotprod = pLessP2X * p2PlusLessP2X + pLessP2Y * p2PlusLessP2Y;
-            if (PointMath.DistanceSquare(point, point2) - dotprod * dotprod / PointMath.DistanceSquare(point2Next, point2) < smallAmount)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        private bool IsConnectionPossibleAndUseful(Point point, List<Point> pointList, int pointIndex, Point point2, List<Point> point2List, int point2Index)
-        {
-            if (pointList == null)
-            {
-                return IsConnectionPossibleAndUseful(point, point2, point2List, point2Index);
-            }
-            // test if startpoint is in the reject region of point2's obstacle
-            {
-                // Only connect the points if the connection will be useful.
-                // See the comment in the method makeReachablepoints for a full explanation.
-                var point2PrevIndex = (point2Index + 1) % point2List.Count;
-                var point2NextIndex = (point2Index - 1 + point2List.Count) % point2List.Count;
-
-                var point2Prev = point2List[point2PrevIndex];
-                var point2Next = point2List[point2NextIndex];
-
-                var p2MinusToP2RCCW = PointMath.RelCCWDouble(point, point2Prev, point2);
-                var p2ToP2PlusRCCW = PointMath.RelCCWDouble(point, point2, point2Next);
-                if (p2MinusToP2RCCW * p2ToP2PlusRCCW > 0)
-                {
-                    // To avoid floating point error problems we should only return false
-                    // if p is well away from the lines. If it's close, then return
-                    // true just to be safe. Returning false when the connection is
-                    // actually useful is a much bigger problem than returning true
-                    // and sacrificing some performance.
-                    if (PointMath.PointToLineDistSq(point, point2Prev, point2) < smallAmount)
-                    {
-                        return true;
-                    }
-
-                    if (PointMath.PointToLineDistSq(point, point2, point2Next) < smallAmount)
-                    {
-                        return true;
-                    }
-                    // Since p is anti-clockwise to both lines p2MinusToP2 and p2ToP2Plus
-                    // (or it is clockwise to both lines) then the connection betwen
-                    // them will not be useful so return .
-                    return false;
-                }
-            }
-            // test if point2 is in the reject region of point1's obstacle
-            {
-                // Only connect the points if the connection will be useful.
-                // See the comment in the method makeReachablepoints for a full explanation.
-                var pointPrevIndex = (pointIndex + 1) % pointList.Count;
-                var pointNextIndex = (pointIndex - 1 + pointList.Count) % pointList.Count;
-
-                var pointPrev = pointList[pointPrevIndex];
-                var pointNext = pointList[pointNextIndex];
-
-                var pMinusToPRCCW = PointMath.RelCCWDouble(point2, pointPrev, point);
-                var pToPPlusRCCW = PointMath.RelCCWDouble(point2, point, pointNext);
-                if (pMinusToPRCCW * pToPPlusRCCW > 0)
-                {
-                    // To avoid floating point error problems we should only return false
-                    // if p is well away from the lines. If it's close, then return
-                    // true just to be safe. Returning false when the connection is
-                    // actually useful is a much bigger problem than returning true
-                    // and sacrificing some performance.
-                    if (PointMath.PointToLineDistSq(point2, pointPrev, point) < smallAmount)
-                    {
-                        return true;
-                    }
-
-                    if (PointMath.PointToLineDistSq(point2, point, pointNext) < smallAmount)
-                    {
-                        return true;
-                    }
-                    // Since p is anti-clockwise to both lines p2MinusToP2 and p2ToP2Plus
-                    // (or it is clockwise to both lines) then the connection betwen
-                    // them will not be useful so return .
-                    return false;
-                }
-            }
-            return true;
         }
 
         public int Heuristic(Point point, Point goal)
@@ -358,26 +247,11 @@ namespace BrainAI.Pathfinding
         public void BeforeSearch(Point start, HashSet<Point> ends)
         {
             this.tempConnections.Clear();
-            
-            // this.tempConnections.Add(start, obstacles[0].points[0]);
-            // foreach (var end in ends)
-            // {
-                // this.tempConnections.Add(obstacles[obstacles.Count - 1].points[0], end);
-                // this.tempConnections.Add(start, end);
-                // this.tempConnections.Add(end, start);
-            // }
-            
-
-            this.tempConnections.Clear();
             // Connect the startpoint to its reachable points and vice versa
             this.FindConnections(start, null, 0, this.tempConnections);
-
+            Log($"For start ({start}) found {this.tempConnections[start].Count()} items: {string.Join(",", this.tempConnections[start])}");
             foreach (var end in ends)
             {
-                // Connect the endpoint to its reachable points and vice versa
-                this.FindConnections(end, null, 0, this.tempConnections);
-                Log($"For start found {this.tempConnections[start].Count()} items.");
-
                 var found = false;
                 foreach (var obstacle in this.obstacles)
                 {
@@ -396,18 +270,24 @@ namespace BrainAI.Pathfinding
                     this.tempConnections.Add(start, end);
                     this.tempConnections.Add(end, start);
                 }
-                Log($"For end found {this.tempConnections[end].Count()} items.");
+                else
+                {
+                    // Connect the endpoint to its reachable points and vice versa
+                    this.FindConnections(end, null, 0, this.tempConnections);
+                    Log($"For end ({end})found {this.tempConnections[end].Count()} items: {string.Join(",", this.tempConnections[end])}");
+                }
             }
-            Log("Total temp connections: " + this.tempConnections.Sum(a => a.Count()));
+            Log($"Total temp connections: {this.tempConnections.Sum(a => a.Count())}");
             Log(string.Join("\n", this.tempConnections.Select(a => $"From {a.Key} to " + string.Join(",", a))));
 
             Log("-=-=-=-=-=-=-");
         }
-
+        bool needLog = false;
         [Conditional("DEBUG")]
         private void Log(string text)
         {
-            Console.WriteLine(text);
+            if (needLog)
+                Console.WriteLine(text);
         }
     }
 }

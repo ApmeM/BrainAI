@@ -9,12 +9,15 @@ namespace BrainAI.Pathfinding
     {
         internal Dictionary<TKey, LinkedListNode<(TKey, TValue)>> bucketReference = new Dictionary<TKey, LinkedListNode<(TKey, TValue)>>();
         internal LinkedList<(TKey, TValue)> valuesList = new LinkedList<(TKey, TValue)>();
+        internal HashSet<(TKey, TValue)> set = new HashSet<(TKey, TValue)>();
 
         internal int count;
         internal int version;
+        private readonly bool ignoreDuplicates;
 
-        public Lookup()
+        public Lookup(bool ignoreDuplicates = false)
         {
+            this.ignoreDuplicates = ignoreDuplicates;
         }
 
         public int Count
@@ -24,14 +27,30 @@ namespace BrainAI.Pathfinding
 
         public void Add(TKey key, TValue value)
         {
+            var tuple = (key, value);
             if (bucketReference.ContainsKey(key))
             {
-                valuesList.AddAfter(bucketReference[key], (key, value));
+                if (ignoreDuplicates)
+                {
+                    if (set.Contains(tuple))
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        set.Add(tuple);
+                    }
+                }
+                valuesList.AddAfter(bucketReference[key], tuple);
             }
             else
             {
-                var node = valuesList.AddLast((key, value));
+                var node = valuesList.AddLast(tuple);
                 bucketReference[key] = node;
+                if (ignoreDuplicates)
+                {
+                    set.Add(tuple);
+                }
             }
             version++;
             count++;
@@ -69,6 +88,11 @@ namespace BrainAI.Pathfinding
                 }
             }
 
+            if (ignoreDuplicates)
+            {
+                set.Remove((key, value));
+            }
+
             valuesList.Remove(start);
             version++;
             count--;
@@ -78,6 +102,7 @@ namespace BrainAI.Pathfinding
         {
             valuesList.Clear();
             bucketReference.Clear();
+            set.Clear();
             count = 0;
             version++;
         }

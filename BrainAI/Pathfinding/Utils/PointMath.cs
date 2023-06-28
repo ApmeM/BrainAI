@@ -10,14 +10,21 @@ namespace BrainAI.Pathfinding
             return (p2.X - p.X) * (p2.X - p.X) + (p2.Y - p.Y) * (p2.Y - p.Y);
         }
 
-        public static double RelCCWDouble(Point center, Point pointBefore, Point pointAfter)
+        // In case points set in CCW order, the value will be positive, otherwice - negative.
+        // Also method can be used as a dotprod between vectors p2-p1 and perpendicular to p0-p1
+        public static double DoubledTriangleSquareBy3Dots(Point p0, Point p1, Point p2)
         {
-            return (center.Y - pointBefore.Y) * (pointAfter.X - pointBefore.X) - (center.X - pointBefore.X) * (pointAfter.Y - pointBefore.Y);
+            return (p0.Y - p1.Y) * (p2.X - p1.X) - (p0.X - p1.X) * (p2.Y - p1.Y);
+        }
+
+        public static double DotProdFor2VecotrsWithOneOrigin(Point p1, Point origin, Point p2)
+        {
+            return (p1.X - origin.X) * (p2.X - origin.X) + (p1.Y - origin.Y) * (p2.Y - origin.Y);
         }
 
         public static double PointToLineDistSq(Point center, Point p1, Point p2)
         {
-            var triangle = (p2.X - p1.X) * (center.Y - p1.Y) - (center.X - p1.X) * (p2.Y - p1.Y);
+            var triangle = PointMath.DoubledTriangleSquareBy3Dots(center, p1, p2);
             return triangle * triangle / PointMath.DistanceSquare(p2, p1);
         }
 
@@ -42,6 +49,11 @@ namespace BrainAI.Pathfinding
             var crossings = 0;
             foreach (var currentPoint in points)
             {
+                if (EqualityComparer<Point>.Default.Equals(lastPoint, p))
+                {
+                    return true;
+                }
+
                 if (((lastPoint.Y <= p.Y && p.Y < currentPoint.Y) || (currentPoint.Y <= p.Y && p.Y < lastPoint.Y))
                         && p.X < ((currentPoint.X - lastPoint.X) / (currentPoint.Y - lastPoint.Y) * (p.Y - lastPoint.Y) + lastPoint.X))
                 {
@@ -56,13 +68,13 @@ namespace BrainAI.Pathfinding
 
         public static bool SegmentIntersectCircle(Point p1, Point p2, Point center, double radiusSq)
         {
-            var dotprod = (center.X - p1.X) * (p2.X - p1.X) + (center.Y - p1.Y) * (p2.Y - p1.Y);
+            var dotprod = PointMath.DotProdFor2VecotrsWithOneOrigin(center, p1, p2);
             if (dotprod <= 0.0 && PointMath.DistanceSquare(center, p1) > radiusSq)
             {
                 return false;
             }
 
-            dotprod = (center.X - p2.X) * (p1.X - p2.X) + (center.Y - p2.Y) * (p1.Y - p2.Y);
+            dotprod = PointMath.DotProdFor2VecotrsWithOneOrigin(center, p2, p1);
             if (dotprod <= 0.0 && PointMath.DistanceSquare(center, p2) > radiusSq)
             {
                 return false;
@@ -83,15 +95,12 @@ namespace BrainAI.Pathfinding
                 return false;
             }
 
-            // Perpendicular vector to segment:
-            var vx = p1.Y - p2.Y;
-            var vy = p2.X - p1.X;
-
             var lastPoint = points[points.Count - 1];
-            var dotprodLast = (lastPoint.X - p1.X) * vx + (lastPoint.Y - p1.Y) * vy;
+
+            var dotprodLast = PointMath.DoubledTriangleSquareBy3Dots(lastPoint, p1, p2);
             foreach (var currentPoint in points)
             {
-                var dotprodCurrent = (currentPoint.X - p1.X) * vx + (currentPoint.Y - p1.Y) * vy;
+                var dotprodCurrent = PointMath.DoubledTriangleSquareBy3Dots(currentPoint, p1, p2);
                 var dotProdDirection = Math.Sign(dotprodLast) * Math.Sign(dotprodCurrent);
                 if (dotProdDirection > 0 || finalDotsAreNotIntersections && dotProdDirection == 0)
                 {
@@ -100,11 +109,8 @@ namespace BrainAI.Pathfinding
                     continue;
                 }
 
-                var v2x = currentPoint.Y - lastPoint.Y;
-                var v2y = lastPoint.X - currentPoint.X;
-
-                var dotprodP1 = (p1.X - currentPoint.X) * v2x + (p1.Y - currentPoint.Y) * v2y;
-                var dotprodP2 = (p2.X - currentPoint.X) * v2x + (p2.Y - currentPoint.Y) * v2y;
+                var dotprodP1 = PointMath.DoubledTriangleSquareBy3Dots(p1, currentPoint, lastPoint);
+                var dotprodP2 = PointMath.DoubledTriangleSquareBy3Dots(p2, currentPoint, lastPoint);
                 dotProdDirection = Math.Sign(dotprodP1) * Math.Sign(dotprodP2);
                 if (dotProdDirection > 0 || finalDotsAreNotIntersections && dotProdDirection == 0)
                 {
@@ -137,10 +143,11 @@ namespace BrainAI.Pathfinding
             var cy = 0.0;
             var p2 = points[points.Count - 1];
             var totalAreaX2 = 0d;
+            var basePoint = new Point(0, 0);
             for (int i = 0; i < points.Count; i++)
             {
                 var p3 = points[i];
-                var areaX2 = ((p2.X * p3.Y) - (p2.Y * p3.X));
+                var areaX2 = PointMath.DoubledTriangleSquareBy3Dots(p3, basePoint, p2);
                 totalAreaX2 += areaX2;
                 cx += (p2.X + p3.X) * areaX2;
                 cy += (p2.Y + p3.Y) * areaX2;
@@ -152,5 +159,20 @@ namespace BrainAI.Pathfinding
 
             return (new Point((int)(cx + 0.5), (int)(cy + 0.5)), (totalAreaX2 > 0));
         }
+
+        public static bool IsDirectionInsidePolygon(Point point, Point point2, List<Point> pointList, int pointIndex, double epsilon = 0.0001)
+        {
+            var pointPrevIndex = (pointIndex - 1 + pointList.Count) % pointList.Count;
+            var pointNextIndex = (pointIndex + 1) % pointList.Count;
+
+            var pointPrev = pointList[pointPrevIndex];
+            var pointNext = pointList[pointNextIndex];
+
+            var leftAngle = PointMath.DoubledTriangleSquareBy3Dots(pointPrev, point, point2);
+            var rightAngle = PointMath.DoubledTriangleSquareBy3Dots(point2, point, pointNext);
+            
+            return Math.Sign(leftAngle) == Math.Sign(rightAngle) && Math.Sign(leftAngle) == 1;
+        }
     }
+
 }

@@ -15,8 +15,8 @@
         {
             this.lookup = new Pathfinding.Lookup<Point, Point>();
             this.lookup.Add(new Point(1, 1), new Point(2, 2));
-            this.lookup.Add(new Point(1, 1), new Point(3, 3));
             this.lookup.Add(new Point(2, 1), new Point(3, 3));
+            this.lookup.Add(new Point(1, 1), new Point(3, 3));
         }
 
         [Test]
@@ -27,17 +27,34 @@
         [Test]
         public void Test2()
         {
-            Assert.AreEqual(1, lookup[new Point(2,1)].Count());
+            Assert.AreEqual(1, lookup[new Point(2, 1)].Count());
         }
         [Test]
         public void Test3()
         {
-            Assert.AreEqual(2, lookup[new Point(1,1)].Count());
+            Assert.AreEqual(2, lookup[new Point(1, 1)].Count());
         }
         [Test]
         public void Test4()
         {
-            Assert.AreEqual(lookup.count, lookup.Sum(a=>a.Count()));
+            Assert.AreEqual(lookup.count, lookup.Sum(a => a.Count()));
+        }
+
+        [Test]
+        public void IgnoreDuplicate()
+        {
+            this.lookup = new Pathfinding.Lookup<Point, Point>(true);
+            this.lookup.Add(new Point(1, 1), new Point(2, 2));
+            this.lookup.Add(new Point(1, 1), new Point(3, 3));
+            this.lookup.Add(new Point(2, 1), new Point(3, 3));
+            this.lookup.Add(new Point(1, 1), new Point(2, 2));
+            this.lookup.Add(new Point(1, 1), new Point(3, 3));
+
+            Assert.AreEqual(lookup.count, lookup.Sum(a => a.Count()));
+            Assert.AreEqual(3, lookup.count);
+            Assert.AreEqual(new Point(1, 1), lookup.First().Key);
+            Assert.AreEqual(new Point(2, 2), lookup.First().First());
+            Assert.AreEqual(new Point(3, 3), lookup.First().Skip(1).Single());
         }
     }
 }
