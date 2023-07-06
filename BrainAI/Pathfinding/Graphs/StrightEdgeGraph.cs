@@ -7,7 +7,7 @@ namespace BrainAI.Pathfinding
 {
     public class StrightEdgeGraph : IAstarGraph<Point>
     {
-        private readonly List<StrightEdgeObstacle> obstacles = new List<StrightEdgeObstacle>();
+        internal readonly List<StrightEdgeObstacle> obstacles = new List<StrightEdgeObstacle>();
 
         private Lookup<Point, Point> tempConnections = new Lookup<Point, Point>(true);
 
