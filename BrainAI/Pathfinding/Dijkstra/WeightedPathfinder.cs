@@ -54,17 +54,28 @@
             return ContinueSearch();
         }
 
-        public void Search(T start, int maxPathWeight)
+        public void Search(T start, int additionalDepth)
         {
             this.PrepareSearch();
             this.StartNewSearch(start);
 
             graph.BeforeSearch(start, tmpGoals);
 
-            InternalSearch(maxPathWeight);
+            InternalSearch(additionalDepth);
+        }
+        
+        public List<T> Search(T start, T goal, int additionalDepth)
+        {
+            this.PrepareSearch();
+            this.StartNewSearch(start);
+
+            this.tmpGoals.Add(goal);
+            graph.BeforeSearch(start, tmpGoals);
+
+            return ContinueSearch(additionalDepth);
         }
 
-        public List<T> Search(T start, HashSet<T> goals, int maxPathWeight)
+        public List<T> Search(T start, HashSet<T> goals, int additionalDepth)
         {
             this.PrepareSearch();
             this.StartNewSearch(start);
@@ -75,7 +86,7 @@
             }
             graph.BeforeSearch(start, tmpGoals);
 
-            return ContinueSearch(maxPathWeight);
+            return ContinueSearch(additionalDepth);
         }
 
         public List<T> ContinueSearch()
@@ -84,31 +95,22 @@
             {
                 return null;
             }
-            
+
             return ContinueSearch(int.MaxValue);
         }
 
-        public List<T> ContinueSearch(int maxPathWeight)
+        public List<T> ContinueSearch(int additionalDepth)
         {
-            var (target, result) = InternalSearch(maxPathWeight);
+            var (target, result) = InternalSearch(additionalDepth);
             return this.BuildPath(target, result);
         }
 
         private ValueTuple<T, bool> InternalSearch(int additionalDepth)
         {
-            if (frontier.Count > 0 && additionalDepth < int.MaxValue - frontier.Peek().Item1)
+            while (frontier.Count > 0 && additionalDepth > 0)
             {
-                additionalDepth += frontier.Peek().Item1;
-            }
-
-            while (frontier.Count > 0)
-            {
+                additionalDepth--;
                 var current = frontier.Peek();
-
-                if (current.Item1 >= additionalDepth)
-                {
-                    break;
-                }
 
                 if (tmpGoals.Contains(current.Item2))
                 {

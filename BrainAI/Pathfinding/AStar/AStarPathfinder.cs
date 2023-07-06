@@ -55,7 +55,21 @@
         /// AStar is not really multigoal search as it have a heuristics calculations based on a single target.
         /// Instead it took first goal from set and tries to get to it. 
         /// Each ContinueSearch will select next goal from set if previous was reached.
-        public List<T> Search(T start, HashSet<T> goals, int maxPathWeight)
+        public List<T> Search(T start, T goal, int additionalDepth)
+        {
+            this.PrepareSearch();
+            this.StartNewSearch(start);
+
+            this.tmpGoals.Add(goal);
+            graph.BeforeSearch(start, tmpGoals);
+
+            return ContinueSearch(additionalDepth);
+        }
+
+        /// AStar is not really multigoal search as it have a heuristics calculations based on a single target.
+        /// Instead it took first goal from set and tries to get to it. 
+        /// Each ContinueSearch will select next goal from set if previous was reached.
+        public List<T> Search(T start, HashSet<T> goals, int additionalDepth)
         {
             this.PrepareSearch();
             this.StartNewSearch(start);
@@ -66,7 +80,7 @@
             }
             graph.BeforeSearch(start, tmpGoals);
 
-            return ContinueSearch(maxPathWeight);
+            return ContinueSearch(additionalDepth);
         }
 
         public List<T> ContinueSearch()
@@ -79,30 +93,20 @@
             return ContinueSearch(int.MaxValue);
         }
 
-        public List<T> ContinueSearch(int maxPathWeight)
+        public List<T> ContinueSearch(int additionalDepth)
         {
-            var (target, result) = InternalSearch(maxPathWeight);
+            var (target, result) = InternalSearch(additionalDepth);
             return this.BuildPath(target, result);
         }
-
 
         private ValueTuple<T, bool> InternalSearch(int additionalDepth)
         {
             var goal = this.GetFirstGoal();
 
-            if (frontier.Count > 0 && additionalDepth < int.MaxValue - frontier.Peek().Item1)
+            while (frontier.Count > 0 && additionalDepth > 0)
             {
-                additionalDepth += frontier.Peek().Item1;
-            }
-
-            while (frontier.Count > 0)
-            {
+                additionalDepth--;
                 var current = frontier.Peek();
-
-                if (current.Item1 - graph.Heuristic(current.Item2, goal) >= additionalDepth)
-                {
-                    break;
-                }
 
                 if (tmpGoals.Contains(current.Item2))
                 {

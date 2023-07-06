@@ -15,6 +15,12 @@ permissions:
   id-token: write
   packages: write
 
+
+# Allow one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -55,6 +61,60 @@ jobs:
           name: nuget
           path: ./BrainAI/bin/Release/BrainAI.*.nupkg
 
+
+  godot:
+    needs: build
+    runs-on: ubuntu-latest
+    name: Build artifacts
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
+        with:
+          fetch-depth: 0
+
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 2.2.108
+          source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Restore packages
+        run: |
+          dotnet restore "./BrainAI.Demo/BrainAI Demo.sln"
+
+      - name: Export game
+        id: export
+        uses: firebelley/godot-export@v4.4.0
+        with:
+          godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/3.5.1/mono/Godot_v3.5.1-stable_mono_linux_headless_64.zip
+          godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/3.5.1/mono/Godot_v3.5.1-stable_mono_export_templates.tpz
+          relative_project_path: ./BrainAI.Demo/
+          export_debug: false
+          use_preset_export_path: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: ${{ steps.export.outputs.build_directory }}/HTML5
+
+
+  deploy_html5:
+    needs: godot
+    name: Deploy to github pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v2
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
 
   pack:
     needs: build

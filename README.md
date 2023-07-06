@@ -7,6 +7,11 @@ BrainAI is a set of helper classes to add AI to your game.
 - [InfluenceMap](BrainAI/InfluenceMap/README.md)
 - [Simulations](BrainAI/Simulations/README.md)
 
+Example
+==========
+
+Dynamic example can be found here: https://apmem.github.io/BrainAI/Godot.html
+
 Credits
 ==========
 

@@ -50,17 +50,28 @@
             return ContinueSearch();
         }
 
-        public void Search(T start, int maxPathWeight)
+        public void Search(T start, int additionalDepth)
         {
             this.PrepareSearch();
             this.StartNewSearch(start);
 
             graph.BeforeSearch(start, tmpGoals);
 
-            InternalSearch(maxPathWeight);
+            InternalSearch(additionalDepth);
         }
 
-        public List<T> Search(T start, HashSet<T> goals, int maxPathWeight)
+        public List<T> Search(T start, T goal, int additionalDepth)
+        {
+            this.PrepareSearch();
+            this.StartNewSearch(start);
+
+            this.tmpGoals.Add(goal);
+            graph.BeforeSearch(start, tmpGoals);
+
+            return ContinueSearch(additionalDepth);
+        }
+
+        public List<T> Search(T start, HashSet<T> goals, int additionalDepth)
         {
             this.PrepareSearch();
             this.StartNewSearch(start);
@@ -71,7 +82,7 @@
             }
             graph.BeforeSearch(start, tmpGoals);
 
-            return ContinueSearch(maxPathWeight);
+            return ContinueSearch(additionalDepth);
         }
 
         public List<T> ContinueSearch()
@@ -84,18 +95,17 @@
             return ContinueSearch(int.MaxValue);
         }
 
-        public List<T> ContinueSearch(int maxPathWeight)
+        public List<T> ContinueSearch(int additionalDepth)
         {
-            var (target, result) = InternalSearch(maxPathWeight);
+            var (target, result) = InternalSearch(additionalDepth);
             return this.BuildPath(target, result);
         }
 
         private ValueTuple<T, bool> InternalSearch(int additionalDepth)
         {
-            var forNextLevel = frontier.Count;
-
             while (frontier.Count > 0 && additionalDepth > 0)
             {
+                additionalDepth--;
                 var current = frontier.Peek();
 
                 if (tmpGoals.Contains(current))
@@ -113,13 +123,6 @@
                         frontier.Enqueue(next);
                         VisitedNodes.Add(next, current);
                     }
-                }
-
-                forNextLevel--;
-                if (forNextLevel == 0)
-                {
-                    forNextLevel = frontier.Count;
-                    additionalDepth--;
                 }
             }
 
