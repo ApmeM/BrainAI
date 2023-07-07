@@ -181,25 +181,11 @@ namespace BrainAI.Pathfinding
                         // Log($"Skipping segment {point} - {point2}: Directed inside poligon for {point}");
                         continue;
                     }
-                    if (
-                        PointMath.SegmentIntersectCircle(point, point2, obstace2.center, obstace2.radiusSq) &&
-                        PointMath.SegmentIntersectsPolygon(obstace2.points, point, point2, true)
-                        )
-                    {
-                        // Log($"Skipping segment {point} - {point2}: Intersects with polygon");
-                        continue;
-                    }
-
+                    
                     // Need to test if line from point to point2 intersects any obstacles
-                    // Also test if any point is contained in any obstacle.
                     var found = true;
                     foreach (var obstacle3 in obstacles)
                     {
-                        if (obstacle3.Equals(obstace2))
-                        {
-                            continue;
-                        }
-
                         if (PointMath.SegmentIntersectCircle(point, point2, obstacle3.center, obstacle3.radiusSq) &&
                             PointMath.SegmentIntersectsPolygon(obstacle3.points, point, point2, true))
                         {
@@ -255,7 +241,6 @@ namespace BrainAI.Pathfinding
                 var found = false;
                 foreach (var obstacle in this.obstacles)
                 {
-
                     if (PointMath.SegmentIntersectCircle(start, end, obstacle.center, obstacle.radiusSq) &&
                         PointMath.SegmentIntersectsPolygon(obstacle.points, start, end, false))
                     {

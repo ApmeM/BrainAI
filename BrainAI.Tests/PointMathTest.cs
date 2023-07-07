@@ -115,7 +115,7 @@
                 new Point(2, -1), new Point(2, 2),
                 true
                 );
-            Assert.AreEqual(false, result);
+            Assert.AreEqual(true, result);
         }
 
         [Test]

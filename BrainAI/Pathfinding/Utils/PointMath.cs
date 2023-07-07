@@ -101,8 +101,15 @@ namespace BrainAI.Pathfinding
             foreach (var currentPoint in points)
             {
                 var dotprodCurrent = PointMath.DoubledTriangleSquareBy3Dots(currentPoint, p1, p2);
-                var dotProdDirection = Math.Sign(dotprodLast) * Math.Sign(dotprodCurrent);
-                if (dotProdDirection > 0 || finalDotsAreNotIntersections && dotProdDirection == 0)
+
+                if (finalDotsAreNotIntersections && (p1 == currentPoint || p2 == currentPoint || p1 == lastPoint || p2 == lastPoint))
+                {
+                    dotprodLast = dotprodCurrent;
+                    lastPoint = currentPoint;
+                    continue;
+                }
+
+                if (Math.Sign(dotprodLast) == Math.Sign(dotprodCurrent))
                 {
                     dotprodLast = dotprodCurrent;
                     lastPoint = currentPoint;
@@ -111,8 +118,7 @@ namespace BrainAI.Pathfinding
 
                 var dotprodP1 = PointMath.DoubledTriangleSquareBy3Dots(p1, currentPoint, lastPoint);
                 var dotprodP2 = PointMath.DoubledTriangleSquareBy3Dots(p2, currentPoint, lastPoint);
-                dotProdDirection = Math.Sign(dotprodP1) * Math.Sign(dotprodP2);
-                if (dotProdDirection > 0 || finalDotsAreNotIntersections && dotProdDirection == 0)
+                if (Math.Sign(dotprodP1) == Math.Sign(dotprodP2))
                 {
                     dotprodLast = dotprodCurrent;
                     lastPoint = currentPoint;
@@ -170,7 +176,7 @@ namespace BrainAI.Pathfinding
 
             var leftAngle = PointMath.DoubledTriangleSquareBy3Dots(pointPrev, point, point2);
             var rightAngle = PointMath.DoubledTriangleSquareBy3Dots(point2, point, pointNext);
-            
+
             return Math.Sign(leftAngle) == Math.Sign(rightAngle) && Math.Sign(leftAngle) == 1;
         }
     }

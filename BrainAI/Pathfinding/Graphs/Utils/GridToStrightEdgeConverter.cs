@@ -6,7 +6,7 @@ namespace BrainAI.Pathfinding
 {
     public static class GridToStrightEdgeConverter
     {
-        public static StrightEdgeGraph BuildGraph(GridGraph graph)
+        public static StrightEdgeGraph BuildGraph(GridGraph graph, int scale = 1)
         {
             var result = new StrightEdgeGraph();
             var list = new LinkedList<Point>();
@@ -34,11 +34,21 @@ namespace BrainAI.Pathfinding
                 DFS(graph, visited, list, wall, new Point(0, -1), p0);
 
                 Cleanup(list);
+                var points = list.ToList();
+                Scale(points, scale);
 
-                result.AddObstacle(list.ToList());
+                result.AddObstacle(points);
             }
 
             return result;
+        }
+
+        private static void Scale(List<Point> list, int scale)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                list[i] = new Point(list[i].X * scale, list[i].Y * scale);
+            }
         }
 
         private static void Cleanup(LinkedList<Point> list)
@@ -46,9 +56,7 @@ namespace BrainAI.Pathfinding
             var node = list.First;
             while (node != null)
             {
-                if (EqualityComparer<Point>.Default.Equals(
-                    (node.Previous ?? list.Last).Value,
-                    (node.Next ?? list.First).Value))
+                if ((node.Previous ?? list.Last).Value == (node.Next ?? list.First).Value)
                 {
                     var toRemove = node;
                     node = node.Previous ?? list.Last;

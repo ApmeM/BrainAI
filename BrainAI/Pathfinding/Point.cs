@@ -2,7 +2,7 @@
 
 namespace BrainAI.Pathfinding
 {
-    public struct Point : IEquatable<Point> 
+    public struct Point : IEquatable<Point>
     {
         public Point(int x, int y)
         {
@@ -32,5 +32,9 @@ namespace BrainAI.Pathfinding
         {
             return this.X == obj.X && this.Y == obj.Y;
         }
+
+        public static bool operator ==(Point a, Point b) => a.X == b.X && a.Y == b.Y;
+
+        public static bool operator !=(Point a, Point b) => a.X != b.X || a.Y != b.Y;
     }
 }

@@ -115,6 +115,23 @@
         }
 
         [Test]
+        public void BuildGraph_Scale()
+        {
+            var grid = new GridGraph(5, 5);
+            grid.Walls.Add(new Point(2, 2));
+            grid.Walls.Add(new Point(3, 2));
+            grid.Walls.Add(new Point(2, 3));
+            grid.Walls.Add(new Point(3, 3));
+            var result = GridToStrightEdgeConverter.BuildGraph(grid, 10).obstacles;
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual(4, result[0].points.Count);
+            Assert.AreEqual(new Point(20, 20), result[0].points[0]);
+            Assert.AreEqual(new Point(40, 20), result[0].points[1]);
+            Assert.AreEqual(new Point(40, 40), result[0].points[2]);
+            Assert.AreEqual(new Point(20, 40), result[0].points[3]);
+        }
+
+        [Test]
         public void BuildGraph_Complex()
         {
             var grid = new GridGraph(5, 5);

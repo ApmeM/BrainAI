@@ -74,5 +74,126 @@ namespace BrainAI.Pathfinding
             Assert.AreEqual(new Point(7, 8), pathData[4]);
             Assert.AreEqual(new Point(10, 10), pathData[5]);
         }
+
+        [Test]
+        public void ExitFromCircle()
+        {
+            var grid = new GridGraph(5, 5);
+            grid.Walls.Add(new Point(2, 2));
+            grid.Walls.Add(new Point(3, 2));
+            grid.Walls.Add(new Point(4, 2));
+            grid.Walls.Add(new Point(4, 3));
+            grid.Walls.Add(new Point(4, 4));
+            grid.Walls.Add(new Point(3, 4));
+            grid.Walls.Add(new Point(2, 4));
+            grid.Walls.Add(new Point(2, 3));
+            var graph = GridToStrightEdgeConverter.BuildGraph(grid, 10);
+            Assert.AreEqual(1, graph.obstacles.Count);
+            Assert.AreEqual(10, graph.obstacles[0].points.Count);
+
+            var start = new Point(35, 35);
+            var end = new Point(100, 100);
+            var pathData = new AStarPathfinder<Point>(graph).Search(start, end);
+
+            Assert.IsNull(pathData);
+        }
+
+        [Test]
+        public void PathInsideObstacles()
+        {
+            var grid = new GridGraph(5, 5);
+            grid.Walls.Add(new Point(0, 0));
+            grid.Walls.Add(new Point(0, 1));
+            grid.Walls.Add(new Point(0, 2));
+            grid.Walls.Add(new Point(0, 3));
+            grid.Walls.Add(new Point(1, 3));
+            grid.Walls.Add(new Point(2, 3));
+            grid.Walls.Add(new Point(3, 3));
+            grid.Walls.Add(new Point(4, 3));
+            grid.Walls.Add(new Point(4, 2));
+            grid.Walls.Add(new Point(4, 1));
+            grid.Walls.Add(new Point(4, 0));
+            grid.Walls.Add(new Point(3, 0));
+            grid.Walls.Add(new Point(2, 0));
+            grid.Walls.Add(new Point(1, 0));
+            grid.Walls.Add(new Point(2, 1));
+            var graph = GridToStrightEdgeConverter.BuildGraph(grid, 10);
+            Assert.AreEqual(1, graph.obstacles.Count);
+
+            var start = new Point(15, 15);
+            var end = new Point(35, 15);
+
+            var pathData = new AStarPathfinder<Point>(graph).Search(start, end);
+
+            Assert.AreEqual(4, pathData.Count);
+            Assert.AreEqual(new Point(15, 15), pathData[0]);
+            Assert.AreEqual(new Point(20, 20), pathData[1]);
+            Assert.AreEqual(new Point(30, 20), pathData[2]);
+            Assert.AreEqual(new Point(35, 15), pathData[3]);
+        }
+
+        [Test]
+        public void PathOutsideObstacles()
+        {
+            var grid = new GridGraph(5, 5);
+            grid.Walls.Add(new Point(0, 0));
+            grid.Walls.Add(new Point(0, 1));
+            grid.Walls.Add(new Point(0, 2));
+            grid.Walls.Add(new Point(0, 3));
+            grid.Walls.Add(new Point(1, 3));
+            grid.Walls.Add(new Point(2, 3));
+            grid.Walls.Add(new Point(3, 3));
+            grid.Walls.Add(new Point(4, 3));
+            grid.Walls.Add(new Point(4, 2));
+            grid.Walls.Add(new Point(4, 1));
+            grid.Walls.Add(new Point(4, 0));
+            grid.Walls.Add(new Point(3, 0));
+            grid.Walls.Add(new Point(2, 0));
+            grid.Walls.Add(new Point(1, 0));
+            grid.Walls.Add(new Point(2, 1));
+            var graph = GridToStrightEdgeConverter.BuildGraph(grid, 10);
+            Assert.AreEqual(1, graph.obstacles.Count);
+
+            var start = new Point(-5, 15);
+            var end = new Point(55, 15);
+
+            var pathData = new AStarPathfinder<Point>(graph).Search(start, end);
+
+            Assert.AreEqual(4, pathData.Count);
+            Assert.AreEqual(new Point(-5, 15), pathData[0]);
+            Assert.AreEqual(new Point( 0,  0), pathData[1]);
+            Assert.AreEqual(new Point(50,  0), pathData[2]);
+            Assert.AreEqual(new Point(55, 15), pathData[3]);
+        }
+
+        [Test]
+        public void PathToOutsideObstacles()
+        {
+            var grid = new GridGraph(5, 5);
+            grid.Walls.Add(new Point(0, 0));
+            grid.Walls.Add(new Point(0, 1));
+            grid.Walls.Add(new Point(0, 2));
+            grid.Walls.Add(new Point(0, 3));
+            grid.Walls.Add(new Point(1, 3));
+            grid.Walls.Add(new Point(2, 3));
+            grid.Walls.Add(new Point(3, 3));
+            grid.Walls.Add(new Point(4, 3));
+            grid.Walls.Add(new Point(4, 2));
+            grid.Walls.Add(new Point(4, 1));
+            grid.Walls.Add(new Point(4, 0));
+            grid.Walls.Add(new Point(3, 0));
+            grid.Walls.Add(new Point(2, 0));
+            grid.Walls.Add(new Point(1, 0));
+            grid.Walls.Add(new Point(2, 1));
+            var graph = GridToStrightEdgeConverter.BuildGraph(grid, 10);
+            Assert.AreEqual(1, graph.obstacles.Count);
+
+            var start = new Point(15, 15);
+            var end = new Point(100, 100);
+
+            var pathData = new AStarPathfinder<Point>(graph).Search(start, end);
+
+            Assert.IsNull(pathData);
+        }
     }
 }
