@@ -138,6 +138,12 @@ namespace BrainAI.Pathfinding
             Log("Total connections: " + this.connections.Sum(a => a.Count()));
             Log(string.Join("\n", this.connections.Select(a => $"From {a.Key} to " + string.Join(",", a))));
         }
+        private class PointWrapper
+        {
+            public Point p;
+        }
+        private PointWrapper wrapper = new PointWrapper();
+        private Comparison<StrightEdgeObstacle> sortByDistance;
 
         private void FindConnections(Point point, List<Point> pointList, int pointIndex, Lookup<Point, Point> reachablepoints)
         {
@@ -152,7 +158,9 @@ namespace BrainAI.Pathfinding
             // by their distance to the startpoint, smallest first.
             // These closer obstacles are more likely to intersect any lines from the
             // startpoint to the far away obstacle points.
-            obstacles.Sort((a, b) => (int)((PointMath.DistanceSquare(point, a.center) - a.radiusSq) - (PointMath.DistanceSquare(point, b.center) - b.radiusSq)));
+            wrapper.p = point;
+            sortByDistance = sortByDistance ?? ((StrightEdgeObstacle a, StrightEdgeObstacle b) => (int)((PointMath.DistanceSquare(wrapper.p, a.center) - a.radiusSq) - (PointMath.DistanceSquare(wrapper.p, b.center) - b.radiusSq)));
+            obstacles.Sort(sortByDistance);
 
             // Test the point for straight lines to points in other
             // polygons (including obstacle itself).
@@ -181,7 +189,7 @@ namespace BrainAI.Pathfinding
                         // Log($"Skipping segment {point} - {point2}: Directed inside poligon for {point}");
                         continue;
                     }
-                    
+
                     // Need to test if line from point to point2 intersects any obstacles
                     var found = true;
                     foreach (var obstacle3 in obstacles)
