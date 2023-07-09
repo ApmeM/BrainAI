@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BrainAI.Pathfinding
 {
-    internal static class PointMath
+    public static class PointMath
     {
         public static double DistanceSquare(Point p2, Point p)
         {
@@ -49,24 +49,28 @@ namespace BrainAI.Pathfinding
             var crossings = 0;
             foreach (var currentPoint in new ExtendedEnumerable<Point>(points, points.Count + 1))
             {
-                if (lastPoint == null)
+                try
+                {
+                    if (lastPoint == null)
+                    {
+                        continue;
+                    }
+
+                    if (EqualityComparer<Point>.Default.Equals(lastPoint.Value, p))
+                    {
+                        return true;
+                    }
+
+                    if (((lastPoint.Value.Y <= p.Y && p.Y < currentPoint.Y) || (currentPoint.Y <= p.Y && p.Y < lastPoint.Value.Y))
+                            && p.X < ((currentPoint.X - lastPoint.Value.X) / (currentPoint.Y - lastPoint.Value.Y) * (p.Y - lastPoint.Value.Y) + lastPoint.Value.X))
+                    {
+                        crossings++;
+                    }
+                }
+                finally
                 {
                     lastPoint = currentPoint;
-                    continue;
                 }
-
-                if (EqualityComparer<Point>.Default.Equals(lastPoint.Value, p))
-                {
-                    return true;
-                }
-
-                if (((lastPoint.Value.Y <= p.Y && p.Y < currentPoint.Y) || (currentPoint.Y <= p.Y && p.Y < lastPoint.Value.Y))
-                        && p.X < ((currentPoint.X - lastPoint.Value.X) / (currentPoint.Y - lastPoint.Value.Y) * (p.Y - lastPoint.Value.Y) + lastPoint.Value.X))
-                {
-                    crossings++;
-                }
-
-                lastPoint = currentPoint;
             }
 
             return (crossings % 2 != 0);
@@ -106,39 +110,39 @@ namespace BrainAI.Pathfinding
             var dotprodLast = 0d;
             foreach (var currentPoint in new ExtendedEnumerable<Point>(points, points.Count + 1))
             {
-                if (lastPoint == null)
-                {
-                    lastPoint = currentPoint;
-                    dotprodLast = PointMath.DoubledTriangleSquareBy3Dots(lastPoint.Value, p1, p2);
-                    continue;
-                }
-
                 var dotprodCurrent = PointMath.DoubledTriangleSquareBy3Dots(currentPoint, p1, p2);
 
-                if (finalDotsAreNotIntersections && (p1 == currentPoint || p2 == currentPoint || p1 == lastPoint || p2 == lastPoint))
+                try
+                {
+                    if (lastPoint == null)
+                    {
+                        continue;
+                    }
+
+                    if (finalDotsAreNotIntersections && (p1 == currentPoint || p2 == currentPoint || p1 == lastPoint || p2 == lastPoint))
+                    {
+                        continue;
+                    }
+
+                    if (Math.Sign(dotprodLast) == Math.Sign(dotprodCurrent))
+                    {
+                        continue;
+                    }
+
+                    var dotprodP1 = PointMath.DoubledTriangleSquareBy3Dots(p1, currentPoint, lastPoint.Value);
+                    var dotprodP2 = PointMath.DoubledTriangleSquareBy3Dots(p2, currentPoint, lastPoint.Value);
+                    if (Math.Sign(dotprodP1) == Math.Sign(dotprodP2))
+                    {
+                        continue;
+                    }
+
+                    return true;
+                }
+                finally
                 {
                     dotprodLast = dotprodCurrent;
                     lastPoint = currentPoint;
-                    continue;
                 }
-
-                if (Math.Sign(dotprodLast) == Math.Sign(dotprodCurrent))
-                {
-                    dotprodLast = dotprodCurrent;
-                    lastPoint = currentPoint;
-                    continue;
-                }
-
-                var dotprodP1 = PointMath.DoubledTriangleSquareBy3Dots(p1, currentPoint, lastPoint.Value);
-                var dotprodP2 = PointMath.DoubledTriangleSquareBy3Dots(p2, currentPoint, lastPoint.Value);
-                if (Math.Sign(dotprodP1) == Math.Sign(dotprodP2))
-                {
-                    dotprodLast = dotprodCurrent;
-                    lastPoint = currentPoint;
-                    continue;
-                }
-
-                return true;
             }
 
             return false;
@@ -182,17 +186,22 @@ namespace BrainAI.Pathfinding
 
             foreach (var p3 in points)
             {
-                if (p2 == null)
+                try
+                {
+                    if (p2 == null)
+                    {
+                        continue;
+                    }
+
+                    var areaX2 = PointMath.DoubledTriangleSquareBy3Dots(p3, basePoint, p2.Value);
+                    totalAreaX2 += areaX2;
+                    cx += (p2.Value.X + p3.X) * areaX2;
+                    cy += (p2.Value.Y + p3.Y) * areaX2;
+                }
+                finally
                 {
                     p2 = p3;
-                    continue;
                 }
-
-                var areaX2 = PointMath.DoubledTriangleSquareBy3Dots(p3, basePoint, p2.Value);
-                totalAreaX2 += areaX2;
-                cx += (p2.Value.X + p3.X) * areaX2;
-                cy += (p2.Value.Y + p3.Y) * areaX2;
-                p2 = p3;
             }
 
             cx /= (3 * totalAreaX2);
