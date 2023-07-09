@@ -203,7 +203,7 @@ namespace BrainAI.Pathfinding
                             continue;
                         }
 
-                        if (point2.Equals(point))
+                        if (point2 == point)
                         {
                             Log($"Skipping segment {point} - {point2}: Same point");
                             continue;

@@ -56,7 +56,7 @@ namespace BrainAI.Pathfinding
                         continue;
                     }
 
-                    if (EqualityComparer<Point>.Default.Equals(lastPoint.Value, p))
+                    if (lastPoint == p)
                     {
                         return true;
                     }
@@ -101,7 +101,7 @@ namespace BrainAI.Pathfinding
 
         public static bool SegmentIntersectsPolygon(List<Point> points, Point p1, Point p2, bool finalDotsAreNotIntersections)
         {
-            if (p1.Equals(p2))
+            if (p1 == p2)
             {
                 return false;
             }

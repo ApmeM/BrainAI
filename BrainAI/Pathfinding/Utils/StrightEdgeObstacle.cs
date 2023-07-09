@@ -27,10 +27,10 @@ namespace BrainAI.Pathfinding
                 this.points.Reverse();
             }
         }
-        
+
         public bool Equals(StrightEdgeObstacle obj)
         {
-            return this.center.Equals(obj.center) && this.radiusSq == obj.radiusSq && this.points == obj.points;
+            return this.center == obj.center && this.radiusSq == obj.radiusSq && this.points == obj.points;
         }
     }
 }
