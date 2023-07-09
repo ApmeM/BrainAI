@@ -152,7 +152,7 @@ namespace BrainAI.Pathfinding
 
                     FindConnections(point.Value, pointPrev, pointNext, this.connections);
 
-                    Log($"New point {point} have {this.connections.Find(point.Value).Count()} connections: {(string.Join(",", this.connections.Find(point.Value)))}");
+                    Log($"New point {point} have {this.connections.Find(point.Value).Count} connections: {(string.Join(",", this.connections.Find(point.Value)))}");
                 }
                 finally
                 {
@@ -160,7 +160,7 @@ namespace BrainAI.Pathfinding
                     point = pointNext;
                 }
             }
-            Log("Total connections: " + this.connections.Sum(a => a.Count()));
+            Log("Total connections: " + this.connections.Sum(a => ((Lookup<Point, Point>.Enumerable)a).Count));
             Log(string.Join("\n", this.connections.Select(a => $"From {a.Key} to " + string.Join(",", a))));
         }
         private class PointWrapper
@@ -285,7 +285,7 @@ namespace BrainAI.Pathfinding
             this.tempConnections.Clear();
             // Connect the startpoint to its reachable points and vice versa
             this.FindConnections(start, null, null, this.tempConnections);
-            Log($"For start ({start}) found {this.tempConnections.Find(start).Count()} items: {string.Join(",", this.tempConnections.Find(start))}");
+            Log($"For start ({start}) found {this.tempConnections.Find(start).Count} items: {string.Join(",", this.tempConnections.Find(start))}");
             foreach (var end in ends)
             {
                 var found = false;
@@ -309,10 +309,10 @@ namespace BrainAI.Pathfinding
                 {
                     // Connect the endpoint to its reachable points and vice versa
                     this.FindConnections(end, null, null, this.tempConnections);
-                    Log($"For end ({end})found {this.tempConnections.Find(end).Count()} items: {string.Join(",", this.tempConnections.Find(end))}");
+                    Log($"For end ({end})found {this.tempConnections.Find(end).Count} items: {string.Join(",", this.tempConnections.Find(end))}");
                 }
             }
-            Log($"Total temp connections: {this.tempConnections.Sum(a => a.Count())}");
+            Log($"Total temp connections: {this.tempConnections.Sum(a => ((Lookup<Point, Point>.Enumerable)a).Count)}");
             Log(string.Join("\n", this.tempConnections.Select(a => $"From {a.Key} to " + string.Join(",", a))));
 
             Log("-=-=-=-=-=-=-");

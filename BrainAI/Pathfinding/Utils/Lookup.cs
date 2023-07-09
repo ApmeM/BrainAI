@@ -8,13 +8,14 @@ namespace BrainAI.Pathfinding
 {
     public class Lookup<TKey, TValue> : ILookup<TKey, TValue>
     {
-        internal Dictionary<TKey, LinkedListNode<(TKey, TValue)>> startReference = new Dictionary<TKey, LinkedListNode<(TKey, TValue)>>();
-        internal Dictionary<TKey, LinkedListNode<(TKey, TValue)>> endReference = new Dictionary<TKey, LinkedListNode<(TKey, TValue)>>();
-        internal LinkedList<(TKey, TValue)> valuesList = new LinkedList<(TKey, TValue)>();
-        internal HashSet<(TKey, TValue)> set = new HashSet<(TKey, TValue)>();
+        private Dictionary<TKey, LinkedListNode<(TKey, TValue)>> startReference = new Dictionary<TKey, LinkedListNode<(TKey, TValue)>>();
+        private Dictionary<TKey, LinkedListNode<(TKey, TValue)>> endReference = new Dictionary<TKey, LinkedListNode<(TKey, TValue)>>();
+        private Dictionary<TKey, int> counts = new Dictionary<TKey, int>();
+        private LinkedList<(TKey, TValue)> valuesList = new LinkedList<(TKey, TValue)>();
+        private HashSet<(TKey, TValue)> set = new HashSet<(TKey, TValue)>();
 
-        internal int count;
-        internal int version;
+        private int count;
+        private int version;
         private readonly bool ignoreDuplicates;
 
         public Lookup(bool ignoreDuplicates = false)
@@ -45,12 +46,14 @@ namespace BrainAI.Pathfinding
                 }
                 valuesList.AddAfter(endReference[key], tuple);
                 endReference[key] = endReference[key].Next;
+                counts[key]++;
             }
             else
             {
                 var node = valuesList.AddLast(tuple);
                 startReference[key] = node;
                 endReference[key] = node;
+                counts[key] = 1;
                 if (ignoreDuplicates)
                 {
                     set.Add(tuple);
@@ -80,10 +83,13 @@ namespace BrainAI.Pathfinding
                 return;
             }
 
+            counts[key]--;
+
             if (start == startReference[key] && start == endReference[key])
             {
                 startReference.Remove(key);
                 endReference.Remove(key);
+                counts.Remove(key);
             }
             else if (start == startReference[key])
             {
@@ -93,7 +99,7 @@ namespace BrainAI.Pathfinding
             {
                 endReference[key] = endReference[key].Previous;
             }
-
+            
             if (ignoreDuplicates)
             {
                 set.Remove((key, value));
@@ -109,6 +115,7 @@ namespace BrainAI.Pathfinding
             valuesList.Clear();
             startReference.Clear();
             endReference.Clear();
+            counts.Clear();
             set.Clear();
             count = 0;
             version++;
@@ -118,10 +125,10 @@ namespace BrainAI.Pathfinding
         {
             if (!startReference.ContainsKey(key))
             {
-                return new Enumerable(null, null);
+                return new Enumerable(null, null, 0);
             }
 
-            return new Enumerable(startReference[key], endReference[key]);
+            return new Enumerable(startReference[key], endReference[key], counts[key]);
         }
 
         public bool Contains(TKey key)
@@ -147,12 +154,15 @@ namespace BrainAI.Pathfinding
         {
             private readonly LinkedListNode<(TKey, TValue)> start;
             private readonly LinkedListNode<(TKey, TValue)> end;
+            public readonly int Count;
+
             public TKey Key => start.Value.Item1;
 
-            public Enumerable(LinkedListNode<(TKey, TValue)> start, LinkedListNode<(TKey, TValue)> end)
+            public Enumerable(LinkedListNode<(TKey, TValue)> start, LinkedListNode<(TKey, TValue)> end, int count)
             {
                 this.start = start;
                 this.end = end;
+                this.Count = count;
             }
 
             [Obsolete("Use GetEnumerator instead. This method requires boxing and allocates memory.")]
@@ -256,7 +266,8 @@ namespace BrainAI.Pathfinding
                 var result = this.bucketEnumerator.MoveNext();
                 if (result)
                 {
-                    Current = new Enumerable(this.bucketEnumerator.Current.Value, this.lookup.endReference[this.bucketEnumerator.Current.Key]);
+                    var key = this.bucketEnumerator.Current.Key;
+                    Current = new Enumerable(this.lookup.startReference[key], this.lookup.endReference[key], this.lookup.counts[key]);
                 }
                 return result;
             }
