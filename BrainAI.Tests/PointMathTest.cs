@@ -166,10 +166,7 @@
         [Test]
         public void IsDirectionInsidePolygon_InsidePoligon()
         {
-            var result = PointMath.IsDirectionInsidePolygon(
-                new Point(0, 0), new Point(2, 2),
-                new List<Point> { new Point(0, 0), new Point(2, 0), new Point(0, 1) }, 0
-                );
+            var result = PointMath.IsDirectionInsidePolygon(new Point(0, 0), new Point(2, 2), new Point(0, 1), new Point(2, 0));
 
             Assert.AreEqual(true, result);
         }
@@ -177,10 +174,7 @@
         [Test]
         public void IsDirectionInsidePolygon_OutsidePoligon()
         {
-            var result = PointMath.IsDirectionInsidePolygon(
-                new Point(0, 0), new Point(-2, -2),
-                new List<Point> { new Point(0, 0), new Point(2, 0), new Point(0, 1) }, 0
-                );
+            var result = PointMath.IsDirectionInsidePolygon(new Point(0, 0), new Point(-2, -2), new Point(0, 1), new Point(0, 0));
 
             Assert.AreEqual(false, result);
         }
@@ -188,10 +182,7 @@
         [Test]
         public void IsDirectionInsidePolygon_InsideRect()
         {
-            var result = PointMath.IsDirectionInsidePolygon(
-                new Point(0, 1), new Point(2, 201),
-                new List<Point> { new Point(0, 1), new Point(2, 1), new Point(2, 201), new Point(0, 201) }, 0
-                );
+            var result = PointMath.IsDirectionInsidePolygon(new Point(0, 1), new Point(2, 201), new Point(0, 201), new Point(2, 1));
 
             Assert.AreEqual(true, result);
         }

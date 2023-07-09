@@ -31,9 +31,9 @@ namespace BrainAI.Pathfinding
         public static double CalcRadiusSquare(List<Point> points, Point center)
         {
             var radiusSq = -1d;
-            for (int i = 0; i < points.Count; i++)
+            foreach (var point in points)
             {
-                var currentRadiusSq = PointMath.DistanceSquare(points[i], center);
+                var currentRadiusSq = PointMath.DistanceSquare(point, center);
                 if (currentRadiusSq > radiusSq)
                 {
                     radiusSq = currentRadiusSq;
@@ -45,20 +45,27 @@ namespace BrainAI.Pathfinding
 
         public static bool PointWithinPolygon(List<Point> points, Point p)
         {
-            var lastPoint = points[points.Count - 1];
+            Point? lastPoint = null;
             var crossings = 0;
-            foreach (var currentPoint in points)
+            foreach (var currentPoint in new ExtendedEnumerable<Point>(points, points.Count + 1))
             {
-                if (EqualityComparer<Point>.Default.Equals(lastPoint, p))
+                if (lastPoint == null)
+                {
+                    lastPoint = currentPoint;
+                    continue;
+                }
+
+                if (EqualityComparer<Point>.Default.Equals(lastPoint.Value, p))
                 {
                     return true;
                 }
 
-                if (((lastPoint.Y <= p.Y && p.Y < currentPoint.Y) || (currentPoint.Y <= p.Y && p.Y < lastPoint.Y))
-                        && p.X < ((currentPoint.X - lastPoint.X) / (currentPoint.Y - lastPoint.Y) * (p.Y - lastPoint.Y) + lastPoint.X))
+                if (((lastPoint.Value.Y <= p.Y && p.Y < currentPoint.Y) || (currentPoint.Y <= p.Y && p.Y < lastPoint.Value.Y))
+                        && p.X < ((currentPoint.X - lastPoint.Value.X) / (currentPoint.Y - lastPoint.Value.Y) * (p.Y - lastPoint.Value.Y) + lastPoint.Value.X))
                 {
                     crossings++;
                 }
+
                 lastPoint = currentPoint;
             }
 
@@ -95,11 +102,17 @@ namespace BrainAI.Pathfinding
                 return false;
             }
 
-            var lastPoint = points[points.Count - 1];
-
-            var dotprodLast = PointMath.DoubledTriangleSquareBy3Dots(lastPoint, p1, p2);
-            foreach (var currentPoint in points)
+            Point? lastPoint = null;
+            var dotprodLast = 0d;
+            foreach (var currentPoint in new ExtendedEnumerable<Point>(points, points.Count + 1))
             {
+                if (lastPoint == null)
+                {
+                    lastPoint = currentPoint;
+                    dotprodLast = PointMath.DoubledTriangleSquareBy3Dots(lastPoint.Value, p1, p2);
+                    continue;
+                }
+
                 var dotprodCurrent = PointMath.DoubledTriangleSquareBy3Dots(currentPoint, p1, p2);
 
                 if (finalDotsAreNotIntersections && (p1 == currentPoint || p2 == currentPoint || p1 == lastPoint || p2 == lastPoint))
@@ -116,8 +129,8 @@ namespace BrainAI.Pathfinding
                     continue;
                 }
 
-                var dotprodP1 = PointMath.DoubledTriangleSquareBy3Dots(p1, currentPoint, lastPoint);
-                var dotprodP2 = PointMath.DoubledTriangleSquareBy3Dots(p2, currentPoint, lastPoint);
+                var dotprodP1 = PointMath.DoubledTriangleSquareBy3Dots(p1, currentPoint, lastPoint.Value);
+                var dotprodP2 = PointMath.DoubledTriangleSquareBy3Dots(p2, currentPoint, lastPoint.Value);
                 if (Math.Sign(dotprodP1) == Math.Sign(dotprodP2))
                 {
                     dotprodLast = dotprodCurrent;
@@ -138,25 +151,47 @@ namespace BrainAI.Pathfinding
         {
             if (points.Count == 1)
             {
-                return (points[0], true);
+                foreach (var point in points)
+                {
+                    return (point, true);
+                }
             }
+
             if (points.Count == 2)
             {
-                return (new Point((int)((points[0].X + points[1].X) / 2f), (int)((points[0].X + points[1].X) / 2f)), true);
+                Point? point1 = null;
+
+                foreach (var point in points)
+                {
+                    if (point1 == null)
+                    {
+                        point1 = point;
+                        continue;
+                    }
+
+                    return (new Point((int)((point1.Value.X + point.X) / 2f), (int)((point1.Value.Y + point.Y) / 2f)), true);
+                }
             }
 
             var cx = 0.0;
             var cy = 0.0;
-            var p2 = points[points.Count - 1];
             var totalAreaX2 = 0d;
             var basePoint = new Point(0, 0);
-            for (int i = 0; i < points.Count; i++)
+
+            Point? p2 = null;
+
+            foreach (var p3 in points)
             {
-                var p3 = points[i];
-                var areaX2 = PointMath.DoubledTriangleSquareBy3Dots(p3, basePoint, p2);
+                if (p2 == null)
+                {
+                    p2 = p3;
+                    continue;
+                }
+
+                var areaX2 = PointMath.DoubledTriangleSquareBy3Dots(p3, basePoint, p2.Value);
                 totalAreaX2 += areaX2;
-                cx += (p2.X + p3.X) * areaX2;
-                cy += (p2.Y + p3.Y) * areaX2;
+                cx += (p2.Value.X + p3.X) * areaX2;
+                cy += (p2.Value.Y + p3.Y) * areaX2;
                 p2 = p3;
             }
 
@@ -166,14 +201,8 @@ namespace BrainAI.Pathfinding
             return (new Point((int)(cx + 0.5), (int)(cy + 0.5)), (totalAreaX2 > 0));
         }
 
-        public static bool IsDirectionInsidePolygon(Point point, Point point2, List<Point> pointList, int pointIndex, double epsilon = 0.0001)
+        public static bool IsDirectionInsidePolygon(Point point, Point point2, Point pointPrev, Point pointNext, double epsilon = 0.0001)
         {
-            var pointPrevIndex = (pointIndex - 1 + pointList.Count) % pointList.Count;
-            var pointNextIndex = (pointIndex + 1) % pointList.Count;
-
-            var pointPrev = pointList[pointPrevIndex];
-            var pointNext = pointList[pointNextIndex];
-
             var leftAngle = PointMath.DoubledTriangleSquareBy3Dots(pointPrev, point, point2);
             var rightAngle = PointMath.DoubledTriangleSquareBy3Dots(point2, point, pointNext);
 

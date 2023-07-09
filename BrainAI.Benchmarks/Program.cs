@@ -19,10 +19,10 @@ public class Program
         AStarForStrightEdge
     }
 
-    [Params(10, 50, 100)]
+    [Params(/*10, 50, */100)]
     public int ArrayLength { get; set; }
 
-    [Params(PathfinderTypes.BFS, PathfinderTypes.Dijkstra, PathfinderTypes.AStar, PathfinderTypes.AStarForStrightEdge)]
+    [Params(/*PathfinderTypes.BFS, PathfinderTypes.Dijkstra, PathfinderTypes.AStar, */PathfinderTypes.AStarForStrightEdge)]
     public PathfinderTypes PathfinderType { get; set; }
 
     private IPathfinder<Point>? pathfinder;

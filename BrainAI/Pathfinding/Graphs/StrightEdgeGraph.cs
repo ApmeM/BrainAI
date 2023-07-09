@@ -182,15 +182,23 @@ namespace BrainAI.Pathfinding
                         // Log($"Skipping segment {point} - {point2}: Point {point2} is in ignore list");
                         continue;
                     }
-                    if (PointMath.IsDirectionInsidePolygon(point2, point, obstace2.points, point2Index))
+
+                    var point2Prev = obstace2.points[(point2Index - 1 + obstace2.points.Count) % obstace2.points.Count];
+                    var point2Next = obstace2.points[(point2Index + 1) % obstace2.points.Count];
+                    if (PointMath.IsDirectionInsidePolygon(point2, point, point2Prev, point2Next))
                     {
                         // Log($"Skipping segment {point} - {point2}: Directed inside poligon for {point2}");
                         continue;
                     }
-                    if (pointList != null && PointMath.IsDirectionInsidePolygon(point, point2, pointList, pointIndex))
+                    if (pointList != null)
                     {
-                        // Log($"Skipping segment {point} - {point2}: Directed inside poligon for {point}");
-                        continue;
+                        var pointPrev = pointList[(pointIndex - 1 + pointList.Count) % pointList.Count];
+                        var pointNext = pointList[(pointIndex + 1) % pointList.Count];
+                        if (PointMath.IsDirectionInsidePolygon(point, point2, pointPrev, pointNext))
+                        {
+                            // Log($"Skipping segment {point} - {point2}: Directed inside poligon for {point}");
+                            continue;
+                        }
                     }
 
                     // Need to test if line from point to point2 intersects any obstacles
