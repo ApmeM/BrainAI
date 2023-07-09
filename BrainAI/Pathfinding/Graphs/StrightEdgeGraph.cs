@@ -13,7 +13,8 @@ namespace BrainAI.Pathfinding
         internal readonly HashSet<int> obstacleDirty = new HashSet<int>();
 
         // It contains points that are concave or contained to another obstacle.
-        private HashSet<Point> pointsToIgnore = new HashSet<Point>();
+        private HashSet<(int, Point)> pointsToIgnoreConcave = new HashSet<(int, Point)>();
+        private HashSet<Point> pointsToIgnoreBlocked = new HashSet<Point>();
 
         private readonly Lookup<Point, Point> connections = new Lookup<Point, Point>(true);
 
@@ -28,7 +29,8 @@ namespace BrainAI.Pathfinding
             obstacleCenter.Clear();
             obstacleRadiusSquare.Clear();
             obstacleDirty.Clear();
-            pointsToIgnore.Clear();
+            pointsToIgnoreConcave.Clear();
+            pointsToIgnoreBlocked.Clear();
             connections.Clear();
         }
 
@@ -62,11 +64,40 @@ namespace BrainAI.Pathfinding
                     // ToDo: reverse;
                     throw new Exception($"Points should be in couter clockwise order.");
                 }
+
+                Point? pointPrev = null;
+                Point? point = null;
+                foreach (var pointNext in new ExtendedEnumerable<Point>(obstacles[obstacle], obstacles[obstacle].Count + 2))
+                {
+                    try
+                    {
+                        if (pointPrev == null)
+                        {
+                            continue;
+                        }
+
+                        if (PointMath.DoubledTriangleSquareBy3Dots(point.Value, pointPrev.Value, pointNext) > 0)
+                        {
+                            // Polygon is CCW - it is checked above
+                            // But the points is CW, which means the point is concave
+                            pointsToIgnoreConcave.Add((obstacle, point.Value));
+                        }
+                        else
+                        {
+                            pointsToIgnoreConcave.Remove((obstacle, point.Value));
+                        }
+                    }
+                    finally
+                    {
+                        pointPrev = point;
+                        point = pointNext;
+                    }
+                }
             }
 
             this.obstacleDirty.Clear();
             this.connections.Clear();
-            this.pointsToIgnore.Clear();
+            this.pointsToIgnoreBlocked.Clear();
             foreach (var obstacle in this.obstacles)
             {
                 UpdateObstacle(obstacle.Key);
@@ -86,7 +117,8 @@ namespace BrainAI.Pathfinding
                 foreach (var point2 in obstacle2)
                 {
                     if (
-                        pointsToIgnore.Contains(point2) ||
+                        pointsToIgnoreConcave.Contains((obstacle2.Key, point2)) ||
+                        pointsToIgnoreBlocked.Contains(point2) ||
                         PointMath.DistanceSquare(obstacleCenter[obstacle], point2) > obstacleRadiusSquare[obstacle] ||
                         !PointMath.PointWithinPolygon(obstacles[obstacle], point2))
                     {
@@ -95,7 +127,7 @@ namespace BrainAI.Pathfinding
 
 
                     Log($"Point {point2} is in new obstacle.");
-                    pointsToIgnore.Add(point2);
+                    pointsToIgnoreBlocked.Add(point2);
 
                     tempList.Clear();
                     foreach (var connection in connections[point2])
@@ -112,50 +144,32 @@ namespace BrainAI.Pathfinding
                 }
             }
 
-            // Find points that are concave or contained in another obstacle.
-            Point? pointPrev = null;
-            Point? point = null;
-
-            foreach (var pointNext in new ExtendedEnumerable<Point>(obstacles[obstacle], obstacles[obstacle].Count + 2))
+            // Find points that are contained in another obstacle.
+            foreach (var p in obstacles[obstacle])
             {
-                try
+                if (pointsToIgnoreConcave.Contains((obstacle, p)) ||
+                    pointsToIgnoreBlocked.Contains(p))
                 {
-                    if (pointPrev == null)
-                    {
-                        continue;
-                    }
-
-                    if (PointMath.DoubledTriangleSquareBy3Dots(point.Value, pointPrev.Value, pointNext) > 0)
-                    {
-                        // Polygon is CCW - it is checked in constructor
-                        // But the points is CW, which means the point is concave
-                        pointsToIgnore.Add(point.Value);
-                        continue;
-                    }
-
-                    foreach (var obstacle2 in this.obstacles)
-                    {
-                        // Current obstacle definitely has its points. No need to check it as all points will be ignored.
-                        if (obstacle2.Key == obstacle)
-                        {
-                            continue;
-                        }
-
-                        if (PointMath.DistanceSquare(obstacleCenter[obstacle2.Key], point.Value) > obstacleRadiusSquare[obstacle2.Key] ||
-                            !PointMath.PointWithinPolygon(obstacle2, point.Value))
-                        {
-                            continue;
-                        }
-
-                        Log($"New point {point} is in old obstacle.");
-                        pointsToIgnore.Add(point.Value);
-                        break;
-                    }
+                    continue;
                 }
-                finally
+
+                foreach (var obstacle2 in this.obstacles)
                 {
-                    pointPrev = point;
-                    point = pointNext;
+                    // Current obstacle definitely has its points. No need to check it as all points will be ignored.
+                    if (obstacle2.Key == obstacle)
+                    {
+                        continue;
+                    }
+
+                    if (PointMath.DistanceSquare(obstacleCenter[obstacle2.Key], p) > obstacleRadiusSquare[obstacle2.Key] ||
+                        !PointMath.PointWithinPolygon(obstacle2, p))
+                    {
+                        continue;
+                    }
+
+                    Log($"New point {p} is in old obstacle.");
+                    pointsToIgnoreBlocked.Add(p);
+                    break;
                 }
             }
 
@@ -170,7 +184,8 @@ namespace BrainAI.Pathfinding
 
                 foreach (var point2 in obstacle2)
                 {
-                    if (pointsToIgnore.Contains(point2))
+                    if (pointsToIgnoreConcave.Contains((obstacle2.Key, point2)) ||
+                        pointsToIgnoreBlocked.Contains(point2))
                     {
                         continue;
                     }
@@ -194,8 +209,8 @@ namespace BrainAI.Pathfinding
                 }
             }
 
-            pointPrev = null;
-            point = null;
+            Point? pointPrev = null;
+            Point? point = null;
             // connect the obstacle's points with all nearby points.
             foreach (var pointNext in new ExtendedEnumerable<Point>(obstacles[obstacle], obstacles[obstacle].Count + 2))
             {
@@ -206,12 +221,13 @@ namespace BrainAI.Pathfinding
                         continue;
                     }
 
-                    if (pointsToIgnore.Contains(point.Value))
+                    if (pointsToIgnoreConcave.Contains((obstacle, point.Value)) ||
+                        pointsToIgnoreBlocked.Contains(point.Value))
                     {
                         continue;
                     }
 
-                    FindConnections(point.Value, pointPrev, pointNext, this.connections);
+                    FindConnections(obstacle, point.Value, pointPrev, pointNext, this.connections);
 
                     Log($"New point {point} have {this.connections[point.Value].Count} connections: {(string.Join(",", this.connections[point.Value]))}");
                 }
@@ -221,6 +237,7 @@ namespace BrainAI.Pathfinding
                     point = pointNext;
                 }
             }
+
             Log("Total connections: " + this.connections.Sum(a => ((Lookup<Point, Point>.Enumerable)a).Count));
             Log(string.Join("\n", this.connections.Select(a => $"From {a.Key} to " + string.Join(",", a))));
         }
@@ -231,11 +248,12 @@ namespace BrainAI.Pathfinding
         private PointWrapper wrapper = new PointWrapper();
         private Comparison<int> sortByDistance;
 
-        private void FindConnections(Point point, Point? pointPrev, Point? pointNext, Lookup<Point, Point> reachablepoints)
+        private void FindConnections(int obstacle, Point point, Point? pointPrev, Point? pointNext, Lookup<Point, Point> reachablepoints)
         {
             // Test to see if it's ok to ignore this point since it's
             // concave (inward-pointing) or it's contained by an obstacle.
-            if (pointsToIgnore.Contains(point))
+            if (pointsToIgnoreConcave.Contains((obstacle, point)) ||
+                pointsToIgnoreBlocked.Contains(point))
             {
                 return;
             }
@@ -271,7 +289,8 @@ namespace BrainAI.Pathfinding
                             Log($"Skipping segment {point} - {point2}: Same point");
                             continue;
                         }
-                        if (pointsToIgnore.Contains(point2.Value))
+                        if (pointsToIgnoreConcave.Contains((obstacle2.Key, point2.Value)) ||
+                            pointsToIgnoreBlocked.Contains(point2.Value))
                         {
                             Log($"Skipping segment {point} - {point2}: Point {point2} is in ignore list");
                             continue;
@@ -348,7 +367,7 @@ namespace BrainAI.Pathfinding
             this.ApplyChanges();
             this.tempConnections.Clear();
             // Connect the startpoint to its reachable points and vice versa
-            this.FindConnections(start, null, null, this.tempConnections);
+            this.FindConnections(int.MinValue, start, null, null, this.tempConnections);
             Log($"For start ({start}) found {this.tempConnections[start].Count} items: {string.Join(",", this.tempConnections[start])}");
             foreach (var end in ends)
             {
@@ -372,7 +391,7 @@ namespace BrainAI.Pathfinding
                 else
                 {
                     // Connect the endpoint to its reachable points and vice versa
-                    this.FindConnections(end, null, null, this.tempConnections);
+                    this.FindConnections(int.MinValue, end, null, null, this.tempConnections);
                     Log($"For end ({end})found {this.tempConnections[end].Count} items: {string.Join(",", this.tempConnections[end])}");
                 }
             }

@@ -22,7 +22,7 @@ namespace BrainAI.Pathfinding
         public void SingleObstacle()
         {
             var graph = new StrightEdgeGraph();
-graph.needLog = true;
+
             graph.AddPoint(1, new Point(200, 300));
             graph.AddPoint(1, new Point(1000, 300));
             graph.AddPoint(1, new Point(1000, 500));

@@ -55,30 +55,17 @@ public class Program
                 {
                     var graph = new StrightEdgeGraph();
 
-                    for (var i = 0; i < ArrayLength / 2; i++)
+                    for (var j = 0; j < ArrayLength / 4; j++)
                     {
-                        var j = i / 2;
-                        switch (i % 2)
-                        {
-                            case 0:
-                                graph.AddObstacle(
-                                    new List<Point>{
-                                        new Point(j*4 + 0 + 0, j*4 + 0 + 1),
-                                        new Point(j*4 + 2 + 0, j*4 + 0 + 1),
-                                        new Point(j*4 + 2 + 0, j*4 + ArrayLength + 1),
-                                        new Point(j*4 + 0 + 0, j*4 + ArrayLength + 1),
-                                    });
-                                break;
-                            case 1:
-                                graph.AddObstacle(
-                                    new List<Point>{
-                                        new Point(j*4 + 0 + 3, j*4 + 0 + 2),
-                                        new Point(j*4 + 2 + 3, j*4 + 0 + 2),
-                                        new Point(j*4 + 2 + 3, j*4 + 2 + 2),
-                                        new Point(j*4 + 0 + 3, j*4 + 2 + 2),
-                                    });
-                                break;
-                        }
+                        graph.AddPoint(j * 2, new Point(j * 4 + 0 + 0, j * 4 + 0 + 1));
+                        graph.AddPoint(j * 2, new Point(j * 4 + 2 + 0, j * 4 + 0 + 1));
+                        graph.AddPoint(j * 2, new Point(j * 4 + 2 + 0, j * 4 + ArrayLength + 1));
+                        graph.AddPoint(j * 2, new Point(j * 4 + 0 + 0, j * 4 + ArrayLength + 1));
+
+                        graph.AddPoint(j * 2 + 1, new Point(j * 4 + 0 + 3, j * 4 + 0 + 2));
+                        graph.AddPoint(j * 2 + 1, new Point(j * 4 + ArrayLength + 3, j * 4 + 0 + 2));
+                        graph.AddPoint(j * 2 + 1, new Point(j * 4 + ArrayLength + 3, j * 4 + 2 + 2));
+                        graph.AddPoint(j * 2 + 1, new Point(j * 4 + 0 + 3, j * 4 + 2 + 2));
                     }
 
                     this.pathfinder = new AStarPathfinder<Point>(graph);
