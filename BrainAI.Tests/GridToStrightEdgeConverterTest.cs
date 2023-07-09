@@ -12,7 +12,9 @@
         {
             var grid = new GridGraph(5, 5);
             grid.Walls.Add(new Point(2, 2));
-            var result = GridToStrightEdgeConverter.BuildGraph(grid).obstacles;
+            var graph = new StrightEdgeGraph();
+            GridToStrightEdgeConverter.Default.BuildGraph(grid, graph);
+            var result = graph.obstacles;
             Assert.AreEqual(4, result[0].points.Count);
             Assert.AreEqual(new Point(2, 2), result[0].points[0]);
             Assert.AreEqual(new Point(3, 2), result[0].points[1]);
@@ -26,7 +28,9 @@
             var grid = new GridGraph(5, 5);
             grid.Walls.Add(new Point(2, 2));
             grid.Walls.Add(new Point(2, 3));
-            var result = GridToStrightEdgeConverter.BuildGraph(grid).obstacles;
+            var graph = new StrightEdgeGraph();
+            GridToStrightEdgeConverter.Default.BuildGraph(grid, graph);
+            var result = graph.obstacles;
             Assert.AreEqual(4, result[0].points.Count);
             Assert.AreEqual(new Point(2, 2), result[0].points[0]);
             Assert.AreEqual(new Point(3, 2), result[0].points[1]);
@@ -40,7 +44,9 @@
             var grid = new GridGraph(5, 5);
             grid.Walls.Add(new Point(2, 2));
             grid.Walls.Add(new Point(2, 1));
-            var result = GridToStrightEdgeConverter.BuildGraph(grid).obstacles;
+            var graph = new StrightEdgeGraph();
+            GridToStrightEdgeConverter.Default.BuildGraph(grid, graph);
+            var result = graph.obstacles;
             Assert.AreEqual(4, result[0].points.Count);
             Assert.AreEqual(new Point(2, 1), result[0].points[0]);
             Assert.AreEqual(new Point(3, 1), result[0].points[1]);
@@ -54,7 +60,9 @@
             var grid = new GridGraph(5, 5);
             grid.Walls.Add(new Point(2, 2));
             grid.Walls.Add(new Point(3, 2));
-            var result = GridToStrightEdgeConverter.BuildGraph(grid).obstacles;
+            var graph = new StrightEdgeGraph();
+            GridToStrightEdgeConverter.Default.BuildGraph(grid, graph);
+            var result = graph.obstacles;
             Assert.AreEqual(4, result[0].points.Count);
             Assert.AreEqual(new Point(2, 2), result[0].points[0]);
             Assert.AreEqual(new Point(4, 2), result[0].points[1]);
@@ -68,7 +76,9 @@
             var grid = new GridGraph(5, 5);
             grid.Walls.Add(new Point(2, 2));
             grid.Walls.Add(new Point(1, 2));
-            var result = GridToStrightEdgeConverter.BuildGraph(grid).obstacles;
+            var graph = new StrightEdgeGraph();
+            GridToStrightEdgeConverter.Default.BuildGraph(grid, graph);
+            var result = graph.obstacles;
             Assert.AreEqual(4, result[0].points.Count);
             Assert.AreEqual(new Point(3, 2), result[0].points[0]);
             Assert.AreEqual(new Point(3, 3), result[0].points[1]);
@@ -82,8 +92,9 @@
             var grid = new GridGraph(5, 5);
             grid.Walls.Add(new Point(2, 2));
             grid.Walls.Add(new Point(4, 2));
-            var result = GridToStrightEdgeConverter.BuildGraph(grid).obstacles;
-            System.Console.WriteLine(string.Join(",", result[0].points));
+            var graph = new StrightEdgeGraph();
+            GridToStrightEdgeConverter.Default.BuildGraph(grid, graph);
+            var result = graph.obstacles;
             Assert.AreEqual(2, result.Count);
             Assert.AreEqual(4, result[0].points.Count);
             Assert.AreEqual(new Point(4, 2), result[0].points[0]);
@@ -105,7 +116,9 @@
             grid.Walls.Add(new Point(3, 2));
             grid.Walls.Add(new Point(2, 3));
             grid.Walls.Add(new Point(3, 3));
-            var result = GridToStrightEdgeConverter.BuildGraph(grid).obstacles;
+            var graph = new StrightEdgeGraph();
+            GridToStrightEdgeConverter.Default.BuildGraph(grid, graph);
+            var result = graph.obstacles;
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual(4, result[0].points.Count);
             Assert.AreEqual(new Point(2, 2), result[0].points[0]);
@@ -122,7 +135,9 @@
             grid.Walls.Add(new Point(3, 2));
             grid.Walls.Add(new Point(2, 3));
             grid.Walls.Add(new Point(3, 3));
-            var result = GridToStrightEdgeConverter.BuildGraph(grid, 10).obstacles;
+            var graph = new StrightEdgeGraph();
+            GridToStrightEdgeConverter.Default.BuildGraph(grid, graph, 10);
+            var result = graph.obstacles;
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual(4, result[0].points.Count);
             Assert.AreEqual(new Point(20, 20), result[0].points[0]);
@@ -148,8 +163,9 @@
             grid.Walls.Add(new Point(3, 6));
             grid.Walls.Add(new Point(2, 7));
             grid.Walls.Add(new Point(3, 7));
-            var result = GridToStrightEdgeConverter.BuildGraph(grid).obstacles;
-            System.Console.WriteLine(string.Join(",", result[0].points));
+            var graph = new StrightEdgeGraph();
+            GridToStrightEdgeConverter.Default.BuildGraph(grid, graph);
+            var result = graph.obstacles;
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual(12, result[0].points.Count);
             Assert.AreEqual(new Point(2, 2), result[0].points[0]);

@@ -4,14 +4,17 @@ using System.Linq;
 
 namespace BrainAI.Pathfinding
 {
-    public static class GridToStrightEdgeConverter
+    public class GridToStrightEdgeConverter
     {
-        public static StrightEdgeGraph BuildGraph(GridGraph graph, int scale = 1)
-        {
-            var result = new StrightEdgeGraph();
-            var list = new LinkedList<Point>();
-            var visited = new HashSet<Point>();
+        public static GridToStrightEdgeConverter Default = new GridToStrightEdgeConverter();
 
+        private LinkedList<Point> list = new LinkedList<Point>();
+        private HashSet<Point> visited = new HashSet<Point>();
+
+        public void BuildGraph(GridGraph graph, StrightEdgeGraph result, int scale = 1)
+        {
+            visited.Clear();
+            
             foreach (var wall in graph.Walls)
             {
                 if (visited.Contains(wall))
@@ -39,8 +42,6 @@ namespace BrainAI.Pathfinding
 
                 result.AddObstacle(points);
             }
-
-            return result;
         }
 
         private static void Scale(List<Point> list, int scale)

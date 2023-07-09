@@ -22,8 +22,11 @@ namespace BrainAI.Pathfinding
 
         public void AddObstacle(List<Point> points)
         {
-            var obstacle = new StrightEdgeObstacle(points);
+            this.AddObstacle(new StrightEdgeObstacle(points));
+        }
 
+        internal void AddObstacle(StrightEdgeObstacle obstacle)
+        {
             // Any points that may be contained need to be marked as so.
             foreach (var obstacle2 in obstacles)
             {

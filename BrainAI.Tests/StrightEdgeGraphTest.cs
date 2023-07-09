@@ -87,7 +87,8 @@ namespace BrainAI.Pathfinding
             grid.Walls.Add(new Point(3, 4));
             grid.Walls.Add(new Point(2, 4));
             grid.Walls.Add(new Point(2, 3));
-            var graph = GridToStrightEdgeConverter.BuildGraph(grid, 10);
+            var graph = new StrightEdgeGraph();
+            GridToStrightEdgeConverter.Default.BuildGraph(grid, graph, 10);
             Assert.AreEqual(1, graph.obstacles.Count);
             Assert.AreEqual(10, graph.obstacles[0].points.Count);
 
@@ -117,7 +118,8 @@ namespace BrainAI.Pathfinding
             grid.Walls.Add(new Point(2, 0));
             grid.Walls.Add(new Point(1, 0));
             grid.Walls.Add(new Point(2, 1));
-            var graph = GridToStrightEdgeConverter.BuildGraph(grid, 10);
+            var graph = new StrightEdgeGraph();
+            GridToStrightEdgeConverter.Default.BuildGraph(grid, graph, 10);
             Assert.AreEqual(1, graph.obstacles.Count);
 
             var start = new Point(15, 15);
@@ -151,7 +153,8 @@ namespace BrainAI.Pathfinding
             grid.Walls.Add(new Point(2, 0));
             grid.Walls.Add(new Point(1, 0));
             grid.Walls.Add(new Point(2, 1));
-            var graph = GridToStrightEdgeConverter.BuildGraph(grid, 10);
+            var graph = new StrightEdgeGraph();
+            GridToStrightEdgeConverter.Default.BuildGraph(grid, graph, 10);
             Assert.AreEqual(1, graph.obstacles.Count);
 
             var start = new Point(-5, 15);
@@ -185,7 +188,8 @@ namespace BrainAI.Pathfinding
             grid.Walls.Add(new Point(2, 0));
             grid.Walls.Add(new Point(1, 0));
             grid.Walls.Add(new Point(2, 1));
-            var graph = GridToStrightEdgeConverter.BuildGraph(grid, 10);
+            var graph = new StrightEdgeGraph();
+            GridToStrightEdgeConverter.Default.BuildGraph(grid, graph, 10);
             Assert.AreEqual(1, graph.obstacles.Count);
 
             var start = new Point(15, 15);

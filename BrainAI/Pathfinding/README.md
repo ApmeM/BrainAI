@@ -63,26 +63,25 @@ If no valid path is found null is returned.
 Breadth First Search is well suited for graphs that have uniform traversal cost between edges.
 
 To implement Breadth First Search all you have to do is satisfy the single-method interface `IUnweightedGraph<T>`. 
-The `UnweightedGraph<T>` is a concrete implementation that you can use as well (an example is below). 
-The `UnweightedGridGraph` is also a concrete implementation that can be used directly or as a starting point for grid based graphs. 
 
 Lets take a look at a functional example of a node based graph of plain old strings. 
 This illustrates how pathfinding can be used to solve non-spatial based problems.
+The `EdgesGraph` used in the example is a concrete implementation that can be used directly or as a starting point for grid based graphs. 
 
 
 ```csharp
-// create an UnweightedGraph with strings as nodes
-var graph = new UnweightedGraph<string>();
+// Create an UnweightedGraph with strings as nodes
+var graph = new EdgesGraph<string>();
 	
-// add a set of 5 nodes and edges for each
-graph.Edges["a"] = new string[] { "b" }; // a→b
-graph.Edges["b"] = new string[] { "a", "c", "d" }; // b→a, b→c, b→d
-graph.Edges["c"] = new string[] { "a" }; // c→a
-graph.Edges["d"] = new string[] { "e", "a" }; // d→e, d→a
-graph.Edges["e"] = new string[] { "b" }; // e→b
+// Add a set of 5 nodes and edges for each
+graph.Edges["a"] = new List<string> { "b" }; // a→b
+graph.Edges["b"] = new List<string> { "a", "c", "d" }; // b→a, b→c, b→d
+graph.Edges["c"] = new List<string> { "a" }; // c→a
+graph.Edges["d"] = new List<string> { "e", "a" }; // d→e, d→a
+graph.Edges["e"] = new List<string> { "b" }; // e→b
 
-// calculate a path from "c" to "e". The result is c→a→b→d→e, which we can confirm by looking at the edge comments above.
-var path = new BreadthFirstPathfinder(graph).Search("c", "e" );
+// Calculate a path from "c" to "e". The result is c→a→b→d→e, which we can confirm by looking at the edge comments above.
+var path = new BreadthFirstPathfinder<string>(graph).Search("c", "e" );
 ```
 
 
@@ -94,24 +93,26 @@ The algorithm will ask you for a cost to get from one node to another and you ca
 It will then use the information to find not a only a path to the goal but the lowest cost path.
 
 To implement Dijkstra you have to provide a graph that implements the interface `IWeightedGraph<T>`. 
-The `WeightedGridGraph` is a concrete implementation that can be used directly or as a starting point for grid based graphs. 
 
-Below is an example of using the `WeightedGridGraph`. 
+The `GridGraph` is another concrete implementation that can be used directly. 
+Below is an example of using the `WeightedPathfinder` for `GridGraph`. 
 
 ```csharp
 
-var graph = new WeightedGridGraph();
+var graph = new GridGraph();
 
-// add some weighted nodes
-graph.WeightedNodes.Add( new Point( 3, 3 ) );
-graph.WeightedNodes.Add( new Point( 3, 4 ) );
-graph.WeightedNodes.Add( new Point( 4, 3 ) );
-graph.WeightedNodes.Add( new Point( 4, 4 ) );
+graph.DefaultWeight = 2;
+
+graph.Weights[new Point( 3, 3 )] = 5;
+graph.Weights[new Point( 3, 4 )] = 5;
+graph.Weights[new Point( 4, 3 )] = 5;
+graph.Weights[new Point( 4, 4 )] = 5;
+
 graph.Walls.Add(new Point(4, 5))
 graph.Walls.Add(new Point(5, 5))
 
-// calculate the path
-var path = new WeightedPathfinder(graph).Search( new Point( 3, 4 ), new Point( 7, 7 ) );
+// Calculate the path
+var path = new WeightedPathfinder<Point>(graph).Search( new Point( 3, 4 ), new Point( 7, 7 ) );
 ```
 
 
@@ -123,24 +124,15 @@ The algorithm will ask you for a cost to get from one node to another and you ca
 It will then use the information to find not a only a path to the goal but the lowest cost path.
 
 To implement Astar you have to provide a graph that implements the interface `IAstarGraph<T>`.
-The `AstarGridGraph` is a concrete implementation that can be used directly or as a starting point for grid based graphs. 
 
-Below is an example of using the `AstarGridGraph`. 
+Below is an example of using the `AstarPathfinder` for `GridGraph`. 
 
-# Graphs
-
-3 types of graphs available out of the box:
-
-- GridGraph - Graph represents a 2d array (not really implemente this way). Each point is connected to its neighbours to the left/right/up/down and diagonals (if enabled). Have a natural borders of 0 x 0 to Width x Height. Walls are specified in a HashSet.
-- EdgesGraph - Basic graph with vertices and edges. Each verticle can be connected with any number of other points by the directed edges. This graph can not be used in AStar pathfinder as there is no way to specify heuristic calculation for base type.
-- EdgesPointGraph - Extension for EdgesGraph that as a vertex use Point class. In this case heuristic can easily be calculated with a manhatten distance and can be used in AStar pathfinder.
-- StrightEdgeGraph - graph that can be built using polygon obstacles on a map. Connections between polygon points are built automatically and the final path is built to avoid obstacles intersection.
 
 ```csharp
 
-var graph = new AstarGridGraph();
+var graph = new GridGraph();
 
-// add some weighted nodes
+// Add some weighted nodes
 graph.WeightedNodes.Add( new Point( 3, 3 ) );
 graph.WeightedNodes.Add( new Point( 3, 4 ) );
 graph.WeightedNodes.Add( new Point( 4, 3 ) );
@@ -148,7 +140,72 @@ graph.WeightedNodes.Add( new Point( 4, 4 ) );
 graph.Walls.Add(new Point(4, 5))
 graph.Walls.Add(new Point(5, 5))
 
-// calculate the path
-var path = new AstarPathfinder(graph).Search( new Point( 3, 4 ), new Point( 7, 7 ) );
+// Calculate the path
+var path = new AstarPathfinder<Point>(graph).Search( new Point( 3, 4 ), new Point( 7, 7 ) );
 ```
 
+
+# Graphs
+
+4 types of graphs available out of the box:
+
+- GridGraph - Graph represents a 2d array (not really implemented this way). Each point is connected to its neighbours to the left/right/up/down and diagonals (if enabled). Have a natural borders of 0 x 0 to Width x Height. Walls are specified in a HashSet.
+- EdgesGraph - Basic graph with vertices and edges. Each verticle can be connected with any number of other points by the directed edges. This graph can not be used in AStar pathfinder as there is no way to specify heuristic calculation for base type.
+- EdgesPointGraph - Extension for EdgesGraph that as a vertex use Point class. In this case heuristic can easily be calculated with a manhatten distance and can be used in AStar pathfinder.
+- StrightEdgeGraph - graph that can be built using polygon obstacles on a map. Connections between polygon points are built automatically and the final path is built to avoid obstacles intersection.
+
+Usage examples for `GridGraph`, `EdgesGraph` and `EdgesPointGraph` can be found above.
+
+Below is the usage example for `StrightEdgeGraph`
+
+```csharp
+
+var graph = new StrightEdgeGraph();
+
+// Add some obstacles
+graph.AddObstacle(
+    new List<Point>{
+            new Point( 200, 300),
+            new Point(1000, 300),
+            new Point(1000, 500),
+            new Point( 200, 500),
+        });
+
+// Calculate the path
+var path = new AstarPathfinder<Point>(graph).Search( new Point( 100, 100 ), new Point( 900, 900 ) );
+// The result will be: 100x100, 200x500, 900x900
+```
+
+It is also possible to create `StrightEdgeGraph` from `GridGraph` as all the necessary information is available there:
+
+```csharp
+
+// Generating grid graph that looks like this:
+// #####
+// #   #
+// # # #
+// #####
+var grid = new GridGraph(5, 5);
+grid.Walls.Add(new Point(0, 0));
+grid.Walls.Add(new Point(0, 1));
+grid.Walls.Add(new Point(0, 2));
+grid.Walls.Add(new Point(0, 3));
+grid.Walls.Add(new Point(1, 3));
+grid.Walls.Add(new Point(2, 3));
+grid.Walls.Add(new Point(3, 3));
+grid.Walls.Add(new Point(4, 3));
+grid.Walls.Add(new Point(4, 2));
+grid.Walls.Add(new Point(4, 1));
+grid.Walls.Add(new Point(4, 0));
+grid.Walls.Add(new Point(3, 0));
+grid.Walls.Add(new Point(2, 0));
+grid.Walls.Add(new Point(1, 0));
+grid.Walls.Add(new Point(2, 1));
+
+// Convert grid graph to stright edge graph where each # converted to square 10x10
+var graph = new StrightEdgeGraph();
+GridToStrightEdgeConverter.Default.BuildGraph(grid, graph, 10);
+
+var pathData = new AStarPathfinder<Point>(graph).Search(new Point(15, 15), new Point(35, 15));
+// The result will be: 15x15, 20x20, 30x200, 35x15
+```
