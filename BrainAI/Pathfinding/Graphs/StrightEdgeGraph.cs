@@ -60,36 +60,44 @@ namespace BrainAI.Pathfinding
             }
 
             // Find points that are concave or contained in another obstacle.
-            for (int pointIndex = 0; pointIndex < obstacle.points.Count; pointIndex++)
+            Point? pointPrev = null;
+            Point? point = null;
+
+            foreach (var pointNext in new ExtendedEnumerable<Point>(obstacle.points, obstacle.points.Count + 2))
             {
-                Point point = obstacle.points[pointIndex];
-                // Find concave points
-                var pointPrevIndex = (pointIndex - 1 + obstacle.points.Count) % obstacle.points.Count;
-                var pointNextIndex = (pointIndex + 1) % obstacle.points.Count;
-
-                var pointPrev = obstacle.points[pointPrevIndex];
-                var pointNext = obstacle.points[pointNextIndex];
-
-                if (PointMath.DoubledTriangleSquareBy3Dots(point, pointPrev, pointNext) > 0)
+                try
                 {
-                    // Polygon is CCW - it is checked in constructor
-                    // But the points is CW, which means the point is concave
-                    pointsToIgnore.Add(point);
-                    continue;
-                }
-
-                foreach (var obstacle2 in this.obstacles)
-                {
-                    if (
-                        PointMath.DistanceSquare(obstacle2.center, point) > obstacle2.radiusSq ||
-                        !PointMath.PointWithinPolygon(obstacle2.points, point))
+                    if (pointPrev == null)
                     {
                         continue;
                     }
 
-                    Log($"New point {point} is in old obstacle.");
-                    pointsToIgnore.Add(point);
-                    break;
+                    if (PointMath.DoubledTriangleSquareBy3Dots(point.Value, pointPrev.Value, pointNext) > 0)
+                    {
+                        // Polygon is CCW - it is checked in constructor
+                        // But the points is CW, which means the point is concave
+                        pointsToIgnore.Add(point.Value);
+                        continue;
+                    }
+
+                    foreach (var obstacle2 in this.obstacles)
+                    {
+                        if (
+                            PointMath.DistanceSquare(obstacle2.center, point.Value) > obstacle2.radiusSq ||
+                            !PointMath.PointWithinPolygon(obstacle2.points, point.Value))
+                        {
+                            continue;
+                        }
+
+                        Log($"New point {point} is in old obstacle.");
+                        pointsToIgnore.Add(point.Value);
+                        break;
+                    }
+                }
+                finally
+                {
+                    pointPrev = point;
+                    point = pointNext;
                 }
             }
 
@@ -125,18 +133,32 @@ namespace BrainAI.Pathfinding
             Log($"Adding new obstacle to the graph.");
             this.obstacles.Add(obstacle);
 
+            pointPrev = null;
+            point = null;
             // connect the obstacle's points with all nearby points.
-            for (int pointIndex = 0; pointIndex < obstacle.points.Count; pointIndex++)
+            foreach (var pointNext in new ExtendedEnumerable<Point>(obstacle.points, obstacle.points.Count + 2))
             {
-                Point point = obstacle.points[pointIndex];
-                if (pointsToIgnore.Contains(point))
+                try
                 {
-                    continue;
+                    if (pointPrev == null)
+                    {
+                        continue;
+                    }
+
+                    if (pointsToIgnore.Contains(point.Value))
+                    {
+                        continue;
+                    }
+
+                    FindConnections(point.Value, pointPrev, pointNext, this.connections);
+
+                    Log($"New point {point} have {this.connections.Find(point.Value).Count()} connections: {(string.Join(",", this.connections.Find(point.Value)))}");
                 }
-
-                FindConnections(point, obstacle.points, pointIndex, this.connections);
-
-                Log($"New point {point} have {this.connections.Find(point).Count()} connections: {(string.Join(",", this.connections.Find(point)))}");
+                finally
+                {
+                    pointPrev = point;
+                    point = pointNext;
+                }
             }
             Log("Total connections: " + this.connections.Sum(a => a.Count()));
             Log(string.Join("\n", this.connections.Select(a => $"From {a.Key} to " + string.Join(",", a))));
@@ -148,7 +170,7 @@ namespace BrainAI.Pathfinding
         private PointWrapper wrapper = new PointWrapper();
         private Comparison<StrightEdgeObstacle> sortByDistance;
 
-        private void FindConnections(Point point, List<Point> pointList, int pointIndex, Lookup<Point, Point> reachablepoints)
+        private void FindConnections(Point point, Point? pointPrev, Point? pointNext, Lookup<Point, Point> reachablepoints)
         {
             // Test to see if it's ok to ignore this point since it's
             // concave (inward-pointing) or it's contained by an obstacle.
@@ -167,57 +189,66 @@ namespace BrainAI.Pathfinding
 
             // Test the point for straight lines to points in other
             // polygons (including obstacle itself).
-            foreach (var obstace2 in obstacles)
+            foreach (var obstacle2 in obstacles)
             {
-                for (int point2Index = 0; point2Index < obstace2.points.Count; point2Index++)
+                Point? point2Prev = null;
+                Point? point2 = null;
+                // connect the obstacle's points with all nearby points.
+                foreach (var point2Next in new ExtendedEnumerable<Point>(obstacle2.points, obstacle2.points.Count + 2))
                 {
-                    Point point2 = obstace2.points[point2Index];
-                    if (point2.Equals(point))
+                    try
                     {
-                        // Log($"Skipping segment {point} - {point2}: Same point");
-                        continue;
-                    }
-                    if (pointsToIgnore.Contains(point2))
-                    {
-                        // Log($"Skipping segment {point} - {point2}: Point {point2} is in ignore list");
-                        continue;
-                    }
-
-                    var point2Prev = obstace2.points[(point2Index - 1 + obstace2.points.Count) % obstace2.points.Count];
-                    var point2Next = obstace2.points[(point2Index + 1) % obstace2.points.Count];
-                    if (PointMath.IsDirectionInsidePolygon(point2, point, point2Prev, point2Next))
-                    {
-                        // Log($"Skipping segment {point} - {point2}: Directed inside poligon for {point2}");
-                        continue;
-                    }
-                    if (pointList != null)
-                    {
-                        var pointPrev = pointList[(pointIndex - 1 + pointList.Count) % pointList.Count];
-                        var pointNext = pointList[(pointIndex + 1) % pointList.Count];
-                        if (PointMath.IsDirectionInsidePolygon(point, point2, pointPrev, pointNext))
+                        if (point2Prev == null)
                         {
-                            // Log($"Skipping segment {point} - {point2}: Directed inside poligon for {point}");
                             continue;
                         }
-                    }
 
-                    // Need to test if line from point to point2 intersects any obstacles
-                    var found = true;
-                    foreach (var obstacle3 in obstacles)
-                    {
-                        if (PointMath.SegmentIntersectCircle(point, point2, obstacle3.center, obstacle3.radiusSq) &&
-                            PointMath.SegmentIntersectsPolygon(obstacle3.points, point, point2, true))
+                        if (point2.Equals(point))
                         {
-                            // Log($"Checking segment {point} - {point2}: Another obstacle intersects.");
-                            found = false;
-                            break;
+                            Log($"Skipping segment {point} - {point2}: Same point");
+                            continue;
+                        }
+                        if (pointsToIgnore.Contains(point2.Value))
+                        {
+                            Log($"Skipping segment {point} - {point2}: Point {point2} is in ignore list");
+                            continue;
+                        }
+                        if (PointMath.IsDirectionInsidePolygon(point2.Value, point, point2Prev.Value, point2Next))
+                        {
+                            Log($"Skipping segment {point} - {point2}: Directed inside poligon for {point2}");
+                            continue;
+                        }
+                        if (pointPrev != null && pointNext != null &&
+                            PointMath.IsDirectionInsidePolygon(point, point2.Value, pointPrev.Value, pointNext.Value))
+                        {
+                            Log($"Skipping segment {point} - {point2}: Directed inside poligon for {point}");
+                            continue;
+                        }
+
+                        // Need to test if line from point to point2 intersects any obstacles
+                        var found = true;
+                        foreach (var obstacle3 in obstacles)
+                        {
+                            if (PointMath.SegmentIntersectCircle(point, point2.Value, obstacle3.center, obstacle3.radiusSq) &&
+                                PointMath.SegmentIntersectsPolygon(obstacle3.points, point, point2.Value, true))
+                            {
+                                Log($"Checking segment {point} - {point2}: Another obstacle intersects.");
+                                found = false;
+                                break;
+                            }
+                        }
+
+                        if (found)
+                        {
+                            reachablepoints.Add(point, point2.Value);
+                            reachablepoints.Add(point2.Value, point);
                         }
                     }
-
-                    if (found)
+                    finally
                     {
-                        reachablepoints.Add(point, point2);
-                        reachablepoints.Add(point2, point);
+                        point2Prev = point2;
+                        point2 = point2Next;
+
                     }
                 }
             }
@@ -253,7 +284,7 @@ namespace BrainAI.Pathfinding
         {
             this.tempConnections.Clear();
             // Connect the startpoint to its reachable points and vice versa
-            this.FindConnections(start, null, 0, this.tempConnections);
+            this.FindConnections(start, null, null, this.tempConnections);
             Log($"For start ({start}) found {this.tempConnections.Find(start).Count()} items: {string.Join(",", this.tempConnections.Find(start))}");
             foreach (var end in ends)
             {
@@ -277,7 +308,7 @@ namespace BrainAI.Pathfinding
                 else
                 {
                     // Connect the endpoint to its reachable points and vice versa
-                    this.FindConnections(end, null, 0, this.tempConnections);
+                    this.FindConnections(end, null, null, this.tempConnections);
                     Log($"For end ({end})found {this.tempConnections.Find(end).Count()} items: {string.Join(",", this.tempConnections.Find(end))}");
                 }
             }
@@ -286,7 +317,7 @@ namespace BrainAI.Pathfinding
 
             Log("-=-=-=-=-=-=-");
         }
-        bool needLog = false;
+        public bool needLog = false;
         [Conditional("DEBUG")]
         private void Log(string text)
         {

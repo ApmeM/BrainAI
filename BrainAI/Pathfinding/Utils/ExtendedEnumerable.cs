@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections;
+using System;
 
 namespace BrainAI.Pathfinding
 {
@@ -19,8 +20,10 @@ namespace BrainAI.Pathfinding
             return new Enumerator(baseEnumerable, total);
         }
 
+        [Obsolete("Use GetEnumerator instead. This method requires boxing and allocates memory.")]
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+        [Obsolete("Use GetEnumerator instead. This method requires boxing and allocates memory.")]
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
 
         public struct Enumerator : IEnumerator<T>
@@ -40,8 +43,8 @@ namespace BrainAI.Pathfinding
             }
 
 
+            [Obsolete("Use Current instead. This method requires boxing and allocates memory.")]
             object IEnumerator.Current => Current;
-            T IEnumerator<T>.Current => Current;
 
             public void Dispose()
             {
