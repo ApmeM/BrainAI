@@ -1,5 +1,6 @@
 ﻿namespace BrainAI.Tests
 {
+    using System.Collections.Generic;
     using System.Linq;
     using BrainAI.Pathfinding;
 
@@ -8,53 +9,56 @@
     [TestFixture]
     public class LookupTest
     {
-        private Pathfinding.Lookup<Point, Point> lookup;
-
-        [SetUp]
-        public void Setup()
-        {
-            this.lookup = new Pathfinding.Lookup<Point, Point>();
-            this.lookup.Add(new Point(1, 1), new Point(2, 2));
-            this.lookup.Add(new Point(2, 1), new Point(3, 3));
-            this.lookup.Add(new Point(1, 1), new Point(3, 3));
-        }
-
         [Test]
-        public void Test1()
+        public void CountsTest()
         {
+            var lookup = new Pathfinding.Lookup<int, int>();
+            lookup.Add(1,2);
+            lookup.Add(2,3);
+            lookup.Add(1,3);
+
             Assert.AreEqual(3, lookup.Count);
+            Assert.AreEqual(1, lookup.Find(2).Count());
+            Assert.AreEqual(2, lookup.Find(1).Count());
+            Assert.AreEqual(3, lookup.Sum(a => a.Count()));
         }
+
         [Test]
-        public void Test2()
+        public void RemoveLastElement()
         {
-            Assert.AreEqual(1, lookup[new Point(2, 1)].Count());
-        }
-        [Test]
-        public void Test3()
-        {
-            Assert.AreEqual(2, lookup[new Point(1, 1)].Count());
-        }
-        [Test]
-        public void Test4()
-        {
-            Assert.AreEqual(lookup.count, lookup.Sum(a => a.Count()));
+            var lookup = new Pathfinding.Lookup<int, int>();
+            lookup.Add(1, 2);
+            lookup.Add(2, 3);
+
+            lookup.Remove(2, 3);
+            Assert.AreEqual(0, lookup.Find(2).Count());
         }
 
         [Test]
         public void IgnoreDuplicate()
         {
-            this.lookup = new Pathfinding.Lookup<Point, Point>(true);
-            this.lookup.Add(new Point(1, 1), new Point(2, 2));
-            this.lookup.Add(new Point(1, 1), new Point(3, 3));
-            this.lookup.Add(new Point(2, 1), new Point(3, 3));
-            this.lookup.Add(new Point(1, 1), new Point(2, 2));
-            this.lookup.Add(new Point(1, 1), new Point(3, 3));
+            var lookup = new Pathfinding.Lookup<int, int>(true);
+            lookup.Add(1, 2);
+            lookup.Add(1, 3);
+            lookup.Add(2, 3);
+            lookup.Add(1, 2);
+            lookup.Add(1, 3);
 
             Assert.AreEqual(lookup.count, lookup.Sum(a => a.Count()));
             Assert.AreEqual(3, lookup.count);
-            Assert.AreEqual(new Point(1, 1), lookup.First().Key);
-            Assert.AreEqual(new Point(2, 2), lookup.First().First());
-            Assert.AreEqual(new Point(3, 3), lookup.First().Skip(1).Single());
+            CollectionAssert.AreEqual(new List<int> { 2, 3 }, lookup.Find(1));
+        }
+
+        [Test]
+        public void CheckLookupOrder()
+        {
+            var lookup = new Pathfinding.Lookup<int, int>(false);
+            lookup.Add(1, 1);
+            lookup.Add(1, 3);
+            lookup.Add(1, 1);
+            lookup.Add(1, 5);
+
+            CollectionAssert.AreEqual(new List<int> { 1, 3, 1, 5 }, lookup.Find(1));
         }
     }
 }

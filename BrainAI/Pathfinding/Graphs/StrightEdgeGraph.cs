@@ -246,7 +246,7 @@ namespace BrainAI.Pathfinding
             this.tempConnections.Clear();
             // Connect the startpoint to its reachable points and vice versa
             this.FindConnections(start, null, 0, this.tempConnections);
-            Log($"For start ({start}) found {this.tempConnections[start].Count()} items: {string.Join(",", this.tempConnections[start])}");
+            Log($"For start ({start}) found {this.tempConnections.Find(start).Count()} items: {string.Join(",", this.tempConnections.Find(start))}");
             foreach (var end in ends)
             {
                 var found = false;
@@ -270,7 +270,7 @@ namespace BrainAI.Pathfinding
                 {
                     // Connect the endpoint to its reachable points and vice versa
                     this.FindConnections(end, null, 0, this.tempConnections);
-                    Log($"For end ({end})found {this.tempConnections[end].Count()} items: {string.Join(",", this.tempConnections[end])}");
+                    Log($"For end ({end})found {this.tempConnections.Find(end).Count()} items: {string.Join(",", this.tempConnections.Find(end))}");
                 }
             }
             Log($"Total temp connections: {this.tempConnections.Sum(a => a.Count())}");

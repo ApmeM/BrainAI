@@ -2,12 +2,14 @@ using System.Collections.Generic;
 using System;
 using System.Collections;
 using System.Linq;
+using System.Diagnostics;
 
 namespace BrainAI.Pathfinding
 {
     public class Lookup<TKey, TValue> : ILookup<TKey, TValue>
     {
-        internal Dictionary<TKey, LinkedListNode<(TKey, TValue)>> bucketReference = new Dictionary<TKey, LinkedListNode<(TKey, TValue)>>();
+        internal Dictionary<TKey, LinkedListNode<(TKey, TValue)>> startReference = new Dictionary<TKey, LinkedListNode<(TKey, TValue)>>();
+        internal Dictionary<TKey, LinkedListNode<(TKey, TValue)>> endReference = new Dictionary<TKey, LinkedListNode<(TKey, TValue)>>();
         internal LinkedList<(TKey, TValue)> valuesList = new LinkedList<(TKey, TValue)>();
         internal HashSet<(TKey, TValue)> set = new HashSet<(TKey, TValue)>();
 
@@ -28,7 +30,7 @@ namespace BrainAI.Pathfinding
         public void Add(TKey key, TValue value)
         {
             var tuple = (key, value);
-            if (bucketReference.ContainsKey(key))
+            if (startReference.ContainsKey(key))
             {
                 if (ignoreDuplicates)
                 {
@@ -41,12 +43,14 @@ namespace BrainAI.Pathfinding
                         set.Add(tuple);
                     }
                 }
-                valuesList.AddAfter(bucketReference[key], tuple);
+                valuesList.AddAfter(endReference[key], tuple);
+                endReference[key] = endReference[key].Next;
             }
             else
             {
                 var node = valuesList.AddLast(tuple);
-                bucketReference[key] = node;
+                startReference[key] = node;
+                endReference[key] = node;
                 if (ignoreDuplicates)
                 {
                     set.Add(tuple);
@@ -58,12 +62,12 @@ namespace BrainAI.Pathfinding
 
         public void Remove(TKey key, TValue value)
         {
-            if (!bucketReference.ContainsKey(key))
+            if (!startReference.ContainsKey(key))
             {
                 return;
             }
 
-            var start = bucketReference[key];
+            var start = startReference[key];
             while (
                 EqualityComparer<TKey>.Default.Equals(start.Value.Item1, key) &&
                 !EqualityComparer<TValue>.Default.Equals(start.Value.Item2, value))
@@ -76,16 +80,18 @@ namespace BrainAI.Pathfinding
                 return;
             }
 
-            if (start == bucketReference[key])
+            if (start == startReference[key] && start == endReference[key])
             {
-                if (start.Next == null || !EqualityComparer<TKey>.Default.Equals(start.Next.Value.Item1, key))
-                {
-                    bucketReference.Remove(key);
-                }
-                else
-                {
-                    bucketReference[key] = bucketReference[key].Next;
-                }
+                startReference.Remove(key);
+                endReference.Remove(key);
+            }
+            else if (start == startReference[key])
+            {
+                startReference[key] = startReference[key].Next;
+            }
+            else if (start == endReference[key])
+            {
+                endReference[key] = endReference[key].Previous;
             }
 
             if (ignoreDuplicates)
@@ -101,7 +107,8 @@ namespace BrainAI.Pathfinding
         public void Clear()
         {
             valuesList.Clear();
-            bucketReference.Clear();
+            startReference.Clear();
+            endReference.Clear();
             set.Clear();
             count = 0;
             version++;
@@ -109,75 +116,85 @@ namespace BrainAI.Pathfinding
 
         public Enumerable Find(TKey key)
         {
-            if (!bucketReference.ContainsKey(key))
+            if (!startReference.ContainsKey(key))
             {
-                return new Enumerable(null);
+                return new Enumerable(null, null);
             }
 
-            return new Enumerable(bucketReference[key]);
+            return new Enumerable(startReference[key], endReference[key]);
         }
 
         public bool Contains(TKey key)
         {
-            return bucketReference.ContainsKey(key);
+            return startReference.ContainsKey(key);
         }
 
+        [Obsolete("Use Find instead. This method requires boxing and allocates memory.")]
         public IEnumerable<TValue> this[TKey key] => this.Find(key);
 
-        public IEnumerator<IGrouping<TKey, TValue>> GetEnumerator()
+        public GroupingEnumerator GetEnumerator()
         {
             return new GroupingEnumerator(this);
         }
 
+        [Obsolete("Use GetEnumerator instead. This method requires boxing and allocates memory.")]
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-        public struct Enumerable : IEnumerable<TValue>, IEnumerable
+        [Obsolete("Use GetEnumerator instead. This method requires boxing and allocates memory.")]
+        IEnumerator<IGrouping<TKey, TValue>> IEnumerable<IGrouping<TKey, TValue>>.GetEnumerator() => this.GetEnumerator();
+
+        public struct Enumerable : IEnumerable<TValue>, IEnumerable, IGrouping<TKey, TValue>
         {
             private readonly LinkedListNode<(TKey, TValue)> start;
+            private readonly LinkedListNode<(TKey, TValue)> end;
+            public TKey Key => start.Value.Item1;
 
-            public Enumerable(LinkedListNode<(TKey, TValue)> start)
+            public Enumerable(LinkedListNode<(TKey, TValue)> start, LinkedListNode<(TKey, TValue)> end)
             {
                 this.start = start;
+                this.end = end;
             }
 
+            [Obsolete("Use GetEnumerator instead. This method requires boxing and allocates memory.")]
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+            [Obsolete("Use GetEnumerator instead. This method requires boxing and allocates memory.")]
             IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() => GetEnumerator();
 
             public Enumerator GetEnumerator()
             {
-                return new Enumerator(this.start);
+                return new Enumerator(this.start, this.end);
             }
         }
 
         public struct Enumerator : IEnumerator<TValue>, IEnumerator
         {
             private LinkedListNode<(TKey, TValue)> node;
-            private TKey originalKey;
             private readonly int version;
+            private readonly LinkedListNode<(TKey, TValue)> start;
+            private LinkedListNode<(TKey, TValue)> end;
             private TValue current;
 
-            internal Enumerator(LinkedListNode<(TKey, TValue)> node)
+            public TValue Current => current;
+
+            object IEnumerator.Current => current;
+
+            internal Enumerator(LinkedListNode<(TKey, TValue)> start, LinkedListNode<(TKey, TValue)> end)
             {
-                this.node = node;
+                this.start = start;
+                this.end = end;
+                this.node = start;
                 this.current = default;
 
                 if (this.node == null)
                 {
                     version = -1;
-                    originalKey = default(TKey);
                 }
                 else
                 {
-                    version = node.List.version;
-                    originalKey = node.Value.Item1;
-
+                    version = start.List.version;
                 }
             }
-
-            public TValue Current => current;
-
-            object IEnumerator.Current => current;
 
             public bool MoveNext()
             {
@@ -191,13 +208,17 @@ namespace BrainAI.Pathfinding
                     throw new InvalidOperationException("EnumFailedVersion");
                 }
 
-                if (!EqualityComparer<TKey>.Default.Equals(node.Value.Item1, originalKey))
+                current = node.Value.Item2;
+
+                if (node == end)
                 {
-                    return false;
+                    node = null;
+                }
+                else
+                {
+                    node = node.Next;
                 }
 
-                current = node.Value.Item2;
-                node = node.Next;
                 return true;
             }
 
@@ -212,58 +233,43 @@ namespace BrainAI.Pathfinding
 
         public struct GroupingEnumerator : IEnumerator<IGrouping<TKey, TValue>>, IEnumerator
         {
-            private IGrouping<TKey, TValue> _current;
+            private Lookup<TKey, TValue> lookup;
             private Dictionary<TKey, LinkedListNode<(TKey, TValue)>>.Enumerator bucketEnumerator;
 
             internal GroupingEnumerator(Lookup<TKey, TValue> lookup)
             {
-                this._current = default;
-                this.bucketEnumerator = lookup.bucketReference.GetEnumerator();
+                this.Current = default;
+                this.lookup = lookup;
+                this.bucketEnumerator = lookup.startReference.GetEnumerator();
             }
 
-            public IGrouping<TKey, TValue> Current => _current;
+            public Enumerable Current;
 
-            object IEnumerator.Current => _current;
+            [Obsolete("Use Current instead. This method requires boxing and allocates memory.")]
+            object IEnumerator.Current => Current;
+
+            [Obsolete("Use Current instead. This method requires boxing and allocates memory.")]
+            IGrouping<TKey, TValue> IEnumerator<IGrouping<TKey, TValue>>.Current => Current;
 
             public bool MoveNext()
             {
                 var result = this.bucketEnumerator.MoveNext();
                 if (result)
                 {
-                    _current = new Grouping(this.bucketEnumerator.Current.Key, this.bucketEnumerator.Current.Value);
+                    Current = new Enumerable(this.bucketEnumerator.Current.Value, this.lookup.endReference[this.bucketEnumerator.Current.Key]);
                 }
                 return result;
             }
 
             public void Reset()
             {
-                ((IEnumerator)this.bucketEnumerator).Reset();
+                // ((IEnumerator)this.bucketEnumerator).Reset();
             }
 
             public void Dispose()
             {
                 this.bucketEnumerator.Dispose();
             }
-        }
-
-        private class Grouping : IGrouping<TKey, TValue>
-        {
-            private readonly LinkedListNode<(TKey, TValue)> node;
-
-            public Grouping(TKey key, LinkedListNode<(TKey, TValue)> node)
-            {
-                this.Key = key;
-                this.node = node;
-            }
-
-            public TKey Key { get; }
-
-            public IEnumerator<TValue> GetEnumerator()
-            {
-                return new Enumerator(node);
-            }
-
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
     }
 }
