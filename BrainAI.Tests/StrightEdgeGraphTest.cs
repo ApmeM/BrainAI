@@ -22,14 +22,12 @@ namespace BrainAI.Pathfinding
         public void SingleObstacle()
         {
             var graph = new StrightEdgeGraph();
+graph.needLog = true;
+            graph.AddPoint(1, new Point(200, 300));
+            graph.AddPoint(1, new Point(1000, 300));
+            graph.AddPoint(1, new Point(1000, 500));
+            graph.AddPoint(1, new Point(200, 500));
 
-            graph.AddObstacle(
-                new List<Point>{
-                        new Point( 200, 300),
-                        new Point(1000, 300),
-                        new Point(1000, 500),
-                        new Point( 200, 500),
-                    });
             var start = new Point(100, 100);
             var end = new Point(900, 900);
             var pathData = new AStarPathfinder<Point>(graph).Search(start, end);
@@ -46,20 +44,15 @@ namespace BrainAI.Pathfinding
 
             for (var j = 0; j < 2; j++)
             {
-                graph.AddObstacle(
-                    new List<Point>{
-                        new Point(j*4 + 0 + 0, j*4 + 0 + 1),
-                        new Point(j*4 + 2 + 0, j*4 + 0 + 1),
-                        new Point(j*4 + 2 + 0, j*4 + 200 + 1),
-                        new Point(j*4 + 0 + 0, j*4 + 200 + 1),
-                    });
-                graph.AddObstacle(
-                    new List<Point>{
-                        new Point(j*4 + 0 + 3, j*4 + 0 + 2),
-                        new Point(j*4 + 200 + 3, j*4 + 0 + 2),
-                        new Point(j*4 + 200 + 3, j*4 + 2 + 2),
-                        new Point(j*4 + 0 + 3, j*4 + 2 + 2),
-                    });
+                graph.AddPoint(j * 2, new Point(j * 4 + 0 + 0, j * 4 + 0 + 1));
+                graph.AddPoint(j * 2, new Point(j * 4 + 2 + 0, j * 4 + 0 + 1));
+                graph.AddPoint(j * 2, new Point(j * 4 + 2 + 0, j * 4 + 200 + 1));
+                graph.AddPoint(j * 2, new Point(j * 4 + 0 + 0, j * 4 + 200 + 1));
+
+                graph.AddPoint(j * 2 + 1, new Point(j * 4 + 0 + 3, j * 4 + 0 + 2));
+                graph.AddPoint(j * 2 + 1, new Point(j * 4 + 200 + 3, j * 4 + 0 + 2));
+                graph.AddPoint(j * 2 + 1, new Point(j * 4 + 200 + 3, j * 4 + 2 + 2));
+                graph.AddPoint(j * 2 + 1, new Point(j * 4 + 0 + 3, j * 4 + 2 + 2));
             }
 
             var start = new Point(0, 0);
@@ -90,7 +83,7 @@ namespace BrainAI.Pathfinding
             var graph = new StrightEdgeGraph();
             GridToStrightEdgeConverter.Default.BuildGraph(grid, graph, 10);
             Assert.AreEqual(1, graph.obstacles.Count);
-            Assert.AreEqual(10, graph.obstacles[0].points.Count);
+            Assert.AreEqual(10, graph.obstacles[0].Count);
 
             var start = new Point(35, 35);
             var end = new Point(100, 100);
@@ -164,8 +157,8 @@ namespace BrainAI.Pathfinding
 
             Assert.AreEqual(4, pathData.Count);
             Assert.AreEqual(new Point(-5, 15), pathData[0]);
-            Assert.AreEqual(new Point( 0,  0), pathData[1]);
-            Assert.AreEqual(new Point(50,  0), pathData[2]);
+            Assert.AreEqual(new Point(0, 0), pathData[1]);
+            Assert.AreEqual(new Point(50, 0), pathData[2]);
             Assert.AreEqual(new Point(55, 15), pathData[3]);
         }
 

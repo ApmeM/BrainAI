@@ -6,10 +6,10 @@ namespace BrainAI.Pathfinding
 {
     public struct ExtendedEnumerable<T> : IEnumerable<T>
     {
-        private readonly List<T> baseEnumerable;
+        private readonly Lookup<int, T>.Enumerable baseEnumerable;
         private readonly int total;
 
-        public ExtendedEnumerable(List<T> baseEnumerable, int total)
+        public ExtendedEnumerable(Lookup<int, T>.Enumerable baseEnumerable, int total)
         {
             this.baseEnumerable = baseEnumerable;
             this.total = total;
@@ -28,12 +28,12 @@ namespace BrainAI.Pathfinding
 
         public struct Enumerator : IEnumerator<T>
         {
-            private List<T>.Enumerator baseEnumerator;
-            private List<T>.Enumerator enumerator;
+            private Lookup<int, T>.Enumerator baseEnumerator;
+            private Lookup<int, T>.Enumerator enumerator;
             public T Current { get; set; }
             private int total;
 
-            public Enumerator(List<T> baseEnumerable, int total)
+            public Enumerator(Lookup<int, T>.Enumerable baseEnumerable, int total)
             {
                 this.baseEnumerator = baseEnumerable.GetEnumerator();
                 this.enumerator = baseEnumerable.GetEnumerator();

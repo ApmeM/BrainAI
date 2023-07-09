@@ -28,7 +28,7 @@ namespace BrainAI.Pathfinding
             return triangle * triangle / PointMath.DistanceSquare(p2, p1);
         }
 
-        public static double CalcRadiusSquare(List<Point> points, Point center)
+        public static double CalcRadiusSquare(Lookup<int, Point>.Enumerable points, Point center)
         {
             var radiusSq = -1d;
             foreach (var point in points)
@@ -43,7 +43,7 @@ namespace BrainAI.Pathfinding
             return radiusSq;
         }
 
-        public static bool PointWithinPolygon(List<Point> points, Point p)
+        public static bool PointWithinPolygon(Lookup<int, Point>.Enumerable points, Point p)
         {
             Point? lastPoint = null;
             var crossings = 0;
@@ -99,7 +99,7 @@ namespace BrainAI.Pathfinding
             return true;
         }
 
-        public static bool SegmentIntersectsPolygon(List<Point> points, Point p1, Point p2, bool finalDotsAreNotIntersections)
+        public static bool SegmentIntersectsPolygon(Lookup<int, Point>.Enumerable points, Point p1, Point p2, bool finalDotsAreNotIntersections)
         {
             if (p1 == p2)
             {
@@ -151,7 +151,7 @@ namespace BrainAI.Pathfinding
         // Result:
         // Point - center point of the polygon
         // bool - is polygon counter-clockwise or not
-        public static (Point, bool) CalcCenterOfPolygon(List<Point> points)
+        public static (Point, bool) CalcCenterOfPolygon(Lookup<int, Point>.Enumerable points)
         {
             if (points.Count == 1)
             {

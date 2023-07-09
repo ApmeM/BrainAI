@@ -14,7 +14,8 @@ namespace BrainAI.Pathfinding
         public void BuildGraph(GridGraph graph, StrightEdgeGraph result, int scale = 1)
         {
             visited.Clear();
-            
+            result.Clear();
+            var obstacle = 0;
             foreach (var wall in graph.Walls)
             {
                 if (visited.Contains(wall))
@@ -37,10 +38,14 @@ namespace BrainAI.Pathfinding
                 DFS(graph, visited, list, wall, new Point(0, -1), p0);
 
                 Cleanup(list);
-                var points = list.ToList();
-                Scale(points, scale);
 
-                result.AddObstacle(points);
+                foreach (var point in list)
+                {
+                    var newPoint = new Point(point.X * scale, point.Y * scale);
+                    result.AddPoint(obstacle, newPoint);
+                }
+
+                obstacle++;
             }
         }
 

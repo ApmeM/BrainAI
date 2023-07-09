@@ -15,9 +15,9 @@
             lookup.Add(2,3);
             lookup.Add(1,3);
 
-            Assert.AreEqual(3, lookup.Count);
-            Assert.AreEqual(1, lookup.Find(2).Count);
-            Assert.AreEqual(2, lookup.Find(1).Count);
+            Assert.AreEqual(2, lookup.Count);
+            Assert.AreEqual(1, lookup[2].Count);
+            Assert.AreEqual(2, lookup[1].Count);
         }
 
         [Test]
@@ -28,7 +28,7 @@
             lookup.Add(2, 3);
 
             lookup.Remove(2, 3);
-            Assert.AreEqual(0, lookup.Find(2).Count);
+            Assert.AreEqual(0, lookup[2].Count);
         }
 
         [Test]
@@ -41,9 +41,9 @@
             lookup.Add(1, 2);
             lookup.Add(1, 3);
 
-            Assert.AreEqual(3, lookup.Count);
-            CollectionAssert.AreEqual(new List<int> { 2, 3 }, lookup.Find(1));
-            CollectionAssert.AreEqual(new List<int> { 3 }, lookup.Find(2));
+            Assert.AreEqual(2, lookup.Count);
+            CollectionAssert.AreEqual(new List<int> { 2, 3 }, lookup[1]);
+            CollectionAssert.AreEqual(new List<int> { 3 }, lookup[2]);
         }
 
         [Test]
@@ -55,7 +55,7 @@
             lookup.Add(1, 1);
             lookup.Add(1, 5);
 
-            CollectionAssert.AreEqual(new List<int> { 1, 3, 1, 5 }, lookup.Find(1));
+            CollectionAssert.AreEqual(new List<int> { 1, 3, 1, 5 }, lookup[1]);
         }
     }
 }

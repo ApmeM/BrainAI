@@ -1,5 +1,6 @@
 ﻿namespace BrainAI.Tests
 {
+    using System.Collections.Generic;
     using BrainAI.Pathfinding;
 
     using NUnit.Framework;
@@ -14,12 +15,8 @@
             grid.Walls.Add(new Point(2, 2));
             var graph = new StrightEdgeGraph();
             GridToStrightEdgeConverter.Default.BuildGraph(grid, graph);
-            var result = graph.obstacles;
-            Assert.AreEqual(4, result[0].points.Count);
-            Assert.AreEqual(new Point(2, 2), result[0].points[0]);
-            Assert.AreEqual(new Point(3, 2), result[0].points[1]);
-            Assert.AreEqual(new Point(3, 3), result[0].points[2]);
-            Assert.AreEqual(new Point(2, 3), result[0].points[3]);
+
+            CollectionAssert.AreEqual(new List<Point> { new Point(2, 2), new Point(3, 2), new Point(3, 3), new Point(2, 3) }, graph.obstacles[0]);
         }
 
         [Test]
@@ -30,12 +27,7 @@
             grid.Walls.Add(new Point(2, 3));
             var graph = new StrightEdgeGraph();
             GridToStrightEdgeConverter.Default.BuildGraph(grid, graph);
-            var result = graph.obstacles;
-            Assert.AreEqual(4, result[0].points.Count);
-            Assert.AreEqual(new Point(2, 2), result[0].points[0]);
-            Assert.AreEqual(new Point(3, 2), result[0].points[1]);
-            Assert.AreEqual(new Point(3, 4), result[0].points[2]);
-            Assert.AreEqual(new Point(2, 4), result[0].points[3]);
+            CollectionAssert.AreEqual(new List<Point> { new Point(2, 2), new Point(3, 2), new Point(3, 4), new Point(2, 4) }, graph.obstacles[0]);
         }
 
         [Test]
@@ -46,12 +38,7 @@
             grid.Walls.Add(new Point(2, 1));
             var graph = new StrightEdgeGraph();
             GridToStrightEdgeConverter.Default.BuildGraph(grid, graph);
-            var result = graph.obstacles;
-            Assert.AreEqual(4, result[0].points.Count);
-            Assert.AreEqual(new Point(2, 1), result[0].points[0]);
-            Assert.AreEqual(new Point(3, 1), result[0].points[1]);
-            Assert.AreEqual(new Point(3, 3), result[0].points[2]);
-            Assert.AreEqual(new Point(2, 3), result[0].points[3]);
+            CollectionAssert.AreEqual(new List<Point> { new Point(2, 1), new Point(3, 1), new Point(3, 3), new Point(2, 3) }, graph.obstacles[0]);
         }
 
         [Test]
@@ -62,12 +49,7 @@
             grid.Walls.Add(new Point(3, 2));
             var graph = new StrightEdgeGraph();
             GridToStrightEdgeConverter.Default.BuildGraph(grid, graph);
-            var result = graph.obstacles;
-            Assert.AreEqual(4, result[0].points.Count);
-            Assert.AreEqual(new Point(2, 2), result[0].points[0]);
-            Assert.AreEqual(new Point(4, 2), result[0].points[1]);
-            Assert.AreEqual(new Point(4, 3), result[0].points[2]);
-            Assert.AreEqual(new Point(2, 3), result[0].points[3]);
+            CollectionAssert.AreEqual(new List<Point> { new Point(2, 2), new Point(4, 2), new Point(4, 3), new Point(2, 3) }, graph.obstacles[0]);
         }
 
         [Test]
@@ -78,12 +60,7 @@
             grid.Walls.Add(new Point(1, 2));
             var graph = new StrightEdgeGraph();
             GridToStrightEdgeConverter.Default.BuildGraph(grid, graph);
-            var result = graph.obstacles;
-            Assert.AreEqual(4, result[0].points.Count);
-            Assert.AreEqual(new Point(3, 2), result[0].points[0]);
-            Assert.AreEqual(new Point(3, 3), result[0].points[1]);
-            Assert.AreEqual(new Point(1, 3), result[0].points[2]);
-            Assert.AreEqual(new Point(1, 2), result[0].points[3]);
+            CollectionAssert.AreEqual(new List<Point> { new Point(3, 2), new Point(3, 3), new Point(1, 3), new Point(1, 2) }, graph.obstacles[0]);
         }
 
         [Test]
@@ -94,18 +71,8 @@
             grid.Walls.Add(new Point(4, 2));
             var graph = new StrightEdgeGraph();
             GridToStrightEdgeConverter.Default.BuildGraph(grid, graph);
-            var result = graph.obstacles;
-            Assert.AreEqual(2, result.Count);
-            Assert.AreEqual(4, result[0].points.Count);
-            Assert.AreEqual(new Point(4, 2), result[0].points[0]);
-            Assert.AreEqual(new Point(5, 2), result[0].points[1]);
-            Assert.AreEqual(new Point(5, 3), result[0].points[2]);
-            Assert.AreEqual(new Point(4, 3), result[0].points[3]);
-            Assert.AreEqual(4, result[1].points.Count);
-            Assert.AreEqual(new Point(2, 2), result[1].points[0]);
-            Assert.AreEqual(new Point(3, 2), result[1].points[1]);
-            Assert.AreEqual(new Point(3, 3), result[1].points[2]);
-            Assert.AreEqual(new Point(2, 3), result[1].points[3]);
+            CollectionAssert.AreEqual(new List<Point> { new Point(2, 2), new Point(3, 2), new Point(3, 3), new Point(2, 3) }, graph.obstacles[0]);
+            CollectionAssert.AreEqual(new List<Point> { new Point(4, 2), new Point(5, 2), new Point(5, 3), new Point(4, 3) }, graph.obstacles[1]);
         }
 
         [Test]
@@ -118,13 +85,7 @@
             grid.Walls.Add(new Point(3, 3));
             var graph = new StrightEdgeGraph();
             GridToStrightEdgeConverter.Default.BuildGraph(grid, graph);
-            var result = graph.obstacles;
-            Assert.AreEqual(1, result.Count);
-            Assert.AreEqual(4, result[0].points.Count);
-            Assert.AreEqual(new Point(2, 2), result[0].points[0]);
-            Assert.AreEqual(new Point(4, 2), result[0].points[1]);
-            Assert.AreEqual(new Point(4, 4), result[0].points[2]);
-            Assert.AreEqual(new Point(2, 4), result[0].points[3]);
+            CollectionAssert.AreEqual(new List<Point> { new Point(2, 2), new Point(4, 2), new Point(4, 4), new Point(2, 4) }, graph.obstacles[0]);
         }
 
         [Test]
@@ -137,13 +98,7 @@
             grid.Walls.Add(new Point(3, 3));
             var graph = new StrightEdgeGraph();
             GridToStrightEdgeConverter.Default.BuildGraph(grid, graph, 10);
-            var result = graph.obstacles;
-            Assert.AreEqual(1, result.Count);
-            Assert.AreEqual(4, result[0].points.Count);
-            Assert.AreEqual(new Point(20, 20), result[0].points[0]);
-            Assert.AreEqual(new Point(40, 20), result[0].points[1]);
-            Assert.AreEqual(new Point(40, 40), result[0].points[2]);
-            Assert.AreEqual(new Point(20, 40), result[0].points[3]);
+            CollectionAssert.AreEqual(new List<Point> { new Point(20, 20), new Point(40, 20), new Point(40, 40), new Point(20, 40) }, graph.obstacles[0]);
         }
 
         [Test]
@@ -165,21 +120,7 @@
             grid.Walls.Add(new Point(3, 7));
             var graph = new StrightEdgeGraph();
             GridToStrightEdgeConverter.Default.BuildGraph(grid, graph);
-            var result = graph.obstacles;
-            Assert.AreEqual(1, result.Count);
-            Assert.AreEqual(12, result[0].points.Count);
-            Assert.AreEqual(new Point(2, 2), result[0].points[0]);
-            Assert.AreEqual(new Point(4, 2), result[0].points[1]);
-            Assert.AreEqual(new Point(4, 3), result[0].points[2]);
-            Assert.AreEqual(new Point(5, 3), result[0].points[3]);
-            Assert.AreEqual(new Point(5, 5), result[0].points[4]);
-            Assert.AreEqual(new Point(4, 5), result[0].points[5]);
-            Assert.AreEqual(new Point(4, 8), result[0].points[6]);
-            Assert.AreEqual(new Point(2, 8), result[0].points[7]);
-            Assert.AreEqual(new Point(2, 7), result[0].points[8]);
-            Assert.AreEqual(new Point(3, 7), result[0].points[9]);
-            Assert.AreEqual(new Point(3, 6), result[0].points[10]);
-            Assert.AreEqual(new Point(2, 6), result[0].points[11]);
+            CollectionAssert.AreEqual(new List<Point> { new Point(2, 2), new Point(4, 2), new Point(4, 3), new Point(5, 3), new Point(5, 5), new Point(4, 5), new Point(4, 8), new Point(2, 8), new Point(2, 7), new Point(3, 7), new Point(3, 6), new Point(2, 6) }, graph.obstacles[0]);
         }
     }
 }

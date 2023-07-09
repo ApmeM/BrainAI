@@ -41,7 +41,12 @@
         [Test]
         public void CalcCenterOfPolygon_CCW()
         {
-            var result = PointMath.CalcCenterOfPolygon(new List<Point> { new Point(0, -1), new Point(0, 1), new Point(2, 0) });
+            var l = new Lookup<int, Point>{
+                {1, new Point(0, -1)},
+                {1, new Point(0, 1)},
+                {1, new Point(2, 0)},
+            };
+            var result = PointMath.CalcCenterOfPolygon(l[1]);
             Assert.AreEqual(false, result.Item2);
             Assert.AreEqual(new Point(1, 0), result.Item1);
         }
@@ -49,72 +54,99 @@
         [Test]
         public void PointWithinPolygon_Inside()
         {
-            var result = PointMath.PointWithinPolygon(new List<Point> { new Point(0, -1), new Point(0, 1), new Point(2, 0) }, new Point(1, 0));
+            var l = new Lookup<int, Point>{
+                {1, new Point(0, -1)},
+                {1, new Point(0, 1)},
+                {1, new Point(2, 0)},
+            };
+
+            var result = PointMath.PointWithinPolygon(l[1], new Point(1, 0));
             Assert.AreEqual(true, result);
         }
 
         [Test]
         public void PointWithinPolygon_Outside()
         {
-            var result = PointMath.PointWithinPolygon(new List<Point> { new Point(0, -1), new Point(0, 1), new Point(2, 0) }, new Point(10, 0));
+            var l = new Lookup<int, Point>{
+                {1, new Point(0, -1)},
+                {1, new Point(0, 1)},
+                {1, new Point(2, 0)},
+            };
+            var result = PointMath.PointWithinPolygon(l[1], new Point(10, 0));
             Assert.AreEqual(false, result);
         }
 
         [Test]
         public void PointWithinPolygon_Vertex()
         {
-            var result = PointMath.PointWithinPolygon(new List<Point> { new Point(0, -1), new Point(0, 1), new Point(2, 0) }, new Point(2, 0));
+            var l = new Lookup<int, Point>{
+                {1, new Point(0, -1)},
+                {1, new Point(0, 1)},
+                {1, new Point(2, 0)},
+            };
+            var result = PointMath.PointWithinPolygon(l[1], new Point(2, 0));
             Assert.AreEqual(true, result);
         }
 
         [Test]
         public void PointWithinPolygon_Edge()
         {
-            var result = PointMath.PointWithinPolygon(new List<Point> { new Point(0, 0), new Point(0, 1), new Point(2, 0) }, new Point(1, 0));
+            var l = new Lookup<int, Point>{
+                {1, new Point(0, 0)},
+                {1, new Point(0, 1)},
+                {1, new Point(2, 0)},
+            };
+            var result = PointMath.PointWithinPolygon(l[1], new Point(1, 0));
             Assert.AreEqual(true, result);
         }
 
         [Test]
         public void SegmentIntersectsPolygon_IntersectsEdge()
         {
-            var result = PointMath.SegmentIntersectsPolygon(
-                new List<Point> { new Point(0, 0), new Point(0, 1), new Point(2, 0) },
-                new Point(1, -1), new Point(1, 1),
-                true
-                );
+            var l = new Lookup<int, Point>{
+                {1, new Point(0, 0)},
+                {1, new Point(0, 1)},
+                {1, new Point(2, 0)},
+            };
+            var result = PointMath.SegmentIntersectsPolygon(l[1], new Point(1, -1), new Point(1, 1), true);
             Assert.AreEqual(true, result);
         }
 
         [Test]
         public void SegmentIntersectsPolygon_NotIntersectsEdge()
         {
-            var result = PointMath.SegmentIntersectsPolygon(
-                new List<Point> { new Point(0, 0), new Point(0, 1), new Point(2, 0) },
-                new Point(1, -1), new Point(1, -2),
-                true
-                );
+            var l = new Lookup<int, Point>{
+                {1, new Point(0, 0)},
+                {1, new Point(0, 1)},
+                {1, new Point(2, 0)},
+            };
+            var result = PointMath.SegmentIntersectsPolygon(l[1], new Point(1, -1), new Point(1, -2), true);
             Assert.AreEqual(false, result);
         }
 
         [Test]
         public void SegmentIntersectsPolygon_IntersectsWithVertex()
         {
-            var result = PointMath.SegmentIntersectsPolygon(
-                new List<Point> { new Point(0, 0), new Point(0, 1), new Point(2, 0) },
-                new Point(2, -1), new Point(2, 2),
-                false
-                );
+            var l = new Lookup<int, Point>{
+                {1, new Point(0, 0)},
+                {1, new Point(0, 1)},
+                {1, new Point(2, 0)},
+            };
+
+            var result = PointMath.SegmentIntersectsPolygon(l[1], new Point(2, -1), new Point(2, 2), false);
             Assert.AreEqual(true, result);
         }
 
         [Test]
         public void SegmentIntersectsPolygon_IntersectsWithVertexButNoNeed()
         {
-            var result = PointMath.SegmentIntersectsPolygon(
-                new List<Point> { new Point(0, 0), new Point(0, 1), new Point(2, 0) },
-                new Point(2, -1), new Point(2, 2),
-                true
-                );
+            var l = new Lookup<int, Point>{
+                {1, new Point(0, 0)},
+                {1, new Point(0, 1)},
+                {1, new Point(2, 0)},
+            };
+
+            var result = PointMath.SegmentIntersectsPolygon(l[1], new Point(2, -1), new Point(2, 2), true);
             Assert.AreEqual(true, result);
         }
 

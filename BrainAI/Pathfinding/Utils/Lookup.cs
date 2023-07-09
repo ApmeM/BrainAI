@@ -54,13 +54,14 @@ namespace BrainAI.Pathfinding
                 startReference[key] = node;
                 endReference[key] = node;
                 counts[key] = 1;
+                count++;
+
                 if (ignoreDuplicates)
                 {
                     set.Add(tuple);
                 }
             }
             version++;
-            count++;
         }
 
         public void Remove(TKey key, TValue value)
@@ -90,6 +91,8 @@ namespace BrainAI.Pathfinding
                 startReference.Remove(key);
                 endReference.Remove(key);
                 counts.Remove(key);
+                count--;
+
             }
             else if (start == startReference[key])
             {
@@ -99,7 +102,7 @@ namespace BrainAI.Pathfinding
             {
                 endReference[key] = endReference[key].Previous;
             }
-            
+
             if (ignoreDuplicates)
             {
                 set.Remove((key, value));
@@ -121,7 +124,19 @@ namespace BrainAI.Pathfinding
             version++;
         }
 
-        public Enumerable Find(TKey key)
+        public bool Contains(TKey key)
+        {
+            return startReference.ContainsKey(key);
+        }
+
+        public Enumerable this[TKey key] => this.Find(key);
+
+        public GroupingEnumerator GetEnumerator()
+        {
+            return new GroupingEnumerator(this);
+        }
+
+        private Enumerable Find(TKey key)
         {
             if (!startReference.ContainsKey(key))
             {
@@ -130,19 +145,8 @@ namespace BrainAI.Pathfinding
 
             return new Enumerable(startReference[key], endReference[key], counts[key]);
         }
-
-        public bool Contains(TKey key)
-        {
-            return startReference.ContainsKey(key);
-        }
-
         [Obsolete("Use Find instead. This method requires boxing and allocates memory.")]
-        public IEnumerable<TValue> this[TKey key] => this.Find(key);
-
-        public GroupingEnumerator GetEnumerator()
-        {
-            return new GroupingEnumerator(this);
-        }
+        IEnumerable<TValue> ILookup<TKey, TValue>.this[TKey key] => this.Find(key);
 
         [Obsolete("Use GetEnumerator instead. This method requires boxing and allocates memory.")]
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
@@ -253,7 +257,7 @@ namespace BrainAI.Pathfinding
                 this.bucketEnumerator = lookup.startReference.GetEnumerator();
             }
 
-            public Enumerable Current;
+            public Enumerable Current { get; set; }
 
             [Obsolete("Use Current instead. This method requires boxing and allocates memory.")]
             object IEnumerator.Current => Current;
