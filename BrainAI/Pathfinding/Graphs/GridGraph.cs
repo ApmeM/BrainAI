@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Text;
 
     /// <summary>
     /// Basic grid graph for use with all pathfinding algorithms
@@ -78,6 +79,34 @@
 
         public void BeforeSearch(Point nodeStart, HashSet<Point> nodeEnd)
         {
+        }
+
+        private StringBuilder sb = new StringBuilder();
+
+        public override string ToString()
+        {
+            sb.Clear();
+
+            for (var y = 0; y < this.Height; y++)
+            {
+                for (var x = 0; x < this.Width; x++)
+                {
+                    var pos = new Point(x, y);
+                    var isWall = this.Walls.Contains(pos);
+                    if (isWall)
+                    {
+                        sb.Append("#");
+                    }
+                    else
+                    {
+                        sb.Append(".");
+                    }
+                }
+
+                sb.Append("\n");
+            }
+
+            return sb.ToString();
         }
     }
 }
