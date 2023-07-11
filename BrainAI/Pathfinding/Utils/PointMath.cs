@@ -43,6 +43,11 @@ namespace BrainAI.Pathfinding
             return radiusSq;
         }
 
+        public static bool PointWithinRectangle(Point minPoint, Point maxPoint, Point p)
+        {
+            return minPoint.X <= p.X && p.X <= maxPoint.X && minPoint.Y <= p.Y && p.Y <= maxPoint.Y;
+        }
+
         public static bool PointWithinPolygon(Lookup<int, Point>.Enumerable points, Point p)
         {
             Point? lastPoint = null;
@@ -146,68 +151,6 @@ namespace BrainAI.Pathfinding
             }
 
             return false;
-        }
-
-        // Result:
-        // Point - center point of the polygon
-        // bool - is polygon counter-clockwise or not
-        public static (Point, bool) CalcCenterOfPolygon(Lookup<int, Point>.Enumerable points)
-        {
-            if (points.Count == 1)
-            {
-                foreach (var point in points)
-                {
-                    return (point, true);
-                }
-            }
-
-            if (points.Count == 2)
-            {
-                Point? point1 = null;
-
-                foreach (var point in points)
-                {
-                    if (point1 == null)
-                    {
-                        point1 = point;
-                        continue;
-                    }
-
-                    return (new Point((int)((point1.Value.X + point.X) / 2f), (int)((point1.Value.Y + point.Y) / 2f)), true);
-                }
-            }
-
-            var cx = 0.0;
-            var cy = 0.0;
-            var totalAreaX2 = 0d;
-            var basePoint = new Point(0, 0);
-
-            Point? p2 = null;
-
-            foreach (var p3 in points)
-            {
-                try
-                {
-                    if (p2 == null)
-                    {
-                        continue;
-                    }
-
-                    var areaX2 = PointMath.DoubledTriangleSquareBy3Dots(p3, basePoint, p2.Value);
-                    totalAreaX2 += areaX2;
-                    cx += (p2.Value.X + p3.X) * areaX2;
-                    cy += (p2.Value.Y + p3.Y) * areaX2;
-                }
-                finally
-                {
-                    p2 = p3;
-                }
-            }
-
-            cx /= (3 * totalAreaX2);
-            cy /= (3 * totalAreaX2);
-
-            return (new Point((int)(cx + 0.5), (int)(cy + 0.5)), (totalAreaX2 > 0));
         }
 
         public static bool IsDirectionInsidePolygon(Point point, Point point2, Point pointPrev, Point pointNext, double epsilon = 0.0001)

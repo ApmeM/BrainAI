@@ -7,14 +7,22 @@ namespace BrainAI.Pathfinding
 {
     public class StrightEdgeGraph : IAstarGraph<Point>
     {
+        private struct ObstacleData
+        {
+            public Point MinPoint;
+            public Point MaxPoint;
+            public Point CenterPoint;
+            public double RadiusSq;
+        }
+
         internal readonly Lookup<int, Point> obstacles = new Lookup<int, Point>();
-        internal readonly Dictionary<int, Point> obstacleCenter = new Dictionary<int, Point>();
-        internal readonly Dictionary<int, double> obstacleRadiusSquare = new Dictionary<int, double>();
-        internal readonly HashSet<int> obstacleDirty = new HashSet<int>();
+
+        private readonly Dictionary<int, ObstacleData> obstacleBorders = new Dictionary<int, ObstacleData>();
+        private readonly HashSet<int> obstacleDirty = new HashSet<int>();
 
         // It contains points that are concave or contained to another obstacle.
         private HashSet<(int, Point)> pointsToIgnoreConcave = new HashSet<(int, Point)>();
-        private HashSet<Point> pointsToIgnoreBlocked = new HashSet<Point>();
+        private HashSet<(int, Point)> pointsToIgnoreBlocked = new HashSet<(int, Point)>();
 
         private readonly Lookup<Point, Point> connections = new Lookup<Point, Point>(true);
 
@@ -26,8 +34,7 @@ namespace BrainAI.Pathfinding
         public void Clear()
         {
             obstacles.Clear();
-            obstacleCenter.Clear();
-            obstacleRadiusSquare.Clear();
+            obstacleBorders.Clear();
             obstacleDirty.Clear();
             pointsToIgnoreConcave.Clear();
             pointsToIgnoreBlocked.Clear();
@@ -55,18 +62,13 @@ namespace BrainAI.Pathfinding
                     throw new Exception($"Minimum of 3 points needed. pointsList.Count == {pointsList.Count}");
                 }
 
-                var (centerPoint, ccw) = PointMath.CalcCenterOfPolygon(pointsList);
-                this.obstacleCenter[obstacle] = centerPoint;
-                this.obstacleRadiusSquare[obstacle] = PointMath.CalcRadiusSquare(pointsList, centerPoint);
-
-                if (!ccw)
-                {
-                    // ToDo: reverse;
-                    throw new Exception($"Points should be in couter clockwise order.");
-                }
-
                 Point? pointPrev = null;
                 Point? point = null;
+
+                var totalAreaX2 = 0d;
+                var basePoint = new Point(0, 0);
+                var minPoint = new Point(int.MaxValue, int.MaxValue);
+                var maxPoint = new Point(int.MinValue, int.MinValue);
                 foreach (var pointNext in new ExtendedEnumerable<Point>(obstacles[obstacle], obstacles[obstacle].Count + 2))
                 {
                     try
@@ -86,6 +88,10 @@ namespace BrainAI.Pathfinding
                         {
                             pointsToIgnoreConcave.Remove((obstacle, point.Value));
                         }
+
+                        minPoint = new Point(Math.Min(minPoint.X, point.Value.X), Math.Min(minPoint.Y, point.Value.Y));
+                        maxPoint = new Point(Math.Max(maxPoint.X, point.Value.X), Math.Max(maxPoint.Y, point.Value.Y));
+                        totalAreaX2 += PointMath.DoubledTriangleSquareBy3Dots(point.Value, basePoint, pointPrev.Value);
                     }
                     finally
                     {
@@ -93,6 +99,22 @@ namespace BrainAI.Pathfinding
                         point = pointNext;
                     }
                 }
+
+                if (totalAreaX2 <= 0)
+                {
+                    // ToDo: reverse;
+                    throw new Exception($"Points should be in couter clockwise order.");
+                }
+
+                var radius = Math.Max(maxPoint.X - minPoint.X, maxPoint.Y - minPoint.Y) * 1.5 / 2;
+                this.obstacleBorders[obstacle] =
+                    new ObstacleData
+                    {
+                        MinPoint = minPoint,
+                        MaxPoint = maxPoint,
+                        CenterPoint = new Point((maxPoint.X + minPoint.X) / 2, (maxPoint.Y + minPoint.Y) / 2),
+                        RadiusSq = radius * radius
+                    };
             }
 
             this.obstacleDirty.Clear();
@@ -118,16 +140,15 @@ namespace BrainAI.Pathfinding
                 {
                     if (
                         pointsToIgnoreConcave.Contains((obstacle2.Key, point2)) ||
-                        pointsToIgnoreBlocked.Contains(point2) ||
-                        PointMath.DistanceSquare(obstacleCenter[obstacle], point2) > obstacleRadiusSquare[obstacle] ||
+                        pointsToIgnoreBlocked.Contains((obstacle2.Key, point2)) ||
+                        !PointMath.PointWithinRectangle(obstacleBorders[obstacle].MinPoint, obstacleBorders[obstacle].MaxPoint, point2) ||
                         !PointMath.PointWithinPolygon(obstacles[obstacle], point2))
                     {
                         continue;
                     }
 
-
                     Log($"Point {point2} is in new obstacle.");
-                    pointsToIgnoreBlocked.Add(point2);
+                    pointsToIgnoreBlocked.Add((obstacle2.Key, point2));
 
                     tempList.Clear();
                     foreach (var connection in connections[point2])
@@ -148,7 +169,7 @@ namespace BrainAI.Pathfinding
             foreach (var p in obstacles[obstacle])
             {
                 if (pointsToIgnoreConcave.Contains((obstacle, p)) ||
-                    pointsToIgnoreBlocked.Contains(p))
+                    pointsToIgnoreBlocked.Contains((obstacle, p)))
                 {
                     continue;
                 }
@@ -161,14 +182,14 @@ namespace BrainAI.Pathfinding
                         continue;
                     }
 
-                    if (PointMath.DistanceSquare(obstacleCenter[obstacle2.Key], p) > obstacleRadiusSquare[obstacle2.Key] ||
+                    if (!PointMath.PointWithinRectangle(obstacleBorders[obstacle2.Key].MinPoint, obstacleBorders[obstacle].MaxPoint, p) ||
                         !PointMath.PointWithinPolygon(obstacle2, p))
                     {
                         continue;
                     }
 
                     Log($"New point {p} is in old obstacle.");
-                    pointsToIgnoreBlocked.Add(p);
+                    pointsToIgnoreBlocked.Add((obstacle, p));
                     break;
                 }
             }
@@ -185,7 +206,7 @@ namespace BrainAI.Pathfinding
                 foreach (var point2 in obstacle2)
                 {
                     if (pointsToIgnoreConcave.Contains((obstacle2.Key, point2)) ||
-                        pointsToIgnoreBlocked.Contains(point2))
+                        pointsToIgnoreBlocked.Contains((obstacle2.Key, point2)))
                     {
                         continue;
                     }
@@ -193,7 +214,7 @@ namespace BrainAI.Pathfinding
                     tempList.Clear();
                     foreach (var point3 in connections[point2])
                     {
-                        if (PointMath.SegmentIntersectCircle(point2, point3, obstacleCenter[obstacle], obstacleRadiusSquare[obstacle]) &&
+                        if (PointMath.SegmentIntersectCircle(point2, point3, obstacleBorders[obstacle].CenterPoint, obstacleBorders[obstacle].RadiusSq) &&
                             PointMath.SegmentIntersectsPolygon(obstacles[obstacle], point2, point3, false))
                         {
                             tempList.Add(point3);
@@ -222,7 +243,7 @@ namespace BrainAI.Pathfinding
                     }
 
                     if (pointsToIgnoreConcave.Contains((obstacle, point.Value)) ||
-                        pointsToIgnoreBlocked.Contains(point.Value))
+                        pointsToIgnoreBlocked.Contains((obstacle, point.Value)))
                     {
                         continue;
                     }
@@ -253,7 +274,7 @@ namespace BrainAI.Pathfinding
             // Test to see if it's ok to ignore this point since it's
             // concave (inward-pointing) or it's contained by an obstacle.
             if (pointsToIgnoreConcave.Contains((obstacle, point)) ||
-                pointsToIgnoreBlocked.Contains(point))
+                pointsToIgnoreBlocked.Contains((obstacle, point)))
             {
                 return;
             }
@@ -290,7 +311,7 @@ namespace BrainAI.Pathfinding
                             continue;
                         }
                         if (pointsToIgnoreConcave.Contains((obstacle2.Key, point2.Value)) ||
-                            pointsToIgnoreBlocked.Contains(point2.Value))
+                            pointsToIgnoreBlocked.Contains((obstacle2.Key, point2.Value)))
                         {
                             Log($"Skipping segment {point} - {point2}: Point {point2} is in ignore list");
                             continue;
@@ -311,7 +332,7 @@ namespace BrainAI.Pathfinding
                         var found = true;
                         foreach (var obstacle3 in obstacles)
                         {
-                            if (PointMath.SegmentIntersectCircle(point, point2.Value, obstacleCenter[obstacle3.Key], obstacleRadiusSquare[obstacle3.Key]) &&
+                            if (PointMath.SegmentIntersectCircle(point, point2.Value, obstacleBorders[obstacle3.Key].CenterPoint, obstacleBorders[obstacle3.Key].RadiusSq) &&
                                 PointMath.SegmentIntersectsPolygon(obstacle3, point, point2.Value, true))
                             {
                                 Log($"Checking segment {point} - {point2}: Another obstacle intersects.");
@@ -374,7 +395,7 @@ namespace BrainAI.Pathfinding
                 var found = false;
                 foreach (var obstacle in this.obstacles)
                 {
-                    if (PointMath.SegmentIntersectCircle(start, end, obstacleCenter[obstacle.Key], obstacleRadiusSquare[obstacle.Key]) &&
+                    if (PointMath.SegmentIntersectCircle(start, end, obstacleBorders[obstacle.Key].CenterPoint, obstacleBorders[obstacle.Key].RadiusSq) &&
                         PointMath.SegmentIntersectsPolygon(obstacle, start, end, false))
                     {
                         found = true;

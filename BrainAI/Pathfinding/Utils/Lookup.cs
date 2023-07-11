@@ -64,6 +64,14 @@ namespace BrainAI.Pathfinding
             version++;
         }
 
+        public void Remove(TKey key)
+        {
+            while (startReference.ContainsKey(key))
+            {
+                Remove(key, startReference[key].Value.Item2);
+            }
+        }
+
         public void Remove(TKey key, TValue value)
         {
             if (!startReference.ContainsKey(key))

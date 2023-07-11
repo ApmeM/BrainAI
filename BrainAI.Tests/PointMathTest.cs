@@ -37,20 +37,7 @@
             var result = PointMath.PointToLineDistSq(new Point(-1, -1), new Point(0, 1), new Point(1, 0));
             Assert.AreEqual(4.5, result);
         }
-
-        [Test]
-        public void CalcCenterOfPolygon_CCW()
-        {
-            var l = new Lookup<int, Point>{
-                {1, new Point(0, -1)},
-                {1, new Point(0, 1)},
-                {1, new Point(2, 0)},
-            };
-            var result = PointMath.CalcCenterOfPolygon(l[1]);
-            Assert.AreEqual(false, result.Item2);
-            Assert.AreEqual(new Point(1, 0), result.Item1);
-        }
-
+        
         [Test]
         public void PointWithinPolygon_Inside()
         {
