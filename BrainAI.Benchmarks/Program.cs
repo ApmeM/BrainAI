@@ -57,10 +57,6 @@ public class Program
             }
         }
 
-        GridToStrightEdgeConverter.Default.BuildGraph(graph!, strightEdge);
-
-        System.Console.WriteLine(graph);
-
         switch (this.PathfinderType)
         {
             case PathfinderTypes.BFS:
@@ -86,10 +82,20 @@ public class Program
     [Benchmark]
     public void Pathfinding()
     {
-        IAstarGraph<Point> newGraph = this.UseStrightEdge ? strightEdge : graph!;
+        IAstarGraph<Point> newGraph;
+        if (UseStrightEdge)
+        {
+            GridToStrightEdgeConverter.Default.BuildGraph(graph!, strightEdge);
+            newGraph = strightEdge!;
+        }
+        else
+        {
+            newGraph = graph!;
+        }
 
         for (var i = 0; i < this.PathFindingRuns; i++)
         {
+
             var pathData = this.pathfinder!.Search(new Point(0, 0), new Point(ArrayLength - 1, ArrayLength - 1));
             if (pathData == null)
             {

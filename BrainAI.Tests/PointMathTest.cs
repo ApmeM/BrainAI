@@ -37,7 +37,7 @@
             var result = PointMath.PointToLineDistSq(new Point(-1, -1), new Point(0, 1), new Point(1, 0));
             Assert.AreEqual(4.5, result);
         }
-        
+
         [Test]
         public void PointWithinPolygon_Inside()
         {
@@ -185,15 +185,29 @@
         [Test]
         public void IsDirectionInsidePolygon_InsidePoligon()
         {
-            var result = PointMath.IsDirectionInsidePolygon(new Point(0, 0), new Point(2, 2), new Point(0, 1), new Point(2, 0));
+            var result = PointMath.IsDirectionInsidePolygon(new Point(0, 0), new Point(2, 2), new Point(0, 1), new Point(2, 0), false);
 
             Assert.AreEqual(true, result);
         }
 
         [Test]
+        public void IsDirectionInsidePolygon_InsidePoligonConcave1()
+        {
+            var result = PointMath.IsDirectionInsidePolygon(new Point(30, 10), new Point(15, 15), new Point(40, 10), new Point(30, 20), true);
+            Assert.AreEqual(true, result);
+        }
+
+        [Test]
+        public void IsDirectionInsidePolygon_InsidePoligonConcave2()
+        {
+            var result = PointMath.IsDirectionInsidePolygon(new Point(40, 10), new Point(15, 15), new Point(40, 30), new Point(30, 10), true);
+            Assert.AreEqual(false, result);
+        }
+
+        [Test]
         public void IsDirectionInsidePolygon_OutsidePoligon()
         {
-            var result = PointMath.IsDirectionInsidePolygon(new Point(0, 0), new Point(-2, -2), new Point(0, 1), new Point(0, 0));
+            var result = PointMath.IsDirectionInsidePolygon(new Point(0, 0), new Point(-2, -2), new Point(0, 1), new Point(0, 0), false);
 
             Assert.AreEqual(false, result);
         }
@@ -201,9 +215,18 @@
         [Test]
         public void IsDirectionInsidePolygon_InsideRect()
         {
-            var result = PointMath.IsDirectionInsidePolygon(new Point(0, 1), new Point(2, 201), new Point(0, 201), new Point(2, 1));
+            var result = PointMath.IsDirectionInsidePolygon(new Point(0, 1), new Point(2, 201), new Point(0, 201), new Point(2, 1), false);
 
             Assert.AreEqual(true, result);
+        }
+
+        [Test]
+        public void CompareVectorsTest()
+        {
+            Assert.AreEqual(-1, PointMath.CompareVectors(new Point(0, 40), new Point(15, 15), new Point(50, 40)));
+            Assert.AreEqual(0, PointMath.CompareVectors(new Point(10, 0), new Point(0, 0), new Point(9, 0)));
+            Assert.AreEqual(1, PointMath.CompareVectors(new Point(10, 0), new Point(0, 0), new Point(11, 1)));
+            Assert.AreEqual(-1, PointMath.CompareVectors(new Point(2, 3), new Point(0, 0), new Point(1, 1)));
         }
     }
 }

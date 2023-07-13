@@ -7,23 +7,16 @@ namespace BrainAI.Pathfinding
 {
     public class StrightEdgeGraph : IAstarGraph<Point>
     {
-        private struct ObstacleData
-        {
-            public Point MinPoint;
-            public Point MaxPoint;
-            public Point CenterPoint;
-            public double RadiusSq;
-        }
+        private readonly List<(int, Point)> points = new List<(int, Point)>();
+        private readonly Dictionary<(int, Point), (Point, Point)> obstacleConnections = new Dictionary<(int, Point), (Point, Point)>();
+        private readonly HashSet<(int, Point)> isConcave = new HashSet<(int, Point)>();
+        private readonly HashSet<((int, Point), (int, Point))> unfinishedLines = new HashSet<((int, Point), (int, Point))>();
+        private readonly List<((int, Point), (int, Point))> linesToRemove = new List<((int, Point), (int, Point))>();
+
+        private readonly List<(int, Point)> candidates = new List<(int, Point)>();
 
         internal readonly Lookup<int, Point> obstacles = new Lookup<int, Point>();
-
-        private readonly Dictionary<int, ObstacleData> obstacleBorders = new Dictionary<int, ObstacleData>();
         private readonly HashSet<int> obstacleDirty = new HashSet<int>();
-
-        // It contains points that are concave or contained to another obstacle.
-        private HashSet<(int, Point)> pointsToIgnoreConcave = new HashSet<(int, Point)>();
-        private HashSet<(int, Point)> pointsToIgnoreBlocked = new HashSet<(int, Point)>();
-
         private readonly Lookup<Point, Point> connections = new Lookup<Point, Point>(true);
 
         // Following temp* fields are temporal and are cleared before usage.
@@ -33,16 +26,17 @@ namespace BrainAI.Pathfinding
 
         public void Clear()
         {
+            points.Clear();
+            obstacleConnections.Clear();
             obstacles.Clear();
-            obstacleBorders.Clear();
             obstacleDirty.Clear();
-            pointsToIgnoreConcave.Clear();
-            pointsToIgnoreBlocked.Clear();
+            isConcave.Clear();
             connections.Clear();
         }
 
         public void AddPoint(int obstacle, Point point)
         {
+            this.points.Add((obstacle, point));
             this.obstacleDirty.Add(obstacle);
             this.obstacles.Add(obstacle, point);
         }
@@ -67,8 +61,6 @@ namespace BrainAI.Pathfinding
 
                 var totalAreaX2 = 0d;
                 var basePoint = new Point(0, 0);
-                var minPoint = new Point(int.MaxValue, int.MaxValue);
-                var maxPoint = new Point(int.MinValue, int.MinValue);
                 foreach (var pointNext in new ExtendedEnumerable<Point>(obstacles[obstacle], obstacles[obstacle].Count + 2))
                 {
                     try
@@ -78,20 +70,17 @@ namespace BrainAI.Pathfinding
                             continue;
                         }
 
-                        if (PointMath.DoubledTriangleSquareBy3Dots(point.Value, pointPrev.Value, pointNext) > 0)
-                        {
-                            // Polygon is CCW - it is checked above
-                            // But the points is CW, which means the point is concave
-                            pointsToIgnoreConcave.Add((obstacle, point.Value));
-                        }
-                        else
-                        {
-                            pointsToIgnoreConcave.Remove((obstacle, point.Value));
-                        }
+                        obstacleConnections[(obstacle, point.Value)] = (pointPrev.Value, pointNext);
 
-                        minPoint = new Point(Math.Min(minPoint.X, point.Value.X), Math.Min(minPoint.Y, point.Value.Y));
-                        maxPoint = new Point(Math.Max(maxPoint.X, point.Value.X), Math.Max(maxPoint.Y, point.Value.Y));
-                        totalAreaX2 += PointMath.DoubledTriangleSquareBy3Dots(point.Value, basePoint, pointPrev.Value);
+                        var triangleSquare = PointMath.DoubledTriangleSquareBy3Dots(point.Value, pointPrev.Value, pointNext);
+                        totalAreaX2 += triangleSquare;
+
+                        if (triangleSquare > 0)
+                            // Polygon is CCW - it is checked below
+                            // But the points is CW, which means the point is concave
+                            isConcave.Add((obstacle, point.Value));
+                        else
+                            isConcave.Remove((obstacle, point.Value));
                     }
                     finally
                     {
@@ -100,261 +89,176 @@ namespace BrainAI.Pathfinding
                     }
                 }
 
-                if (totalAreaX2 <= 0)
+                if (totalAreaX2 > 0)
                 {
                     // ToDo: reverse;
                     throw new Exception($"Points should be in couter clockwise order.");
                 }
-
-                var radius = Math.Max(maxPoint.X - minPoint.X, maxPoint.Y - minPoint.Y) * 1.5 / 2;
-                this.obstacleBorders[obstacle] =
-                    new ObstacleData
-                    {
-                        MinPoint = minPoint,
-                        MaxPoint = maxPoint,
-                        CenterPoint = new Point((maxPoint.X + minPoint.X) / 2, (maxPoint.Y + minPoint.Y) / 2),
-                        RadiusSq = radius * radius
-                    };
             }
 
             this.obstacleDirty.Clear();
             this.connections.Clear();
-            this.pointsToIgnoreBlocked.Clear();
-            foreach (var obstacle in this.obstacles)
-            {
-                UpdateObstacle(obstacle.Key);
-            }
         }
 
-        public void UpdateObstacle(int obstacle)
-        {
-            // Any points that may be contained need to be marked as so.
-            foreach (var obstacle2 in obstacles)
-            {
-                if (obstacle2.Key == obstacle)
-                {
-                    continue;
-                }
-
-                foreach (var point2 in obstacle2)
-                {
-                    if (
-                        pointsToIgnoreConcave.Contains((obstacle2.Key, point2)) ||
-                        pointsToIgnoreBlocked.Contains((obstacle2.Key, point2)) ||
-                        !PointMath.PointWithinRectangle(obstacleBorders[obstacle].MinPoint, obstacleBorders[obstacle].MaxPoint, point2) ||
-                        !PointMath.PointWithinPolygon(obstacles[obstacle], point2))
-                    {
-                        continue;
-                    }
-
-                    Log($"Point {point2} is in new obstacle.");
-                    pointsToIgnoreBlocked.Add((obstacle2.Key, point2));
-
-                    tempList.Clear();
-                    foreach (var connection in connections[point2])
-                    {
-                        tempList.Add(connection);
-                    }
-
-                    foreach (var point3 in tempList)
-                    {
-                        Log($"New obstacle break connection between {point2} and {point3}");
-                        connections.Remove(point2, point3);
-                        connections.Remove(point3, point2);
-                    }
-                }
-            }
-
-            // Find points that are contained in another obstacle.
-            foreach (var p in obstacles[obstacle])
-            {
-                if (pointsToIgnoreConcave.Contains((obstacle, p)) ||
-                    pointsToIgnoreBlocked.Contains((obstacle, p)))
-                {
-                    continue;
-                }
-
-                foreach (var obstacle2 in this.obstacles)
-                {
-                    // Current obstacle definitely has its points. No need to check it as all points will be ignored.
-                    if (obstacle2.Key == obstacle)
-                    {
-                        continue;
-                    }
-
-                    if (!PointMath.PointWithinRectangle(obstacleBorders[obstacle2.Key].MinPoint, obstacleBorders[obstacle].MaxPoint, p) ||
-                        !PointMath.PointWithinPolygon(obstacle2, p))
-                    {
-                        continue;
-                    }
-
-                    Log($"New point {p} is in old obstacle.");
-                    pointsToIgnoreBlocked.Add((obstacle, p));
-                    break;
-                }
-            }
-
-            // Check if the new obstacle obstructs any point connections, and if it does, delete them.
-            foreach (var obstacle2 in obstacles)
-            {
-                // Current obstacle has no connections yet, no need to check it.
-                if (obstacle2.Key == obstacle)
-                {
-                    continue;
-                }
-
-                foreach (var point2 in obstacle2)
-                {
-                    if (pointsToIgnoreConcave.Contains((obstacle2.Key, point2)) ||
-                        pointsToIgnoreBlocked.Contains((obstacle2.Key, point2)))
-                    {
-                        continue;
-                    }
-
-                    tempList.Clear();
-                    foreach (var point3 in connections[point2])
-                    {
-                        if (PointMath.SegmentIntersectCircle(point2, point3, obstacleBorders[obstacle].CenterPoint, obstacleBorders[obstacle].RadiusSq) &&
-                            PointMath.SegmentIntersectsPolygon(obstacles[obstacle], point2, point3, false))
-                        {
-                            tempList.Add(point3);
-                        }
-                    }
-
-                    foreach (var point3 in tempList)
-                    {
-                        Log($"New obstacle break connection between {point2} and {point3}");
-                        connections.Remove(point2, point3);
-                        connections.Remove(point3, point2);
-                    }
-                }
-            }
-
-            Point? pointPrev = null;
-            Point? point = null;
-            // connect the obstacle's points with all nearby points.
-            foreach (var pointNext in new ExtendedEnumerable<Point>(obstacles[obstacle], obstacles[obstacle].Count + 2))
-            {
-                try
-                {
-                    if (pointPrev == null)
-                    {
-                        continue;
-                    }
-
-                    if (pointsToIgnoreConcave.Contains((obstacle, point.Value)) ||
-                        pointsToIgnoreBlocked.Contains((obstacle, point.Value)))
-                    {
-                        continue;
-                    }
-
-                    FindConnections(obstacle, point.Value, pointPrev, pointNext, this.connections);
-
-                    Log($"New point {point} have {this.connections[point.Value].Count} connections: {(string.Join(",", this.connections[point.Value]))}");
-                }
-                finally
-                {
-                    pointPrev = point;
-                    point = pointNext;
-                }
-            }
-
-            Log("Total connections: " + this.connections.Sum(a => ((Lookup<Point, Point>.Enumerable)a).Count));
-            Log(string.Join("\n", this.connections.Select(a => $"From {a.Key} to " + string.Join(",", a))));
-        }
         private class PointWrapper
         {
             public Point p;
         }
         private PointWrapper wrapper = new PointWrapper();
-        private Comparison<int> sortByDistance;
+        private Comparison<(int, Point)> sortByAngleFromPoint;
 
-        private void FindConnections(int obstacle, Point point, Point? pointPrev, Point? pointNext, Lookup<Point, Point> reachablepoints)
+        private void FindConnections(Point p, Lookup<Point, Point> reachablepoints)
         {
-            // Test to see if it's ok to ignore this point since it's
-            // concave (inward-pointing) or it's contained by an obstacle.
-            if (pointsToIgnoreConcave.Contains((obstacle, point)) ||
-                pointsToIgnoreBlocked.Contains((obstacle, point)))
+            Log($"=-=-=-=-=-=-=-=");
+            wrapper.p = p;
+            sortByAngleFromPoint = sortByAngleFromPoint ?? (((int, Point) first, (int, Point) second) =>
             {
-                return;
-            }
-
-            // To optimise the line-obstacle intersection testing, order the obstacle list
-            // by their distance to the startpoint, smallest first.
-            // These closer obstacles are more likely to intersect any lines from the
-            // startpoint to the far away obstacle points.
-
-            // ToDo: sort
-            // wrapper.p = point;
-            // sortByDistance = sortByDistance ?? ((int a, int b) => (int)((PointMath.DistanceSquare(wrapper.p, obstacleCenter[a]) - obstacleRadiusSquare[a]) - (PointMath.DistanceSquare(wrapper.p, obstacleCenter[b]) - obstacleRadiusSquare[b])));
-            // obstacles.Sort(sortByDistance);
-
-            // Test the point for straight lines to points in other
-            // polygons (including obstacle itself).
-            foreach (var obstacle2 in obstacles)
-            {
-                Point? point2Prev = null;
-                Point? point2 = null;
-                // connect the obstacle's points with all nearby points.
-                foreach (var point2Next in new ExtendedEnumerable<Point>(obstacle2, obstacle2.Count + 2))
+                var result = PointMath.CompareVectors(first.Item2, wrapper.p, second.Item2);
+                if (result == 0)
                 {
-                    try
+                    return Math.Sign(PointMath.DistanceSquare(wrapper.p, first.Item2) - PointMath.DistanceSquare(wrapper.p, second.Item2));
+                }
+                return result;
+
+            });
+
+            points.Sort(sortByAngleFromPoint);
+
+            unfinishedLines.Clear();
+            candidates.Clear();
+            Log($"Finding connections for point {p}. Sorted list of points around: {string.Join(", ", points.Select(a => a.Item2))}");
+            foreach (var point2 in points)
+            {
+                var invalidCandidate = false;
+                if (point2.Item2 == p)
+                {
+                    Log($"-- {point2.Item2} the point we check. No need to handle it.");
+                    invalidCandidate = true;
+                }
+
+                if (!invalidCandidate && isConcave.Contains(point2))
+                {
+                    Log($"-- {point2.Item2} is concave.");
+                    invalidCandidate = true;
+                }
+
+                if (!invalidCandidate && PointMath.IsDirectionInsidePolygon(point2.Item2, p, obstacleConnections[point2].Item1, obstacleConnections[point2].Item2, isConcave.Contains(point2)))
+                {
+                    Log($"-- {point2.Item2} to {p} vector is directed inside polygon.");
+                    invalidCandidate = true;
+                }
+
+                linesToRemove.Clear();
+                foreach (var segment in unfinishedLines)
+                {
+                    if (segment.Item2 == point2)
                     {
-                        if (point2Prev == null)
-                        {
-                            continue;
-                        }
-
-                        if (point2 == point)
-                        {
-                            Log($"Skipping segment {point} - {point2}: Same point");
-                            continue;
-                        }
-                        if (pointsToIgnoreConcave.Contains((obstacle2.Key, point2.Value)) ||
-                            pointsToIgnoreBlocked.Contains((obstacle2.Key, point2.Value)))
-                        {
-                            Log($"Skipping segment {point} - {point2}: Point {point2} is in ignore list");
-                            continue;
-                        }
-                        if (PointMath.IsDirectionInsidePolygon(point2.Value, point, point2Prev.Value, point2Next))
-                        {
-                            Log($"Skipping segment {point} - {point2}: Directed inside poligon for {point2}");
-                            continue;
-                        }
-                        if (pointPrev != null && pointNext != null &&
-                            PointMath.IsDirectionInsidePolygon(point, point2.Value, pointPrev.Value, pointNext.Value))
-                        {
-                            Log($"Skipping segment {point} - {point2}: Directed inside poligon for {point}");
-                            continue;
-                        }
-
-                        // Need to test if line from point to point2 intersects any obstacles
-                        var found = true;
-                        foreach (var obstacle3 in obstacles)
-                        {
-                            if (PointMath.SegmentIntersectCircle(point, point2.Value, obstacleBorders[obstacle3.Key].CenterPoint, obstacleBorders[obstacle3.Key].RadiusSq) &&
-                                PointMath.SegmentIntersectsPolygon(obstacle3, point, point2.Value, true))
-                            {
-                                Log($"Checking segment {point} - {point2}: Another obstacle intersects.");
-                                found = false;
-                                break;
-                            }
-                        }
-
-                        if (found)
-                        {
-                            reachablepoints.Add(point, point2.Value);
-                            reachablepoints.Add(point2.Value, point);
-                        }
+                        // We found end of the unfinished line - remove line from hash.
+                        // No need to check intersection of this point with this segment.
+                        linesToRemove.Add(segment);
+                        continue;
                     }
-                    finally
-                    {
-                        point2Prev = point2;
-                        point2 = point2Next;
 
+                    if (!invalidCandidate && PointMath.SegmentIntersectsSegment(segment.Item1.Item2, segment.Item2.Item2, p, point2.Item2))
+                    {
+                        Log($"-- {point2.Item2} to {p} vector intersected with unfinished line {(segment.Item1.Item2, segment.Item2.Item2)}");
+                        invalidCandidate = true;
                     }
                 }
+
+                if (!invalidCandidate)
+                {
+                    Log($"-- {point2.Item2} is a new candidate. No intersection found between {p} and {point2.Item2}.");
+                    candidates.Add(point2);
+                }
+
+                foreach (var lineToRemove in linesToRemove)
+                {
+                    unfinishedLines.Remove(lineToRemove);
+                    Log($"-- {point2.Item2} is the final point for segment {(lineToRemove.Item1.Item2, lineToRemove.Item2.Item2)}. Number of segments left: {unfinishedLines.Count}");
+                }
+
+                var nextPoint = FindEndPoint(p, point2);
+                if (nextPoint != null)
+                {
+                    // If this point have next dot in proper order - add it as unfinished line.
+                    unfinishedLines.Add((point2, nextPoint.Value));
+                    Log($"-- {point2.Item2} is the starting point for segment {(point2.Item2, nextPoint.Value.Item2)}. Number of segments left: {unfinishedLines.Count}");
+                }
             }
+            Log($"Found {candidates.Count} candidates:{(string.Join(",", candidates))}");
+            // After loop through all points we might still have unfinished lines.
+            // Need to check all potential connections for those lines.
+            // Also check that those candidates are not directed inside polygon.
+            foreach (var point in candidates)
+            {
+                var intersectionFound = false;
+                foreach (var segment in unfinishedLines)
+                {
+                    if (segment.Item2 == point || segment.Item1 == point)
+                    {
+                        // Here both start and end of the unfinished line is a valid reachable point.
+                        continue;
+                    }
+
+                    if (PointMath.SegmentIntersectsSegment(segment.Item1.Item2, segment.Item2.Item2, p, point.Item2))
+                    {
+                        intersectionFound = true;
+                        Log($"-- {point.Item2} intersected with unfinished line {(segment.Item1.Item2, segment.Item2.Item2)}.");
+                        break;
+                    }
+                }
+
+                if (!intersectionFound)
+                {
+                    reachablepoints.Add(p, point.Item2);
+                }
+            }
+
+            Log($"For point {p} found {reachablepoints[p].Count} connections: {string.Join(",", reachablepoints[p])}");
+        }
+
+        private (int, Point)? FindEndPoint(Point center, (int, Point) startPoint)
+        {
+            var p1 = obstacleConnections[startPoint].Item1;
+            var p2 = obstacleConnections[startPoint].Item2;
+
+            var dir1 = PointMath.DoubledTriangleSquareBy3Dots(center, startPoint.Item2, p1);
+            var dir2 = PointMath.DoubledTriangleSquareBy3Dots(center, startPoint.Item2, p2);
+
+            if (dir1 < 0 && dir2 < 0)
+            {
+                var intersect1 = PointMath.SegmentIntersectsSegment(center, p1, startPoint.Item2, p2);
+                var intersect2 = PointMath.SegmentIntersectsSegment(center, p2, startPoint.Item2, p1);
+                if (!intersect1 && !intersect2)
+                {
+                    var dist1 = PointMath.DistanceSquare(center, p1);
+                    var dist2 = PointMath.DistanceSquare(center, p2);
+                    return dist1 < dist2 ? (startPoint.Item1, p1) : (startPoint.Item1, p2);
+                }
+                else if (!intersect2)
+                {
+                    return (startPoint.Item1, p2);
+                }
+                else if (!intersect1)
+                {
+                    return (startPoint.Item1, p1);
+                }
+                else
+                {
+                    throw new Exception("Cant decide which point is better.");
+                }
+            }
+            else if (dir1 < 0)
+            {
+                return (startPoint.Item1, p1);
+            }
+            else if (dir2 < 0)
+            {
+                return (startPoint.Item1, p2);
+            }
+
+            return null;
         }
 
         public int Heuristic(Point point, Point goal)
@@ -370,11 +274,17 @@ namespace BrainAI.Pathfinding
         public List<Point> GetNeighbors(Point point)
         {
             this.tempNeighbors.Clear();
-            foreach (var p in connections[point])
+            foreach (var p in tempConnections[point])
             {
                 this.tempNeighbors.Add(p);
             }
-            foreach (var p in tempConnections[point])
+
+            if (!connections.Contains(point) && point != start && !ends.Contains(point))
+            {
+                FindConnections(point, connections);
+            }
+
+            foreach (var p in connections[point])
             {
                 this.tempNeighbors.Add(p);
             }
@@ -382,43 +292,44 @@ namespace BrainAI.Pathfinding
             Log($"Neighbours for point {point}: {(string.Join(", ", this.tempNeighbors))}");
             return this.tempNeighbors;
         }
-
+        private Point start;
+        private HashSet<Point> ends;
         public void BeforeSearch(Point start, HashSet<Point> ends)
         {
+            this.start = start;
+            this.ends = ends;
+
             this.ApplyChanges();
             this.tempConnections.Clear();
             // Connect the startpoint to its reachable points and vice versa
-            this.FindConnections(int.MinValue, start, null, null, this.tempConnections);
-            Log($"For start ({start}) found {this.tempConnections[start].Count} items: {string.Join(",", this.tempConnections[start])}");
+            this.FindConnections(start, this.tempConnections);
             foreach (var end in ends)
             {
-                var found = false;
-                foreach (var obstacle in this.obstacles)
+                if (this.points.Count == 0)
                 {
-                    if (PointMath.SegmentIntersectCircle(start, end, obstacleBorders[obstacle.Key].CenterPoint, obstacleBorders[obstacle.Key].RadiusSq) &&
-                        PointMath.SegmentIntersectsPolygon(obstacle, start, end, false))
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found)
-                {
-                    Log($"End is achieveble from start..");
+                    // No obstacles on a map. Join start and end point directly.
                     this.tempConnections.Add(start, end);
                     this.tempConnections.Add(end, start);
+                    continue;
                 }
-                else
+
+                // ToDo: end is achievable from start.
+
+                // Connect the endpoint to its reachable points and vice versa
+                this.FindConnections(end, this.tempConnections);
+
+                tempList.Clear();
+                foreach (var point in tempConnections[end])
                 {
-                    // Connect the endpoint to its reachable points and vice versa
-                    this.FindConnections(int.MinValue, end, null, null, this.tempConnections);
-                    Log($"For end ({end})found {this.tempConnections[end].Count} items: {string.Join(",", this.tempConnections[end])}");
+                    tempList.Add(point);
+                }
+                foreach (var p in tempList)
+                {
+                    tempConnections.Add(p, end);
                 }
             }
             Log($"Total temp connections: {this.tempConnections.Sum(a => ((Lookup<Point, Point>.Enumerable)a).Count)}");
             Log(string.Join("\n", this.tempConnections.Select(a => $"From {a.Key} to " + string.Join(",", a))));
-
             Log("-=-=-=-=-=-=-");
         }
         public bool needLog = false;

@@ -153,13 +153,65 @@ namespace BrainAI.Pathfinding
             return false;
         }
 
-        public static bool IsDirectionInsidePolygon(Point point, Point point2, Point pointPrev, Point pointNext, double epsilon = 0.0001)
+        public static bool IsDirectionInsidePolygon(Point point, Point point2, Point pointPrev, Point pointNext, bool concave)
         {
             var leftAngle = PointMath.DoubledTriangleSquareBy3Dots(pointPrev, point, point2);
             var rightAngle = PointMath.DoubledTriangleSquareBy3Dots(point2, point, pointNext);
 
-            return Math.Sign(leftAngle) == Math.Sign(rightAngle) && Math.Sign(leftAngle) == 1;
+            return !concave && Math.Sign(leftAngle) == Math.Sign(rightAngle) && Math.Sign(leftAngle) == 1 ||
+                    concave && !(Math.Sign(leftAngle) == Math.Sign(rightAngle) && Math.Sign(leftAngle) == -1);
+        }
+
+        public static bool SegmentIntersectsSegment(Point p11, Point p12, Point p21, Point p22)
+        {
+            return p21 == p12 || p22 == p12 || p21 == p11 || p22 == p11 ||
+                Math.Sign(PointMath.DoubledTriangleSquareBy3Dots((Point)p12, (Point)p21, (Point)p22)) != Math.Sign(PointMath.DoubledTriangleSquareBy3Dots((Point)p11, (Point)p21, (Point)p22)) &&
+                Math.Sign(PointMath.DoubledTriangleSquareBy3Dots((Point)p21, (Point)p12, (Point)p11)) != Math.Sign(PointMath.DoubledTriangleSquareBy3Dots((Point)p22, (Point)p12, (Point)p11));
+        }
+
+        public static int CompareVectors(Point first, Point origin, Point second)
+        {
+            var v1 = new Point(first.X - origin.X, first.Y - origin.Y);
+            var v2 = new Point(second.X - origin.X, second.Y - origin.Y);
+            if (v1.X == 0 && v1.Y == 0 && v2.X == 0 && v2.Y == 0)
+            {
+                return 0;
+            }
+            if (v1.X == 0 && v1.Y == 0)
+            {
+                return -1;
+            }
+            if (v2.X == 0 && v2.Y == 0)
+            {
+                return 1;
+            }
+            if (v1.Y > 0)
+            {
+                if (v2.Y < 0) return 1;
+                if (v2.Y > 0) return Math.Sign(PointMath.DoubledTriangleSquareBy3Dots(new Point(0, 0), v1, v2));
+                return -Math.Sign(v2.X);
+            }
+            if (v1.Y < 0)
+            {
+                if (v2.Y > 0) return -1;
+                if (v2.Y < 0) return Math.Sign(PointMath.DoubledTriangleSquareBy3Dots(new Point(0, 0), v1, v2));
+                return Math.Sign(v2.X);
+            }
+
+            if (v1.X > 0)
+            {
+                if (v2.Y == 0 && v2.X > 0) return 0;
+                return 1;
+            }
+
+            if (v1.X < 0)
+            {
+                if (v2.Y == 0 && v2.X > 0) return -1;
+                if (v2.Y == 0 && v2.X < 0) return 0;
+                return -Math.Sign(v2.Y);
+            }
+
+            return 0;
         }
     }
-
 }

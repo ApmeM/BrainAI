@@ -22,7 +22,6 @@ namespace BrainAI.Pathfinding
         public void SingleObstacle()
         {
             var graph = new StrightEdgeGraph();
-
             graph.AddPoint(1, new Point(200, 300));
             graph.AddPoint(1, new Point(1000, 300));
             graph.AddPoint(1, new Point(1000, 500));
@@ -112,6 +111,7 @@ namespace BrainAI.Pathfinding
             grid.Walls.Add(new Point(1, 0));
             grid.Walls.Add(new Point(2, 1));
             var graph = new StrightEdgeGraph();
+
             GridToStrightEdgeConverter.Default.BuildGraph(grid, graph, 10);
             Assert.AreEqual(1, graph.obstacles.Count);
 
@@ -182,6 +182,7 @@ namespace BrainAI.Pathfinding
             grid.Walls.Add(new Point(1, 0));
             grid.Walls.Add(new Point(2, 1));
             var graph = new StrightEdgeGraph();
+
             GridToStrightEdgeConverter.Default.BuildGraph(grid, graph, 10);
             Assert.AreEqual(1, graph.obstacles.Count);
 
