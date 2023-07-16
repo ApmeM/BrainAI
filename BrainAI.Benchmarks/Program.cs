@@ -37,7 +37,7 @@ public class Program
     [GlobalSetup]
     public void Setup()
     {
-        graph = new GridGraph(ArrayLength, ArrayLength, true);
+        this.graph = new GridGraph(ArrayLength, ArrayLength, true);
         int x;
         int y;
         for (var step = 0; step < ArrayLength / 4 - 1; step++)
@@ -61,17 +61,17 @@ public class Program
         {
             case PathfinderTypes.BFS:
                 {
-                    this.pathfinder = new BreadthFirstPathfinder<Point>(graph);
+                    this.pathfinder = new BreadthFirstPathfinder<Point>(UseStrightEdge ? strightEdge : graph);
                 }
                 break;
             case PathfinderTypes.Dijkstra:
                 {
-                    this.pathfinder = new WeightedPathfinder<Point>(graph);
+                    this.pathfinder = new WeightedPathfinder<Point>(UseStrightEdge ? strightEdge : graph);
                 }
                 break;
             case PathfinderTypes.AStar:
                 {
-                    this.pathfinder = new AStarPathfinder<Point>(graph);
+                    this.pathfinder = new AStarPathfinder<Point>(UseStrightEdge ? strightEdge : graph);
                 }
                 break;
             default:
@@ -82,20 +82,13 @@ public class Program
     [Benchmark]
     public void Pathfinding()
     {
-        IAstarGraph<Point> newGraph;
         if (UseStrightEdge)
         {
             GridToStrightEdgeConverter.Default.BuildGraph(graph!, strightEdge);
-            newGraph = strightEdge!;
-        }
-        else
-        {
-            newGraph = graph!;
         }
 
         for (var i = 0; i < this.PathFindingRuns; i++)
         {
-
             var pathData = this.pathfinder!.Search(new Point(0, 0), new Point(ArrayLength - 1, ArrayLength - 1));
             if (pathData == null)
             {

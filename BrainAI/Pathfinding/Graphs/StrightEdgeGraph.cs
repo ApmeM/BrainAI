@@ -23,13 +23,36 @@ namespace BrainAI.Pathfinding
         private readonly Lookup<Point, Point> tempConnections = new Lookup<Point, Point>(true);
         private readonly List<Point> tempNeighbors = new List<Point>();
         private readonly List<Point> tempList = new List<Point>();
+        private PointWrapper wrapper = new PointWrapper();
+        private Comparison<(int, Point)> sortByAngleFromPoint;
+
+        private class PointWrapper
+        {
+            public Point p;
+        }
+
+        public StrightEdgeGraph()
+        {
+            sortByAngleFromPoint = (((int, Point) first, (int, Point) second) =>
+            {
+                var result = PointMath.CompareVectors(first.Item2, wrapper.p, second.Item2);
+                if (result == 0)
+                {
+                    result = Math.Sign(PointMath.DistanceSquare(wrapper.p, first.Item2) - PointMath.DistanceSquare(wrapper.p, second.Item2));
+                }
+                return result;
+
+            });
+
+        }
 
         public void Clear()
         {
             points.Clear();
-            obstacleConnections.Clear();
-            obstacles.Clear();
             obstacleDirty.Clear();
+            obstacles.Clear();
+
+            obstacleConnections.Clear();
             isConcave.Clear();
             connections.Clear();
         }
@@ -41,7 +64,7 @@ namespace BrainAI.Pathfinding
             this.obstacles.Add(obstacle, point);
         }
 
-        public void ApplyChanges()
+        private void ApplyChanges()
         {
             if (this.obstacleDirty.Count == 0)
             {
@@ -100,53 +123,24 @@ namespace BrainAI.Pathfinding
             this.connections.Clear();
         }
 
-        private class PointWrapper
-        {
-            public Point p;
-        }
-        private PointWrapper wrapper = new PointWrapper();
-        private Comparison<(int, Point)> sortByAngleFromPoint;
-
         private void FindConnections(Point p, Lookup<Point, Point> reachablepoints)
         {
             Log($"=-=-=-=-=-=-=-=");
             wrapper.p = p;
-            sortByAngleFromPoint = sortByAngleFromPoint ?? (((int, Point) first, (int, Point) second) =>
-            {
-                var result = PointMath.CompareVectors(first.Item2, wrapper.p, second.Item2);
-                if (result == 0)
-                {
-                    return Math.Sign(PointMath.DistanceSquare(wrapper.p, first.Item2) - PointMath.DistanceSquare(wrapper.p, second.Item2));
-                }
-                return result;
-
-            });
-
             points.Sort(sortByAngleFromPoint);
-
             unfinishedLines.Clear();
             candidates.Clear();
             Log($"Finding connections for point {p}. Sorted list of points around: {string.Join(", ", points.Select(a => a.Item2))}");
             foreach (var point2 in points)
             {
-                var invalidCandidate = false;
-                if (point2.Item2 == p)
-                {
-                    Log($"-- {point2.Item2} the point we check. No need to handle it.");
-                    invalidCandidate = true;
-                }
+                var invalidCandidate =
+                    point2.Item2 == p ||
+                    isConcave.Contains(point2) ||
+                    PointMath.IsDirectionInsidePolygon(point2.Item2, p, obstacleConnections[point2].Item1, obstacleConnections[point2].Item2, isConcave.Contains(point2));
+                LogIf(invalidCandidate, $"-- {point2.Item2} is either same, concave or directed inside polygon.");
 
-                if (!invalidCandidate && isConcave.Contains(point2))
-                {
-                    Log($"-- {point2.Item2} is concave.");
-                    invalidCandidate = true;
-                }
-
-                if (!invalidCandidate && PointMath.IsDirectionInsidePolygon(point2.Item2, p, obstacleConnections[point2].Item1, obstacleConnections[point2].Item2, isConcave.Contains(point2)))
-                {
-                    Log($"-- {point2.Item2} to {p} vector is directed inside polygon.");
-                    invalidCandidate = true;
-                }
+                var nextPoint = PointMath.FindEndPoint(p, point2, obstacleConnections[point2].Item1, obstacleConnections[point2].Item2);
+                LogIf(nextPoint != null, $"-- {point2.Item2} is the starting point for segment {(point2.Item2, nextPoint?.Item2)}. Number of segments left: {unfinishedLines.Count}");
 
                 linesToRemove.Clear();
                 foreach (var segment in unfinishedLines)
@@ -159,11 +153,16 @@ namespace BrainAI.Pathfinding
                         continue;
                     }
 
-                    if (!invalidCandidate && PointMath.SegmentIntersectsSegment(segment.Item1.Item2, segment.Item2.Item2, p, point2.Item2))
+                    var segmentIntersectPoint2 = PointMath.SegmentIntersectsSegment(segment.Item1.Item2, segment.Item2.Item2, p, point2.Item2);
+                    LogIf(segmentIntersectPoint2, $"-- {point2.Item2} to {p} vector intersected with unfinished line {(segment.Item1.Item2, segment.Item2.Item2)}");
+
+                    if (nextPoint != null && segmentIntersectPoint2 && PointMath.SegmentIntersectsSegment(segment.Item1.Item2, segment.Item2.Item2, p, nextPoint.Value.Item2))
                     {
-                        Log($"-- {point2.Item2} to {p} vector intersected with unfinished line {(segment.Item1.Item2, segment.Item2.Item2)}");
-                        invalidCandidate = true;
+                        Log($"-- {point2.Item2} to {nextPoint.Value.Item2} line is fully blocked by segment  {(segment.Item1.Item2, segment.Item2.Item2)}.");
+                        nextPoint = null;
                     }
+
+                    invalidCandidate = invalidCandidate || segmentIntersectPoint2;
                 }
 
                 if (!invalidCandidate)
@@ -178,14 +177,12 @@ namespace BrainAI.Pathfinding
                     Log($"-- {point2.Item2} is the final point for segment {(lineToRemove.Item1.Item2, lineToRemove.Item2.Item2)}. Number of segments left: {unfinishedLines.Count}");
                 }
 
-                var nextPoint = FindEndPoint(p, point2);
                 if (nextPoint != null)
                 {
-                    // If this point have next dot in proper order - add it as unfinished line.
                     unfinishedLines.Add((point2, nextPoint.Value));
-                    Log($"-- {point2.Item2} is the starting point for segment {(point2.Item2, nextPoint.Value.Item2)}. Number of segments left: {unfinishedLines.Count}");
                 }
             }
+
             Log($"Found {candidates.Count} candidates:{(string.Join(",", candidates))}");
             // After loop through all points we might still have unfinished lines.
             // Need to check all potential connections for those lines.
@@ -216,49 +213,6 @@ namespace BrainAI.Pathfinding
             }
 
             Log($"For point {p} found {reachablepoints[p].Count} connections: {string.Join(",", reachablepoints[p])}");
-        }
-
-        private (int, Point)? FindEndPoint(Point center, (int, Point) startPoint)
-        {
-            var p1 = obstacleConnections[startPoint].Item1;
-            var p2 = obstacleConnections[startPoint].Item2;
-
-            var dir1 = PointMath.DoubledTriangleSquareBy3Dots(center, startPoint.Item2, p1);
-            var dir2 = PointMath.DoubledTriangleSquareBy3Dots(center, startPoint.Item2, p2);
-
-            if (dir1 < 0 && dir2 < 0)
-            {
-                var intersect1 = PointMath.SegmentIntersectsSegment(center, p1, startPoint.Item2, p2);
-                var intersect2 = PointMath.SegmentIntersectsSegment(center, p2, startPoint.Item2, p1);
-                if (!intersect1 && !intersect2)
-                {
-                    var dist1 = PointMath.DistanceSquare(center, p1);
-                    var dist2 = PointMath.DistanceSquare(center, p2);
-                    return dist1 < dist2 ? (startPoint.Item1, p1) : (startPoint.Item1, p2);
-                }
-                else if (!intersect2)
-                {
-                    return (startPoint.Item1, p2);
-                }
-                else if (!intersect1)
-                {
-                    return (startPoint.Item1, p1);
-                }
-                else
-                {
-                    throw new Exception("Cant decide which point is better.");
-                }
-            }
-            else if (dir1 < 0)
-            {
-                return (startPoint.Item1, p1);
-            }
-            else if (dir2 < 0)
-            {
-                return (startPoint.Item1, p2);
-            }
-
-            return null;
         }
 
         public int Heuristic(Point point, Point goal)
@@ -332,12 +286,22 @@ namespace BrainAI.Pathfinding
             Log(string.Join("\n", this.tempConnections.Select(a => $"From {a.Key} to " + string.Join(",", a))));
             Log("-=-=-=-=-=-=-");
         }
+
         public bool needLog = false;
         [Conditional("DEBUG")]
         private void Log(string text)
         {
             if (needLog)
                 Console.WriteLine(text);
+        }
+
+        [Conditional("DEBUG")]
+        private void LogIf(bool condition, string text)
+        {
+            if (condition)
+            {
+                Log(text);
+            }
         }
     }
 }

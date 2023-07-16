@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace BrainAI.Pathfinding
 {
@@ -15,142 +14,6 @@ namespace BrainAI.Pathfinding
         public static double DoubledTriangleSquareBy3Dots(Point p0, Point p1, Point p2)
         {
             return (p0.Y - p1.Y) * (p2.X - p1.X) - (p0.X - p1.X) * (p2.Y - p1.Y);
-        }
-
-        public static double DotProdFor2VecotrsWithOneOrigin(Point p1, Point origin, Point p2)
-        {
-            return (p1.X - origin.X) * (p2.X - origin.X) + (p1.Y - origin.Y) * (p2.Y - origin.Y);
-        }
-
-        public static double PointToLineDistSq(Point center, Point p1, Point p2)
-        {
-            var triangle = PointMath.DoubledTriangleSquareBy3Dots(center, p1, p2);
-            return triangle * triangle / PointMath.DistanceSquare(p2, p1);
-        }
-
-        public static double CalcRadiusSquare(Lookup<int, Point>.Enumerable points, Point center)
-        {
-            var radiusSq = -1d;
-            foreach (var point in points)
-            {
-                var currentRadiusSq = PointMath.DistanceSquare(point, center);
-                if (currentRadiusSq > radiusSq)
-                {
-                    radiusSq = currentRadiusSq;
-                }
-            }
-
-            return radiusSq;
-        }
-
-        public static bool PointWithinRectangle(Point minPoint, Point maxPoint, Point p)
-        {
-            return minPoint.X <= p.X && p.X <= maxPoint.X && minPoint.Y <= p.Y && p.Y <= maxPoint.Y;
-        }
-
-        public static bool PointWithinPolygon(Lookup<int, Point>.Enumerable points, Point p)
-        {
-            Point? lastPoint = null;
-            var crossings = 0;
-            foreach (var currentPoint in new ExtendedEnumerable<Point>(points, points.Count + 1))
-            {
-                try
-                {
-                    if (lastPoint == null)
-                    {
-                        continue;
-                    }
-
-                    if (lastPoint == p)
-                    {
-                        return true;
-                    }
-
-                    if (((lastPoint.Value.Y <= p.Y && p.Y < currentPoint.Y) || (currentPoint.Y <= p.Y && p.Y < lastPoint.Value.Y))
-                            && p.X < ((currentPoint.X - lastPoint.Value.X) / (currentPoint.Y - lastPoint.Value.Y) * (p.Y - lastPoint.Value.Y) + lastPoint.Value.X))
-                    {
-                        crossings++;
-                    }
-                }
-                finally
-                {
-                    lastPoint = currentPoint;
-                }
-            }
-
-            return (crossings % 2 != 0);
-        }
-
-
-        public static bool SegmentIntersectCircle(Point p1, Point p2, Point center, double radiusSq)
-        {
-            var dotprod = PointMath.DotProdFor2VecotrsWithOneOrigin(center, p1, p2);
-            if (dotprod <= 0.0 && PointMath.DistanceSquare(center, p1) > radiusSq)
-            {
-                return false;
-            }
-
-            dotprod = PointMath.DotProdFor2VecotrsWithOneOrigin(center, p2, p1);
-            if (dotprod <= 0.0 && PointMath.DistanceSquare(center, p2) > radiusSq)
-            {
-                return false;
-            }
-
-            if (PointMath.PointToLineDistSq(center, p2, p1) > radiusSq)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public static bool SegmentIntersectsPolygon(Lookup<int, Point>.Enumerable points, Point p1, Point p2, bool finalDotsAreNotIntersections)
-        {
-            if (p1 == p2)
-            {
-                return false;
-            }
-
-            Point? lastPoint = null;
-            var dotprodLast = 0d;
-            foreach (var currentPoint in new ExtendedEnumerable<Point>(points, points.Count + 1))
-            {
-                var dotprodCurrent = PointMath.DoubledTriangleSquareBy3Dots(currentPoint, p1, p2);
-
-                try
-                {
-                    if (lastPoint == null)
-                    {
-                        continue;
-                    }
-
-                    if (finalDotsAreNotIntersections && (p1 == currentPoint || p2 == currentPoint || p1 == lastPoint || p2 == lastPoint))
-                    {
-                        continue;
-                    }
-
-                    if (Math.Sign(dotprodLast) == Math.Sign(dotprodCurrent))
-                    {
-                        continue;
-                    }
-
-                    var dotprodP1 = PointMath.DoubledTriangleSquareBy3Dots(p1, currentPoint, lastPoint.Value);
-                    var dotprodP2 = PointMath.DoubledTriangleSquareBy3Dots(p2, currentPoint, lastPoint.Value);
-                    if (Math.Sign(dotprodP1) == Math.Sign(dotprodP2))
-                    {
-                        continue;
-                    }
-
-                    return true;
-                }
-                finally
-                {
-                    dotprodLast = dotprodCurrent;
-                    lastPoint = currentPoint;
-                }
-            }
-
-            return false;
         }
 
         public static bool IsDirectionInsidePolygon(Point point, Point point2, Point pointPrev, Point pointNext, bool concave)
@@ -173,45 +36,64 @@ namespace BrainAI.Pathfinding
         {
             var v1 = new Point(first.X - origin.X, first.Y - origin.Y);
             var v2 = new Point(second.X - origin.X, second.Y - origin.Y);
-            if (v1.X == 0 && v1.Y == 0 && v2.X == 0 && v2.Y == 0)
+
+            if (v1.Y == 0 && v2.Y == 0)
             {
-                return 0;
-            }
-            if (v1.X == 0 && v1.Y == 0)
-            {
-                return -1;
-            }
-            if (v2.X == 0 && v2.Y == 0)
-            {
-                return 1;
-            }
-            if (v1.Y > 0)
-            {
-                if (v2.Y < 0) return 1;
-                if (v2.Y > 0) return Math.Sign(PointMath.DoubledTriangleSquareBy3Dots(new Point(0, 0), v1, v2));
-                return -Math.Sign(v2.X);
-            }
-            if (v1.Y < 0)
-            {
-                if (v2.Y > 0) return -1;
-                if (v2.Y < 0) return Math.Sign(PointMath.DoubledTriangleSquareBy3Dots(new Point(0, 0), v1, v2));
-                return Math.Sign(v2.X);
+                return Math.Sign(Math.Sign(v1.X) - Math.Sign(v2.X));
             }
 
-            if (v1.X > 0)
+            if ((v1.Y >= 0) ^ (v2.Y >= 0))
             {
-                if (v2.Y == 0 && v2.X > 0) return 0;
-                return 1;
+                if (v1.Y >= 0)
+                    return 1;
+                else
+                    return -1;
             }
-
-            if (v1.X < 0)
+            else
             {
-                if (v2.Y == 0 && v2.X > 0) return -1;
-                if (v2.Y == 0 && v2.X < 0) return 0;
-                return -Math.Sign(v2.Y);
+                return Math.Sign(PointMath.DoubledTriangleSquareBy3Dots(new Point(0, 0), v1, v2));
             }
-
-            return 0;
         }
+
+        public static (int, Point)? FindEndPoint(Point center, (int, Point) startPoint, Point p1, Point p2)
+        {
+            var dir1 = PointMath.DoubledTriangleSquareBy3Dots(center, startPoint.Item2, p1) < 0;
+            var dir2 = PointMath.DoubledTriangleSquareBy3Dots(center, startPoint.Item2, p2) < 0;
+
+            if (dir1 && dir2)
+            {
+                var intersect1 = PointMath.SegmentIntersectsSegment(center, p1, startPoint.Item2, p2);
+                var intersect2 = PointMath.SegmentIntersectsSegment(center, p2, startPoint.Item2, p1);
+                if (!intersect1 && !intersect2)
+                {
+                    var dist1 = PointMath.DistanceSquare(center, p1);
+                    var dist2 = PointMath.DistanceSquare(center, p2);
+                    return dist1 < dist2 ? (startPoint.Item1, p1) : (startPoint.Item1, p2);
+                }
+                else if (!intersect2)
+                {
+                    return (startPoint.Item1, p2);
+                }
+                else if (!intersect1)
+                {
+                    return (startPoint.Item1, p1);
+                }
+                else
+                {
+                    throw new Exception("Cant decide which point is better.");
+                }
+            }
+            else if (dir1)
+            {
+                return (startPoint.Item1, p1);
+            }
+            else if (dir2)
+            {
+                return (startPoint.Item1, p2);
+            }
+
+            return null;
+        }
+
     }
 }

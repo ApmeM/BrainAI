@@ -193,5 +193,38 @@ namespace BrainAI.Pathfinding
 
             Assert.IsNull(pathData);
         }
+
+        [Test]
+        public void PathFindingForDifferentSizes()
+        {
+            for (var ArrayLength = 0; ArrayLength < 30; ArrayLength++)
+            {
+                var graph = new GridGraph(ArrayLength, ArrayLength, true);
+                int x;
+                int y;
+                for (var step = 0; step < ArrayLength / 4 - 1; step++)
+                {
+                    x = step * 4;
+                    for (y = x + 1; y < ArrayLength - 1; y++)
+                    {
+                        graph.Walls.Add(new Point(x, y));
+                        graph.Walls.Add(new Point(x + 1, y));
+                    }
+
+                    y = step * 4 + 2;
+                    for (x = y + 1; x < ArrayLength - 1; x++)
+                    {
+                        graph.Walls.Add(new Point(x, y));
+                        graph.Walls.Add(new Point(x, y + 1));
+                    }
+                }
+
+                var strightEdge = new StrightEdgeGraph();
+                var pathfinder = new AStarPathfinder<Point>(strightEdge);
+                GridToStrightEdgeConverter.Default.BuildGraph(graph, strightEdge);
+                var pathData = pathfinder.Search(new Point(0, 0), new Point(ArrayLength - 1, ArrayLength - 1));
+                Assert.NotNull(pathData);
+            }
+        }
     }
 }

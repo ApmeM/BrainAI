@@ -1,7 +1,5 @@
 ﻿namespace BrainAI.Tests
 {
-    using System;
-    using System.Collections.Generic;
     using BrainAI.Pathfinding;
 
     using NUnit.Framework;
@@ -21,165 +19,6 @@
         {
             var result = PointMath.DoubledTriangleSquareBy3Dots(new Point(0, 1), new Point(0, 0), new Point(1, 0));
             Assert.AreEqual(1, result);
-        }
-
-        [Test]
-        public void DoubledTriangleSquareBy3Dots_DotPodPerpendicular()
-        {
-            var result1 = PointMath.DoubledTriangleSquareBy3Dots(new Point(0, 1), new Point(0, 0), new Point(1, 0));
-            var result2 = PointMath.DotProdFor2VecotrsWithOneOrigin(new Point(0, 1), new Point(0, 0), new Point(0, 1));
-            Assert.AreEqual(result1, result2);
-        }
-
-        [Test]
-        public void PointToLineDistSq()
-        {
-            var result = PointMath.PointToLineDistSq(new Point(-1, -1), new Point(0, 1), new Point(1, 0));
-            Assert.AreEqual(4.5, result);
-        }
-
-        [Test]
-        public void PointWithinPolygon_Inside()
-        {
-            var l = new Lookup<int, Point>{
-                {1, new Point(0, -1)},
-                {1, new Point(0, 1)},
-                {1, new Point(2, 0)},
-            };
-
-            var result = PointMath.PointWithinPolygon(l[1], new Point(1, 0));
-            Assert.AreEqual(true, result);
-        }
-
-        [Test]
-        public void PointWithinPolygon_Outside()
-        {
-            var l = new Lookup<int, Point>{
-                {1, new Point(0, -1)},
-                {1, new Point(0, 1)},
-                {1, new Point(2, 0)},
-            };
-            var result = PointMath.PointWithinPolygon(l[1], new Point(10, 0));
-            Assert.AreEqual(false, result);
-        }
-
-        [Test]
-        public void PointWithinPolygon_Vertex()
-        {
-            var l = new Lookup<int, Point>{
-                {1, new Point(0, -1)},
-                {1, new Point(0, 1)},
-                {1, new Point(2, 0)},
-            };
-            var result = PointMath.PointWithinPolygon(l[1], new Point(2, 0));
-            Assert.AreEqual(true, result);
-        }
-
-        [Test]
-        public void PointWithinPolygon_Edge()
-        {
-            var l = new Lookup<int, Point>{
-                {1, new Point(0, 0)},
-                {1, new Point(0, 1)},
-                {1, new Point(2, 0)},
-            };
-            var result = PointMath.PointWithinPolygon(l[1], new Point(1, 0));
-            Assert.AreEqual(true, result);
-        }
-
-        [Test]
-        public void SegmentIntersectsPolygon_IntersectsEdge()
-        {
-            var l = new Lookup<int, Point>{
-                {1, new Point(0, 0)},
-                {1, new Point(0, 1)},
-                {1, new Point(2, 0)},
-            };
-            var result = PointMath.SegmentIntersectsPolygon(l[1], new Point(1, -1), new Point(1, 1), true);
-            Assert.AreEqual(true, result);
-        }
-
-        [Test]
-        public void SegmentIntersectsPolygon_NotIntersectsEdge()
-        {
-            var l = new Lookup<int, Point>{
-                {1, new Point(0, 0)},
-                {1, new Point(0, 1)},
-                {1, new Point(2, 0)},
-            };
-            var result = PointMath.SegmentIntersectsPolygon(l[1], new Point(1, -1), new Point(1, -2), true);
-            Assert.AreEqual(false, result);
-        }
-
-        [Test]
-        public void SegmentIntersectsPolygon_IntersectsWithVertex()
-        {
-            var l = new Lookup<int, Point>{
-                {1, new Point(0, 0)},
-                {1, new Point(0, 1)},
-                {1, new Point(2, 0)},
-            };
-
-            var result = PointMath.SegmentIntersectsPolygon(l[1], new Point(2, -1), new Point(2, 2), false);
-            Assert.AreEqual(true, result);
-        }
-
-        [Test]
-        public void SegmentIntersectsPolygon_IntersectsWithVertexButNoNeed()
-        {
-            var l = new Lookup<int, Point>{
-                {1, new Point(0, 0)},
-                {1, new Point(0, 1)},
-                {1, new Point(2, 0)},
-            };
-
-            var result = PointMath.SegmentIntersectsPolygon(l[1], new Point(2, -1), new Point(2, 2), true);
-            Assert.AreEqual(true, result);
-        }
-
-        [Test]
-        public void SegmentIntersectCircle_NotIntersecting()
-        {
-            var result = PointMath.SegmentIntersectCircle(
-                new Point(2, -1), new Point(2, 2),
-                new Point(0, 0), 3);
-            Assert.AreEqual(false, result);
-        }
-
-        [Test]
-        public void SegmentIntersectCircle_IntersectingOnABorder()
-        {
-            var result = PointMath.SegmentIntersectCircle(
-                new Point(2, -1), new Point(2, 2),
-                new Point(0, 0), 4);
-            Assert.AreEqual(true, result);
-        }
-
-        [Test]
-        public void SegmentIntersectCircle_FullyIntersecting()
-        {
-            var result = PointMath.SegmentIntersectCircle(
-                new Point(2, -1), new Point(2, 2),
-                new Point(0, 0), 5);
-            Assert.AreEqual(true, result);
-        }
-
-        [Test]
-        public void SegmentIntersectCircle_DirectedButNotIntersected()
-        {
-            var result = PointMath.SegmentIntersectCircle(
-                new Point(0, -10), new Point(0, -3),
-                new Point(0, 0), 4);
-            Assert.AreEqual(false, result);
-        }
-
-        [Test]
-        public void SegmentIntersectCircle_DirectedAndTouched()
-        {
-            var result = PointMath.SegmentIntersectCircle(
-                new Point(0, -10), new Point(0, -2),
-                new Point(0, 0), 4);
-            Assert.AreEqual(true, result);
         }
 
         [Test]
@@ -221,12 +60,58 @@
         }
 
         [Test]
-        public void CompareVectorsTest()
+        public void CompareVectorsTest_EqualZeroVectors()
         {
-            Assert.AreEqual(-1, PointMath.CompareVectors(new Point(0, 40), new Point(15, 15), new Point(50, 40)));
+            Assert.AreEqual(0, PointMath.CompareVectors(new Point(15, 15), new Point(15, 15), new Point(15, 15)));
+            Assert.AreEqual(1, PointMath.CompareVectors(new Point(15, 15), new Point(15, 15), new Point(-15, 15)));
+            Assert.AreEqual(-1, PointMath.CompareVectors(new Point(-15, 15), new Point(15, 15), new Point(15, 15)));
+        }
+
+        [Test]
+        public void CompareVectorsTest_ZeroY_CompareDirectionOfX()
+        {
+            Assert.AreEqual(-1, PointMath.CompareVectors(new Point(-15, 15), new Point(15, 15), new Point(20, 15)));
+            Assert.AreEqual(1, PointMath.CompareVectors(new Point(20, 15), new Point(15, 15), new Point(-15, 15)));
+            Assert.AreEqual(0, PointMath.CompareVectors(new Point(-15, 15), new Point(15, 15), new Point(-10, 15)));
+       }
+
+        [Test]
+        public void CompareVectorsTest_VectorsInDifferentHalfSphere_TopIsFirst()
+        {
+            Assert.AreEqual(-1, PointMath.CompareVectors(new Point(-16, -40), new Point(15, 15), new Point(17, 40)));
+            Assert.AreEqual(1, PointMath.CompareVectors(new Point(-19, 20), new Point(15, 15), new Point(18, -20)));
+        }
+
+        [Test]
+        public void CompareVectorsTest_VectorsInSameDirection_Equal()
+        {
             Assert.AreEqual(0, PointMath.CompareVectors(new Point(10, 0), new Point(0, 0), new Point(9, 0)));
+            Assert.AreEqual(0, PointMath.CompareVectors(new Point(-10, -10), new Point(0, 0), new Point(-12, -12)));
+            Assert.AreEqual(0, PointMath.CompareVectors(new Point(-15, 15), new Point(15, 15), new Point(-10, 15)));
+            Assert.AreEqual(0, PointMath.CompareVectors(new Point(20, 15), new Point(15, 15), new Point(25, 15)));
+            Assert.AreEqual(0, PointMath.CompareVectors(new Point(15, -15), new Point(15, 15), new Point(15, -10)));
+            Assert.AreEqual(0, PointMath.CompareVectors(new Point(15, 20), new Point(15, 15), new Point(15, 25)));
+        }
+
+        [Test]
+        public void CompareVectorsTest_VectorsTopHalfSphere_RightIsFirst()
+        {
             Assert.AreEqual(1, PointMath.CompareVectors(new Point(10, 0), new Point(0, 0), new Point(11, 1)));
             Assert.AreEqual(-1, PointMath.CompareVectors(new Point(2, 3), new Point(0, 0), new Point(1, 1)));
+        }
+
+        [Test]
+        public void CompareVectorsTest_VectorsBottomHalfSphere_LeftIsFirst()
+        {
+            Assert.AreEqual(1, PointMath.CompareVectors(new Point(10, -50), new Point(0, 0), new Point(11, -20)));
+            Assert.AreEqual(-1, PointMath.CompareVectors(new Point(10, -50), new Point(0, 0), new Point(-11, -20)));
+        }
+
+        [Test]
+        public void CompareVectorsTest_OneVectorDirectedToZero()
+        {
+            Assert.AreEqual(1, PointMath.CompareVectors(new Point(-2, 0), new Point(0, 0), new Point(10, -18)));
+            Assert.AreEqual(-1, PointMath.CompareVectors(new Point(10, -18), new Point(0, 0), new Point(-2, 0)));
         }
     }
 }

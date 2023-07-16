@@ -33,62 +33,62 @@ dotnet run --project BrainAI.Benchmark -c Release
 ```
 
 With the following result:
-|      Method | ArrayLength | UseStrightEdge | PathFindingRuns | PathfinderType |           Mean |         Error |        StdDev |         Median |            P95 | Allocated |
-|------------ |------------ |--------------- |---------------- |--------------- |---------------:|--------------:|--------------:|---------------:|---------------:|----------:|
-| Pathfinding |          10 |          False |               1 |            BFS |      26.676 us |     0.3713 us |     0.3473 us |      26.772 us |      26.969 us |         - |
-| Pathfinding |          10 |          False |               1 |       Dijkstra |      51.175 us |     1.0211 us |     2.4466 us |      49.841 us |      55.113 us |         - |
-| Pathfinding |          10 |          False |               1 |          AStar |       9.719 us |     0.0726 us |     0.0643 us |       9.696 us |       9.809 us |         - |
-| Pathfinding |          10 |          False |              10 |            BFS |     269.064 us |     0.6449 us |     0.5717 us |     269.081 us |     269.744 us |         - |
-| Pathfinding |          10 |          False |              10 |       Dijkstra |     509.135 us |     1.5010 us |     1.3306 us |     509.050 us |     510.973 us |       1 B |
-| Pathfinding |          10 |          False |              10 |          AStar |     100.940 us |     0.2035 us |     0.1903 us |     100.876 us |     101.206 us |         - |
-| Pathfinding |          10 |          False |              50 |            BFS |   1,325.226 us |     6.4410 us |     5.0287 us |   1,323.869 us |   1,333.690 us |       2 B |
-| Pathfinding |          10 |          False |              50 |       Dijkstra |   2,502.287 us |    12.9523 us |    12.1156 us |   2,499.021 us |   2,516.859 us |       3 B |
-| Pathfinding |          10 |          False |              50 |          AStar |     522.226 us |     2.8526 us |     2.6683 us |     522.161 us |     525.830 us |       1 B |
-| Pathfinding |          10 |           True |               1 |            BFS |      34.049 us |     0.2154 us |     0.4150 us |      33.946 us |      34.330 us |         - |
-| Pathfinding |          10 |           True |               1 |       Dijkstra |      61.935 us |     0.2705 us |     0.2530 us |      61.908 us |      62.335 us |         - |
-| Pathfinding |          10 |           True |               1 |          AStar |      17.696 us |     0.1113 us |     0.1041 us |      17.725 us |      17.811 us |         - |
-| Pathfinding |          10 |           True |              10 |            BFS |     267.850 us |     1.1917 us |     1.1147 us |     267.722 us |     269.662 us |         - |
-| Pathfinding |          10 |           True |              10 |       Dijkstra |     521.001 us |     1.1029 us |     0.9210 us |     520.771 us |     522.277 us |       1 B |
-| Pathfinding |          10 |           True |              10 |          AStar |     112.877 us |     2.1738 us |     5.9874 us |     109.325 us |     122.950 us |         - |
-| Pathfinding |          10 |           True |              50 |            BFS |   1,321.059 us |    17.9173 us |    34.0896 us |   1,313.688 us |   1,427.462 us |       2 B |
-| Pathfinding |          10 |           True |              50 |       Dijkstra |   2,684.310 us |    10.7980 us |     9.5722 us |   2,684.841 us |   2,698.006 us |       3 B |
-| Pathfinding |          10 |           True |              50 |          AStar |     511.128 us |    10.1200 us |    21.3466 us |     499.801 us |     554.360 us |       1 B |
-| Pathfinding |          50 |          False |               1 |            BFS |   1,023.317 us |     0.9996 us |     0.9350 us |   1,023.150 us |   1,024.634 us |       2 B |
-| Pathfinding |          50 |          False |               1 |       Dijkstra |   1,502.961 us |     4.2612 us |     3.7775 us |   1,502.539 us |   1,507.690 us |       2 B |
-| Pathfinding |          50 |          False |               1 |          AStar |     134.658 us |     0.4475 us |     0.4186 us |     134.616 us |     135.291 us |         - |
-| Pathfinding |          50 |          False |              10 |            BFS |  10,700.253 us |    50.3373 us |    44.6227 us |  10,709.098 us |  10,757.115 us |      13 B |
-| Pathfinding |          50 |          False |              10 |       Dijkstra |  15,001.758 us |    30.8403 us |    28.8480 us |  15,005.544 us |  15,042.619 us |      26 B |
-| Pathfinding |          50 |          False |              10 |          AStar |   1,335.091 us |     3.5452 us |     3.1427 us |   1,335.023 us |   1,339.298 us |       2 B |
-| Pathfinding |          50 |          False |              50 |            BFS |  51,132.841 us |    46.5494 us |    43.5424 us |  51,120.757 us |  51,197.873 us |      82 B |
-| Pathfinding |          50 |          False |              50 |       Dijkstra |  75,856.325 us |   288.6234 us |   269.9785 us |  75,809.130 us |  76,301.801 us |     758 B |
-| Pathfinding |          50 |          False |              50 |          AStar |   7,355.819 us |   132.2865 us |   241.8934 us |   7,455.821 us |   7,541.490 us |      13 B |
-| Pathfinding |          50 |           True |               1 |            BFS |   1,613.221 us |    31.7675 us |    43.4837 us |   1,632.070 us |   1,650.149 us |       2 B |
-| Pathfinding |          50 |           True |               1 |       Dijkstra |   2,158.922 us |     8.4397 us |     7.8945 us |   2,158.617 us |   2,170.139 us |       3 B |
-| Pathfinding |          50 |           True |               1 |          AStar |     660.985 us |     3.0724 us |     2.8740 us |     661.980 us |     664.371 us |       1 B |
-| Pathfinding |          50 |           True |              10 |            BFS |  10,853.880 us |    26.2956 us |    24.5970 us |  10,851.483 us |  10,889.583 us |      13 B |
-| Pathfinding |          50 |           True |              10 |       Dijkstra |  16,474.230 us |    66.0608 us |    58.5612 us |  16,486.654 us |  16,546.103 us |      26 B |
-| Pathfinding |          50 |           True |              10 |          AStar |   2,074.850 us |     9.7943 us |     8.1786 us |   2,075.783 us |   2,086.448 us |       3 B |
-| Pathfinding |          50 |           True |              50 |            BFS |  52,062.248 us |    60.9905 us |    57.0505 us |  52,048.164 us |  52,153.807 us |   1,912 B |
-| Pathfinding |          50 |           True |              50 |       Dijkstra |  79,046.819 us |   295.5048 us |   276.4154 us |  79,075.404 us |  79,433.181 us |     136 B |
-| Pathfinding |          50 |           True |              50 |          AStar |   7,074.905 us |    44.5669 us |    39.5074 us |   7,077.113 us |   7,140.155 us |       6 B |
-| Pathfinding |         100 |          False |               1 |            BFS |   6,512.820 us |    19.7202 us |    18.4463 us |   6,513.478 us |   6,540.504 us |       6 B |
-| Pathfinding |         100 |          False |               1 |       Dijkstra |   9,087.343 us |    38.1070 us |    35.6453 us |   9,095.392 us |   9,131.073 us |      13 B |
-| Pathfinding |         100 |          False |               1 |          AStar |     448.573 us |     1.6642 us |     1.4753 us |     448.609 us |     450.696 us |         - |
-| Pathfinding |         100 |          False |              10 |            BFS |  70,208.434 us |   307.0935 us |   272.2304 us |  70,268.823 us |  70,690.866 us |     102 B |
-| Pathfinding |         100 |          False |              10 |       Dijkstra |  97,179.548 us |   435.7577 us |   407.6080 us |  97,222.472 us |  97,706.084 us |     136 B |
-| Pathfinding |         100 |          False |              10 |          AStar |   4,628.331 us |    14.2808 us |    12.6596 us |   4,627.571 us |   4,647.579 us |       6 B |
-| Pathfinding |         100 |          False |              50 |            BFS | 350,755.400 us | 1,197.4155 us |   999.8962 us | 350,994.046 us | 352,150.444 us |   5,584 B |
-| Pathfinding |         100 |          False |              50 |       Dijkstra | 455,693.376 us | 1,788.6878 us | 1,585.6251 us | 455,615.633 us | 458,165.705 us |   2,168 B |
-| Pathfinding |         100 |          False |              50 |          AStar |  21,386.565 us |   110.4555 us |    97.9159 us |  21,361.167 us |  21,562.847 us |      26 B |
-| Pathfinding |         100 |           True |               1 |            BFS |  10,019.283 us |    38.4330 us |    34.0699 us |  10,010.480 us |  10,073.312 us |      13 B |
-| Pathfinding |         100 |           True |               1 |       Dijkstra |  12,460.881 us |    71.0278 us |    66.4394 us |  12,474.942 us |  12,540.345 us |      13 B |
-| Pathfinding |         100 |           True |               1 |          AStar |   3,713.460 us |    14.3264 us |    12.6999 us |   3,711.689 us |   3,733.891 us |       3 B |
-| Pathfinding |         100 |           True |              10 |            BFS |  74,627.974 us |   230.3585 us |   192.3597 us |  74,581.330 us |  74,952.514 us |     265 B |
-| Pathfinding |         100 |           True |              10 |       Dijkstra |  95,502.810 us |   148.2677 us |   123.8103 us |  95,540.990 us |  95,635.319 us |     880 B |
-| Pathfinding |         100 |           True |              10 |          AStar |   7,606.013 us |    10.0293 us |     9.3814 us |   7,609.409 us |   7,618.126 us |       6 B |
-| Pathfinding |         100 |           True |              50 |            BFS | 325,789.926 us | 2,083.5505 us | 1,847.0132 us | 326,265.258 us | 327,782.162 us |     816 B |
-| Pathfinding |         100 |           True |              50 |       Dijkstra | 462,956.540 us | 1,313.5988 us | 1,164.4711 us | 463,222.066 us | 464,023.905 us |   2,168 B |
-| Pathfinding |         100 |           True |              50 |          AStar |  24,324.418 us |   195.9561 us |   192.4551 us |  24,303.119 us |  24,658.969 us |      26 B |
+|      Method | ArrayLength | UseStrightEdge | PathFindingRuns | PathfinderType |          Mean |        Error |        StdDev |        Median | Allocated |
+|------------ |------------ |--------------- |---------------- |--------------- |--------------:|-------------:|--------------:|--------------:|----------:|
+| Pathfinding |          10 |          False |               1 |            BFS |      27.48 us |     0.225 us |      0.188 us |      27.47 us |         - |
+| Pathfinding |          10 |          False |               1 |       Dijkstra |      53.08 us |     0.321 us |      0.268 us |      53.12 us |         - |
+| Pathfinding |          10 |          False |               1 |          AStar |      10.65 us |     0.095 us |      0.084 us |      10.66 us |         - |
+| Pathfinding |          10 |          False |              10 |            BFS |     308.56 us |     6.073 us |     12.128 us |     313.61 us |         - |
+| Pathfinding |          10 |          False |              10 |       Dijkstra |     534.09 us |     3.847 us |      3.410 us |     534.94 us |       1 B |
+| Pathfinding |          10 |          False |              10 |          AStar |     106.57 us |     1.052 us |      0.932 us |     106.30 us |         - |
+| Pathfinding |          10 |          False |              50 |            BFS |   1,490.46 us |    20.591 us |     18.254 us |   1,488.34 us |       2 B |
+| Pathfinding |          10 |          False |              50 |       Dijkstra |   2,868.28 us |    42.619 us |     35.588 us |   2,858.45 us |       3 B |
+| Pathfinding |          10 |          False |              50 |          AStar |     616.05 us |    12.154 us |     29.120 us |     621.59 us |       1 B |
+| Pathfinding |          10 |           True |               1 |            BFS |      43.59 us |     0.687 us |      0.941 us |      43.46 us |         - |
+| Pathfinding |          10 |           True |               1 |       Dijkstra |      48.36 us |     0.960 us |      1.655 us |      48.80 us |         - |
+| Pathfinding |          10 |           True |               1 |          AStar |      40.56 us |     0.337 us |      0.298 us |      40.55 us |         - |
+| Pathfinding |          10 |           True |              10 |            BFS |     143.20 us |     2.777 us |      2.598 us |     142.24 us |         - |
+| Pathfinding |          10 |           True |              10 |       Dijkstra |     184.58 us |     3.393 us |      3.174 us |     184.63 us |       1 B |
+| Pathfinding |          10 |           True |              10 |          AStar |     164.38 us |     3.255 us |      3.045 us |     164.42 us |       5 B |
+| Pathfinding |          10 |           True |              50 |            BFS |     556.81 us |     3.876 us |      3.236 us |     558.48 us |       2 B |
+| Pathfinding |          10 |           True |              50 |       Dijkstra |     622.70 us |    10.140 us |      9.959 us |     620.25 us |       1 B |
+| Pathfinding |          10 |           True |              50 |          AStar |     644.04 us |    16.588 us |     48.909 us |     627.54 us |       1 B |
+| Pathfinding |          50 |          False |               1 |            BFS |   1,233.62 us |    21.659 us |     28.163 us |   1,221.47 us |       2 B |
+| Pathfinding |          50 |          False |               1 |       Dijkstra |   1,805.66 us |    35.400 us |     48.456 us |   1,826.71 us |       2 B |
+| Pathfinding |          50 |          False |               1 |          AStar |     176.28 us |     3.518 us |      6.861 us |     178.20 us |         - |
+| Pathfinding |          50 |          False |              10 |            BFS |  13,388.71 us |   164.038 us |    145.416 us |  13,393.93 us |      13 B |
+| Pathfinding |          50 |          False |              10 |       Dijkstra |  17,315.52 us |   182.591 us |    161.862 us |  17,374.47 us |      26 B |
+| Pathfinding |          50 |          False |              10 |          AStar |   1,605.39 us |    31.486 us |     54.313 us |   1,612.98 us |       2 B |
+| Pathfinding |          50 |          False |              50 |            BFS |  65,105.64 us | 1,444.234 us |  4,258.356 us |  65,023.11 us |      91 B |
+| Pathfinding |          50 |          False |              50 |       Dijkstra |  91,905.56 us | 1,445.624 us |  2,569.595 us |  92,299.78 us |     136 B |
+| Pathfinding |          50 |          False |              50 |          AStar |   7,753.12 us |    67.315 us |     74.820 us |   7,745.57 us |      13 B |
+| Pathfinding |          50 |           True |               1 |            BFS |   2,350.71 us |    52.638 us |    154.378 us |   2,366.32 us |       3 B |
+| Pathfinding |          50 |           True |               1 |       Dijkstra |   5,120.55 us |   100.988 us |    108.057 us |   5,104.98 us |       9 B |
+| Pathfinding |          50 |           True |               1 |          AStar |   1,693.70 us |    19.544 us |     29.253 us |   1,685.44 us |       2 B |
+| Pathfinding |          50 |           True |              10 |            BFS |   3,510.59 us |    68.923 us |    103.160 us |   3,528.05 us |       3 B |
+| Pathfinding |          50 |           True |              10 |       Dijkstra |   7,614.82 us |   210.356 us |    620.240 us |   7,338.55 us |       6 B |
+| Pathfinding |          50 |           True |              10 |          AStar |   2,623.33 us |    47.774 us |     95.411 us |   2,616.92 us |       3 B |
+| Pathfinding |          50 |           True |              50 |            BFS |   8,024.46 us |   171.839 us |    506.672 us |   7,943.17 us |      13 B |
+| Pathfinding |          50 |           True |              50 |       Dijkstra |  16,944.58 us |   378.435 us |  1,115.823 us |  16,617.79 us |      26 B |
+| Pathfinding |          50 |           True |              50 |          AStar |   7,930.88 us |   122.293 us |    125.586 us |   7,910.70 us |      13 B |
+| Pathfinding |         100 |          False |               1 |            BFS |   7,980.14 us |    70.254 us |     58.665 us |   7,993.64 us |      13 B |
+| Pathfinding |         100 |          False |               1 |       Dijkstra |  12,055.17 us |   305.725 us |    901.437 us |  12,103.56 us |      13 B |
+| Pathfinding |         100 |          False |               1 |          AStar |     525.24 us |     6.481 us |     10.279 us |     526.87 us |       1 B |
+| Pathfinding |         100 |          False |              10 |            BFS |  78,220.95 us |   831.208 us |    736.844 us |  78,042.53 us |     227 B |
+| Pathfinding |         100 |          False |              10 |       Dijkstra | 130,546.07 us | 1,453.004 us |  1,359.141 us | 130,659.55 us |   1,334 B |
+| Pathfinding |         100 |          False |              10 |          AStar |   5,347.00 us |    40.068 us |     35.519 us |   5,350.75 us |       6 B |
+| Pathfinding |         100 |          False |              50 |            BFS | 401,881.39 us | 6,879.061 us | 12,048.121 us | 405,599.34 us |     816 B |
+| Pathfinding |         100 |          False |              50 |       Dijkstra | 649,048.47 us | 5,614.323 us |  4,688.214 us | 648,912.15 us |   5,256 B |
+| Pathfinding |         100 |          False |              50 |          AStar |  25,814.14 us |   491.779 us |    410.658 us |  25,716.72 us |      26 B |
+| Pathfinding |         100 |           True |               1 |            BFS |  11,398.99 us |   221.779 us |    280.480 us |  11,511.58 us |      13 B |
+| Pathfinding |         100 |           True |               1 |       Dijkstra |  33,535.46 us |   556.512 us |    493.334 us |  33,400.74 us |      51 B |
+| Pathfinding |         100 |           True |               1 |          AStar |  18,568.33 us |   384.583 us |  1,121.847 us |  18,861.15 us |      26 B |
+| Pathfinding |         100 |           True |              10 |            BFS |  14,927.35 us |   370.474 us |  1,092.351 us |  15,456.84 us |      13 B |
+| Pathfinding |         100 |           True |              10 |       Dijkstra |  39,958.63 us |   461.197 us |    385.120 us |  39,975.49 us |      51 B |
+| Pathfinding |         100 |           True |              10 |          AStar |  21,544.23 us |   489.689 us |  1,443.858 us |  21,022.65 us |      26 B |
+| Pathfinding |         100 |           True |              50 |            BFS |  25,987.00 us |   499.623 us |    442.903 us |  25,906.93 us |      26 B |
+| Pathfinding |         100 |           True |              50 |       Dijkstra |  69,629.72 us | 1,302.185 us |  1,393.323 us |  69,932.55 us |     102 B |
+| Pathfinding |         100 |           True |              50 |          AStar |  43,520.29 us |   668.145 us |    624.983 us |  43,337.43 us |      63 B |
 
 Note those allocated bytes probably related to dotnet behavior: https://github.com/dotnet/BenchmarkDotNet/pull/1543
 
