@@ -10,7 +10,7 @@
     {
         public int Heuristic(Point node, Point goal)
         {
-            return (Math.Abs(node.X - goal.X) + Math.Abs(node.Y - goal.Y)) * this.DefaultWeight;
+            return (node - goal).ManhattanLength * this.DefaultWeight;
         }
     }
 }

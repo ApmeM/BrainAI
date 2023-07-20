@@ -27,33 +27,25 @@ namespace BrainAI.Pathfinding
 
                 list.Clear();
 
-                var p0 = list.AddLast(new Point(wall.X, wall.Y));
-                var p1 = list.AddLast(new Point(wall.X + 1, wall.Y));
-                var p2 = list.AddLast(new Point(wall.X + 1, wall.Y + 1));
-                var p3 = list.AddLast(new Point(wall.X, wall.Y + 1));
+                var p0 = list.AddLast(wall);
+                var p1 = list.AddLast(wall + Point.Right);
+                var p2 = list.AddLast(wall + Point.Right + Point.Down);
+                var p3 = list.AddLast(wall + Point.Down);
 
-                DFS(graph, visited, list, wall, new Point(1, 0), p1);
-                DFS(graph, visited, list, wall, new Point(-1, 0), p3);
-                DFS(graph, visited, list, wall, new Point(0, +1), p2);
-                DFS(graph, visited, list, wall, new Point(0, -1), p0);
+                DFS(graph, visited, list, wall, Point.Right, p1);
+                DFS(graph, visited, list, wall, Point.Left, p3);
+                DFS(graph, visited, list, wall, Point.Down, p2);
+                DFS(graph, visited, list, wall, Point.Up, p0);
 
                 Cleanup(list);
 
                 foreach (var point in list)
                 {
-                    var newPoint = new Point(point.X * scale, point.Y * scale);
+                    var newPoint = point * scale;
                     result.AddPoint(obstacle, newPoint);
                 }
 
                 obstacle++;
-            }
-        }
-
-        private static void Scale(List<Point> list, int scale)
-        {
-            for (int i = 0; i < list.Count; i++)
-            {
-                list[i] = new Point(list[i].X * scale, list[i].Y * scale);
             }
         }
 
@@ -82,8 +74,8 @@ namespace BrainAI.Pathfinding
                 var next = (node.Next ?? list.First).Value;
                 var cur = node.Value;
 
-                var dir1 = new Point(cur.X - prev.X, cur.Y - prev.Y);
-                var dir2 = new Point(next.X - cur.X, next.Y - cur.Y);
+                var dir1 = cur - prev;
+                var dir2 = next - cur;
                 if (
                     Math.Sign(dir1.X) == Math.Sign(dir2.X) &&
                     Math.Sign(dir1.Y) == Math.Sign(dir2.Y)
@@ -103,7 +95,7 @@ namespace BrainAI.Pathfinding
 
         private static void DFS(GridGraph graph, HashSet<Point> visited, LinkedList<Point> list, Point p, Point direction, LinkedListNode<Point> afterNode)
         {
-            var wall = new Point(p.X + direction.X, p.Y + direction.Y);
+            var wall = p + direction;
 
             if (!graph.Walls.Contains(wall) ||
                 visited.Contains(wall))
@@ -122,37 +114,37 @@ namespace BrainAI.Pathfinding
             {
                 p0 = afterNode;
                 p3 = afterNode.Next;
-                p2 = list.AddAfter(afterNode, new Point(wall.X + 1, wall.Y + 1));
-                p1 = list.AddAfter(afterNode, new Point(wall.X + 1, wall.Y));
+                p2 = list.AddAfter(afterNode, wall + Point.Right + Point.Down);
+                p1 = list.AddAfter(afterNode, wall + Point.Right);
             }
             else if (direction.X < 0)
             {
                 p2 = afterNode;
                 p1 = afterNode.Next;
-                p0 = list.AddAfter(afterNode, new Point(wall.X, wall.Y));
-                p3 = list.AddAfter(afterNode, new Point(wall.X, wall.Y + 1));
+                p0 = list.AddAfter(afterNode, wall);
+                p3 = list.AddAfter(afterNode, wall + Point.Down);
             }
             else if (direction.Y > 0)
             {
 
                 p0 = afterNode.Next;
                 p1 = afterNode;
-                p3 = list.AddAfter(afterNode, new Point(wall.X, wall.Y + 1));
-                p2 = list.AddAfter(afterNode, new Point(wall.X + 1, wall.Y + 1));
+                p3 = list.AddAfter(afterNode, wall + Point.Down);
+                p2 = list.AddAfter(afterNode, wall + Point.Right + Point.Down);
 
             }
             else
             {
                 p3 = afterNode;
                 p2 = afterNode.Next;
-                p1 = list.AddAfter(afterNode, new Point(wall.X + 1, wall.Y));
-                p0 = list.AddAfter(afterNode, new Point(wall.X, wall.Y));
+                p1 = list.AddAfter(afterNode, wall + Point.Right);
+                p0 = list.AddAfter(afterNode, wall);
             }
 
-            DFS(graph, visited, list, wall, new Point(1, 0), p1);
-            DFS(graph, visited, list, wall, new Point(-1, 0), p3);
-            DFS(graph, visited, list, wall, new Point(0, +1), p2);
-            DFS(graph, visited, list, wall, new Point(0, -1), p0);
+            DFS(graph, visited, list, wall, Point.Right, p1);
+            DFS(graph, visited, list, wall, Point.Left, p3);
+            DFS(graph, visited, list, wall, Point.Down, p2);
+            DFS(graph, visited, list, wall, Point.Up, p0);
         }
     }
 }

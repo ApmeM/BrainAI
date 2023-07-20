@@ -64,7 +64,7 @@
 
         public int Heuristic(Point node, Point goal)
         {
-            return Math.Abs(node.X - goal.X) + Math.Abs(node.Y - goal.Y);
+            return (node - goal).ManhattanLength * this.DefaultWeight;
         }
 
         private bool IsNodeInBounds(Point node)

@@ -35,10 +35,10 @@ namespace BrainAI.Pathfinding
         {
             sortByAngleFromPoint = (((int, Point) first, (int, Point) second) =>
             {
-                var result = PointMath.CompareVectors(first.Item2, wrapper.p, second.Item2);
+                 var result = (first.Item2-wrapper.p).CompareTo(second.Item2-wrapper.p);
                 if (result == 0)
                 {
-                    result = Math.Sign(PointMath.DistanceSquare(wrapper.p, first.Item2) - PointMath.DistanceSquare(wrapper.p, second.Item2));
+                    result = Math.Sign((wrapper.p - first.Item2).LengthQuad - (wrapper.p - second.Item2).LengthQuad);
                 }
                 return result;
 
@@ -95,7 +95,7 @@ namespace BrainAI.Pathfinding
 
                         obstacleConnections[(obstacle, point.Value)] = (pointPrev.Value, pointNext);
 
-                        var triangleSquare = PointMath.DoubledTriangleSquareBy3Dots(point.Value, pointPrev.Value, pointNext);
+                        var triangleSquare = (pointNext-pointPrev.Value).Cross(point.Value-pointPrev.Value);
                         totalAreaX2 += triangleSquare;
 
                         if (triangleSquare > 0)
