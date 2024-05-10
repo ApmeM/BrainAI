@@ -31,7 +31,6 @@
             this.StartNewSearch(start);
 
             tmpGoals.Add(goal);
-            graph.BeforeSearch(start, tmpGoals);
 
             return ContinueSearch();
         }
@@ -45,7 +44,6 @@
             {
                 this.tmpGoals.Add(goal);
             }
-            graph.BeforeSearch(start, tmpGoals);
 
             return ContinueSearch();
         }
@@ -54,8 +52,6 @@
         {
             this.PrepareSearch();
             this.StartNewSearch(start);
-
-            graph.BeforeSearch(start, tmpGoals);
 
             InternalSearch(additionalDepth);
         }
@@ -66,7 +62,6 @@
             this.StartNewSearch(start);
 
             this.tmpGoals.Add(goal);
-            graph.BeforeSearch(start, tmpGoals);
 
             return ContinueSearch(additionalDepth);
         }
@@ -80,7 +75,6 @@
             {
                 this.tmpGoals.Add(goal);
             }
-            graph.BeforeSearch(start, tmpGoals);
 
             return ContinueSearch(additionalDepth);
         }

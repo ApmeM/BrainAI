@@ -77,10 +77,6 @@
             return !this.Walls.Contains(node);
         }
 
-        public void BeforeSearch(Point nodeStart, HashSet<Point> nodeEnd)
-        {
-        }
-
         private StringBuilder sb = new StringBuilder();
 
         public override string ToString()

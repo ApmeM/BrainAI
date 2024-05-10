@@ -33,16 +33,16 @@ namespace BrainAI.Pathfinding
 
         public StrightEdgeGraph()
         {
-            sortByAngleFromPoint = (((int, Point) first, (int, Point) second) =>
+            sortByAngleFromPoint = ((int, Point) first, (int, Point) second) =>
             {
-                 var result = (first.Item2-wrapper.p).CompareTo(second.Item2-wrapper.p);
+                var result = (first.Item2 - wrapper.p).CompareTo(second.Item2 - wrapper.p);
                 if (result == 0)
                 {
                     result = Math.Sign((wrapper.p - first.Item2).LengthQuad - (wrapper.p - second.Item2).LengthQuad);
                 }
                 return result;
 
-            });
+            };
 
         }
 
@@ -95,7 +95,7 @@ namespace BrainAI.Pathfinding
 
                         obstacleConnections[(obstacle, point.Value)] = (pointPrev.Value, pointNext);
 
-                        var triangleSquare = (pointNext-pointPrev.Value).Cross(point.Value-pointPrev.Value);
+                        var triangleSquare = (pointNext - pointPrev.Value).Cross(point.Value - pointPrev.Value);
                         totalAreaX2 += triangleSquare;
 
                         if (triangleSquare > 0)
@@ -121,6 +121,26 @@ namespace BrainAI.Pathfinding
 
             this.obstacleDirty.Clear();
             this.connections.Clear();
+        }
+
+        public Point FindClosestVisiblePoint(Point p)
+        {
+            this.ApplyChanges();
+            this.tempConnections.Clear();
+            this.FindConnections(p, tempConnections);
+
+            var minDistance = float.MaxValue;
+            var closestPoint = p;
+
+            foreach (var connect in tempConnections[p])
+            {
+                if (connect.LengthQuad < minDistance){
+                    minDistance = connect.LengthQuad;
+                    closestPoint = connect;
+                }
+            }
+
+            return closestPoint;
         }
 
         private void FindConnections(Point p, Lookup<Point, Point> reachablepoints)
@@ -227,13 +247,11 @@ namespace BrainAI.Pathfinding
 
         public List<Point> GetNeighbors(Point point)
         {
-            this.tempNeighbors.Clear();
-            foreach (var p in tempConnections[point])
-            {
-                this.tempNeighbors.Add(p);
-            }
+            this.ApplyChanges();
 
-            if (!connections.Contains(point) && point != start && !ends.Contains(point))
+            this.tempNeighbors.Clear();
+
+            if (!connections.Contains(point))
             {
                 FindConnections(point, connections);
             }
@@ -245,46 +263,6 @@ namespace BrainAI.Pathfinding
 
             Log($"Neighbours for point {point}: {(string.Join(", ", this.tempNeighbors))}");
             return this.tempNeighbors;
-        }
-        private Point start;
-        private HashSet<Point> ends;
-        public void BeforeSearch(Point start, HashSet<Point> ends)
-        {
-            this.start = start;
-            this.ends = ends;
-
-            this.ApplyChanges();
-            this.tempConnections.Clear();
-            // Connect the startpoint to its reachable points and vice versa
-            this.FindConnections(start, this.tempConnections);
-            foreach (var end in ends)
-            {
-                if (this.points.Count == 0)
-                {
-                    // No obstacles on a map. Join start and end point directly.
-                    this.tempConnections.Add(start, end);
-                    this.tempConnections.Add(end, start);
-                    continue;
-                }
-
-                // ToDo: end is achievable from start.
-
-                // Connect the endpoint to its reachable points and vice versa
-                this.FindConnections(end, this.tempConnections);
-
-                tempList.Clear();
-                foreach (var point in tempConnections[end])
-                {
-                    tempList.Add(point);
-                }
-                foreach (var p in tempList)
-                {
-                    tempConnections.Add(p, end);
-                }
-            }
-            Log($"Total temp connections: {this.tempConnections.Sum(a => ((Lookup<Point, Point>.Enumerable)a).Count)}");
-            Log(string.Join("\n", this.tempConnections.Select(a => $"From {a.Key} to " + string.Join(",", a))));
-            Log("-=-=-=-=-=-=-");
         }
 
         public bool needLog = false;

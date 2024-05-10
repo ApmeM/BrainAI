@@ -22,10 +22,6 @@
         {
             return this.Weights.ContainsKey((from, to)) ? this.Weights[(from, to)] : this.DefaultWeight;
         }
-
-        public void BeforeSearch(T nodeStart, HashSet<T> nodeEnd)
-        {
-        }
     }
 }
 

@@ -120,5 +120,9 @@ namespace BrainAI.Pathfinding
                 return Math.Sign((other - this).Cross(-this));
             }
         }
+
+        public override string ToString(){
+            return $"({X}, {Y})";
+        }
     }
 }

@@ -206,18 +206,18 @@ Below is the usage example for `StrightEdgeGraph`
 
 var graph = new StrightEdgeGraph();
 
-// Add some obstacles
-graph.AddObstacle(
-    new List<Point>{
-            new Point( 200, 300),
-            new Point(1000, 300),
-            new Point(1000, 500),
-            new Point( 200, 500),
-        });
+// Add 4 pointsof the same obstacle some obstacles
+graph.AddPoint(1, new Point( 200, 300));
+graph.AddPoint(1, new Point(1000, 300));
+graph.AddPoint(1, new Point(1000, 500));
+graph.AddPoint(1, new Point( 200, 500));
 
 // Calculate the path
-var path = new AstarPathfinder<Point>(graph).Search( new Point( 100, 100 ), new Point( 900, 900 ) );
-// The result will be: 100x100, 200x500, 900x900
+var start = graph.FindClosestVisiblePoint(new Point(100, 100));
+var end = graph.FindClosestVisiblePoint(new Point(900, 900));
+
+var path = new AstarPathfinder<Point>(graph).Search( start, end );
+// The result will be: 200x300, 200x500
 ```
 
 It is also possible to create `StrightEdgeGraph` from `GridGraph` as all the necessary information is available there:

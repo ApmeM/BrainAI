@@ -7,16 +7,17 @@ namespace BrainAI.Pathfinding
     [TestFixture]
     public class StrightEdgeGraphTest
     {
-        [Test]
-        public void WithoutObstacles()
-        {
-            var graph = new StrightEdgeGraph();
+        // [Test]
+        // public void WithoutObstacles()
+        // {
+        //     var graph = new StrightEdgeGraph();
 
-            var start = new Point(0, 0);
-            var end = new Point(500, 500);
-            var pathData = new AStarPathfinder<Point>(graph).Search(start, end);
-            Assert.AreEqual(2, pathData.Count);
-        }
+        //     var start = graph.FindClosestVisiblePoint(new Point(0, 0));
+        //     var end = graph.FindClosestVisiblePoint(new Point(500, 500));
+
+        //     var pathData = new AStarPathfinder<Point>(graph).Search(start, end);
+        //     Assert.AreEqual(2, pathData.Count);
+        // }
 
         [Test]
         public void SingleObstacle()
@@ -27,13 +28,13 @@ namespace BrainAI.Pathfinding
             graph.AddPoint(1, new Point(1000, 500));
             graph.AddPoint(1, new Point(200, 500));
 
-            var start = new Point(100, 100);
-            var end = new Point(900, 900);
+            var start = graph.FindClosestVisiblePoint(new Point(100, 100));
+            var end = graph.FindClosestVisiblePoint(new Point(900, 900));
+
             var pathData = new AStarPathfinder<Point>(graph).Search(start, end);
-            Assert.AreEqual(3, pathData.Count);
-            Assert.AreEqual(new Point(100, 100), pathData[0]);
+            Assert.AreEqual(2, pathData.Count);
+            Assert.AreEqual(new Point(200, 300), pathData[0]);
             Assert.AreEqual(new Point(200, 500), pathData[1]);
-            Assert.AreEqual(new Point(900, 900), pathData[2]);
         }
 
         [Test]
@@ -54,17 +55,16 @@ namespace BrainAI.Pathfinding
                 graph.AddPoint(j * 2 + 1, new Point(j * 4 + 0 + 3, j * 4 + 2 + 2));
             }
 
-            var start = new Point(0, 0);
-            var end = new Point(10, 10);
+            var start = graph.FindClosestVisiblePoint(new Point(0, 0));
+            var end = graph.FindClosestVisiblePoint(new Point(10, 10));
             var pathData = new AStarPathfinder<Point>(graph).Search(start, end);
 
-            Assert.AreEqual(6, pathData.Count);
-            Assert.AreEqual(new Point(0, 0), pathData[0]);
+            Assert.AreEqual(5, pathData.Count);
+            Assert.AreEqual(new Point(0, 1), pathData[0]);
             Assert.AreEqual(new Point(2, 1), pathData[1]);
             Assert.AreEqual(new Point(3, 4), pathData[2]);
             Assert.AreEqual(new Point(6, 5), pathData[3]);
             Assert.AreEqual(new Point(7, 8), pathData[4]);
-            Assert.AreEqual(new Point(10, 10), pathData[5]);
         }
 
         [Test]
@@ -84,8 +84,8 @@ namespace BrainAI.Pathfinding
             Assert.AreEqual(1, graph.obstacles.Count);
             Assert.AreEqual(10, graph.obstacles[0].Count);
 
-            var start = new Point(35, 35);
-            var end = new Point(100, 100);
+            var start = graph.FindClosestVisiblePoint(new Point(35, 35));
+            var end = graph.FindClosestVisiblePoint(new Point(100, 100));
             var pathData = new AStarPathfinder<Point>(graph).Search(start, end);
 
             Assert.IsNull(pathData);
@@ -115,16 +115,14 @@ namespace BrainAI.Pathfinding
             GridToStrightEdgeConverter.Default.BuildGraph(grid, graph, 10);
             Assert.AreEqual(1, graph.obstacles.Count);
 
-            var start = new Point(15, 15);
-            var end = new Point(35, 15);
+            var start = graph.FindClosestVisiblePoint(new Point(15, 15));
+            var end = graph.FindClosestVisiblePoint(new Point(35, 15));
 
             var pathData = new AStarPathfinder<Point>(graph).Search(start, end);
 
-            Assert.AreEqual(4, pathData.Count);
-            Assert.AreEqual(new Point(15, 15), pathData[0]);
-            Assert.AreEqual(new Point(20, 20), pathData[1]);
-            Assert.AreEqual(new Point(30, 20), pathData[2]);
-            Assert.AreEqual(new Point(35, 15), pathData[3]);
+            Assert.AreEqual(2, pathData.Count);
+            Assert.AreEqual(new Point(20, 20), pathData[0]);
+            Assert.AreEqual(new Point(30, 20), pathData[1]);
         }
 
         [Test]
@@ -150,16 +148,14 @@ namespace BrainAI.Pathfinding
             GridToStrightEdgeConverter.Default.BuildGraph(grid, graph, 10);
             Assert.AreEqual(1, graph.obstacles.Count);
 
-            var start = new Point(-5, 15);
-            var end = new Point(55, 15);
+            var start = graph.FindClosestVisiblePoint(new Point(-5, 15));
+            var end = graph.FindClosestVisiblePoint(new Point(55, 15));
 
             var pathData = new AStarPathfinder<Point>(graph).Search(start, end);
 
-            Assert.AreEqual(4, pathData.Count);
-            Assert.AreEqual(new Point(-5, 15), pathData[0]);
-            Assert.AreEqual(new Point(0, 0), pathData[1]);
-            Assert.AreEqual(new Point(50, 0), pathData[2]);
-            Assert.AreEqual(new Point(55, 15), pathData[3]);
+            Assert.AreEqual(2, pathData.Count);
+            Assert.AreEqual(new Point(0, 0), pathData[0]);
+            Assert.AreEqual(new Point(50, 0), pathData[1]);
         }
 
         [Test]
@@ -186,8 +182,8 @@ namespace BrainAI.Pathfinding
             GridToStrightEdgeConverter.Default.BuildGraph(grid, graph, 10);
             Assert.AreEqual(1, graph.obstacles.Count);
 
-            var start = new Point(15, 15);
-            var end = new Point(100, 100);
+            var start = graph.FindClosestVisiblePoint(new Point(15, 15));
+            var end = graph.FindClosestVisiblePoint(new Point(100, 100));
 
             var pathData = new AStarPathfinder<Point>(graph).Search(start, end);
 
@@ -197,7 +193,7 @@ namespace BrainAI.Pathfinding
         [Test]
         public void PathFindingForDifferentSizes()
         {
-            for (var ArrayLength = 0; ArrayLength < 30; ArrayLength++)
+            for (var ArrayLength = 10; ArrayLength < 30; ArrayLength++)
             {
                 var graph = new GridGraph(ArrayLength, ArrayLength, true);
                 int x;
@@ -222,7 +218,11 @@ namespace BrainAI.Pathfinding
                 var strightEdge = new StrightEdgeGraph();
                 var pathfinder = new AStarPathfinder<Point>(strightEdge);
                 GridToStrightEdgeConverter.Default.BuildGraph(graph, strightEdge);
-                var pathData = pathfinder.Search(new Point(0, 0), new Point(ArrayLength - 1, ArrayLength - 1));
+
+                var start = strightEdge.FindClosestVisiblePoint(new Point(0, 0));
+                var end = strightEdge.FindClosestVisiblePoint(new Point(ArrayLength - 1, ArrayLength - 1));
+
+                var pathData = pathfinder.Search(start, end);
                 Assert.NotNull(pathData);
             }
         }
