@@ -11,7 +11,7 @@ namespace BrainAI.Pathfinding
         private readonly Dictionary<(int, Point), (Point, Point)> obstacleConnections = new Dictionary<(int, Point), (Point, Point)>();
         private readonly HashSet<(int, Point)> isConcave = new HashSet<(int, Point)>();
         private readonly HashSet<((int, Point), (int, Point))> unfinishedLines = new HashSet<((int, Point), (int, Point))>();
-        private readonly List<((int, Point), (int, Point))> linesToRemove = new List<((int, Point), (int, Point))>();
+        private readonly List<((int, Point), (int, Point))> finishedLines = new List<((int, Point), (int, Point))>();
 
         private readonly List<(int, Point)> candidates = new List<(int, Point)>();
 
@@ -22,7 +22,7 @@ namespace BrainAI.Pathfinding
         // Following temp* fields are temporal and are cleared before usage.
         private readonly Lookup<Point, Point> tempConnections = new Lookup<Point, Point>(true);
         private readonly List<Point> tempNeighbors = new List<Point>();
-        private readonly List<Point> tempList = new List<Point>();
+        private readonly HashSet<Point> tempList = new HashSet<Point>();
         private PointWrapper wrapper = new PointWrapper();
         private Comparison<(int, Point)> sortByAngleFromPoint;
 
@@ -43,7 +43,6 @@ namespace BrainAI.Pathfinding
                 return result;
 
             };
-
         }
 
         public void Clear()
@@ -123,24 +122,20 @@ namespace BrainAI.Pathfinding
             this.connections.Clear();
         }
 
-        public Point FindClosestVisiblePoint(Point p)
+        public HashSet<Point> FindVisiblePoints(Point p)
         {
             this.ApplyChanges();
             this.tempConnections.Clear();
             this.FindConnections(p, tempConnections);
 
-            var minDistance = float.MaxValue;
-            var closestPoint = p;
+            tempList.Clear();
 
             foreach (var connect in tempConnections[p])
             {
-                if (connect.LengthQuad < minDistance){
-                    minDistance = connect.LengthQuad;
-                    closestPoint = connect;
-                }
+                tempList.Add(connect);
             }
 
-            return closestPoint;
+            return tempList;
         }
 
         private void FindConnections(Point p, Lookup<Point, Point> reachablepoints)
@@ -162,14 +157,14 @@ namespace BrainAI.Pathfinding
                 var nextPoint = PointMath.FindEndPoint(p, point2, obstacleConnections[point2].Item1, obstacleConnections[point2].Item2);
                 LogIf(nextPoint != null, $"-- {point2.Item2} is the starting point for segment {(point2.Item2, nextPoint?.Item2)}. Number of segments left: {unfinishedLines.Count}");
 
-                linesToRemove.Clear();
+                finishedLines.Clear();
                 foreach (var segment in unfinishedLines)
                 {
                     if (segment.Item2 == point2)
                     {
                         // We found end of the unfinished line - remove line from hash.
                         // No need to check intersection of this point with this segment.
-                        linesToRemove.Add(segment);
+                        finishedLines.Add(segment);
                         continue;
                     }
 
@@ -191,7 +186,7 @@ namespace BrainAI.Pathfinding
                     candidates.Add(point2);
                 }
 
-                foreach (var lineToRemove in linesToRemove)
+                foreach (var lineToRemove in finishedLines)
                 {
                     unfinishedLines.Remove(lineToRemove);
                     Log($"-- {point2.Item2} is the final point for segment {(lineToRemove.Item1.Item2, lineToRemove.Item2.Item2)}. Number of segments left: {unfinishedLines.Count}");
@@ -203,7 +198,7 @@ namespace BrainAI.Pathfinding
                 }
             }
 
-            Log($"Found {candidates.Count} candidates:{(string.Join(",", candidates))}");
+            Log($"Found {candidates.Count} candidates:{string.Join(",", candidates)}");
             // After loop through all points we might still have unfinished lines.
             // Need to check all potential connections for those lines.
             // Also check that those candidates are not directed inside polygon.
@@ -261,7 +256,7 @@ namespace BrainAI.Pathfinding
                 this.tempNeighbors.Add(p);
             }
 
-            Log($"Neighbours for point {point}: {(string.Join(", ", this.tempNeighbors))}");
+            Log($"Neighbours for point {point}: {string.Join(", ", this.tempNeighbors)}");
             return this.tempNeighbors;
         }
 
@@ -280,6 +275,29 @@ namespace BrainAI.Pathfinding
             {
                 Log(text);
             }
+        }
+
+        public bool IsVisible(Point start, Point end)
+        {
+            this.ApplyChanges();
+            wrapper.p = start;
+            points.Sort(sortByAngleFromPoint);
+            foreach (var point2 in points)
+            {
+                var nextPoint = PointMath.FindEndPoint(start, point2, obstacleConnections[point2].Item1, obstacleConnections[point2].Item2);
+                if (nextPoint == null)
+                {
+                    continue;
+                }
+
+                var segmentIntersectPoint2 = PointMath.SegmentIntersectsSegment(start, end, point2.Item2, nextPoint.Value.Item2);
+                if (segmentIntersectPoint2)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

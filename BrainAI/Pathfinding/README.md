@@ -33,62 +33,33 @@ dotnet run --project BrainAI.Benchmark -c Release
 ```
 
 With the following result:
-|      Method | ArrayLength | UseStrightEdge | PathFindingRuns | PathfinderType |           Mean |         Error |        StdDev |         Median | Allocated |
-|------------ |------------ |--------------- |---------------- |--------------- |---------------:|--------------:|--------------:|---------------:|----------:|
-| Pathfinding |          10 |          False |               1 |            BFS |      19.155 us |     0.0554 us |     0.0518 us |      19.159 us |         - |
-| Pathfinding |          10 |          False |               1 |       Dijkstra |      38.052 us |     0.2686 us |     0.2381 us |      38.095 us |         - |
-| Pathfinding |          10 |          False |               1 |          AStar |       8.231 us |     0.0202 us |     0.0189 us |       8.229 us |         - |
-| Pathfinding |          10 |          False |              10 |            BFS |     189.587 us |     1.1289 us |     1.0007 us |     189.546 us |         - |
-| Pathfinding |          10 |          False |              10 |       Dijkstra |     390.890 us |     1.0295 us |     0.9126 us |     390.659 us |         - |
-| Pathfinding |          10 |          False |              10 |          AStar |      81.006 us |     0.6442 us |     0.5029 us |      81.013 us |         - |
-| Pathfinding |          10 |          False |              50 |            BFS |     954.884 us |     1.7725 us |     1.5713 us |     955.019 us |       1 B |
-| Pathfinding |          10 |          False |              50 |       Dijkstra |   1,912.335 us |     6.1702 us |     5.1524 us |   1,910.986 us |       3 B |
-| Pathfinding |          10 |          False |              50 |          AStar |     413.984 us |     1.6436 us |     1.6143 us |     414.152 us |         - |
-| Pathfinding |          10 |           True |               1 |            BFS |      33.620 us |     0.1962 us |     0.1835 us |      33.641 us |         - |
-| Pathfinding |          10 |           True |               1 |       Dijkstra |      36.157 us |     0.6131 us |     0.9724 us |      35.912 us |         - |
-| Pathfinding |          10 |           True |               1 |          AStar |      31.199 us |     0.1012 us |     0.0845 us |      31.164 us |       1 B |
-| Pathfinding |          10 |           True |              10 |            BFS |     104.313 us |     0.5688 us |     0.4441 us |     104.222 us |         - |
-| Pathfinding |          10 |           True |              10 |       Dijkstra |     121.497 us |     1.0003 us |     0.7809 us |     121.270 us |       1 B |
-| Pathfinding |          10 |           True |              10 |          AStar |     116.071 us |     2.2480 us |     3.4999 us |     117.298 us |         - |
-| Pathfinding |          10 |           True |              50 |            BFS |     407.197 us |     5.5142 us |     5.1580 us |     405.984 us |         - |
-| Pathfinding |          10 |           True |              50 |       Dijkstra |     480.515 us |     1.9971 us |     1.5592 us |     480.244 us |      18 B |
-| Pathfinding |          10 |           True |              50 |          AStar |     456.502 us |     2.0076 us |     1.7797 us |     455.938 us |       2 B |
-| Pathfinding |          50 |          False |               1 |            BFS |     390.706 us |     1.1021 us |     0.8605 us |     390.659 us |         - |
-| Pathfinding |          50 |          False |               1 |       Dijkstra |     804.307 us |    15.1645 us |    19.1782 us |     813.230 us |       1 B |
-| Pathfinding |          50 |          False |               1 |          AStar |      64.997 us |     1.2637 us |     1.7716 us |      65.747 us |         - |
-| Pathfinding |          50 |          False |              10 |            BFS |   3,877.194 us |    76.4613 us |   152.7015 us |   3,800.986 us |       3 B |
-| Pathfinding |          50 |          False |              10 |       Dijkstra |   8,094.760 us |   155.4436 us |   185.0445 us |   8,215.428 us |      13 B |
-| Pathfinding |          50 |          False |              10 |          AStar |     629.147 us |    10.8188 us |    10.1199 us |     631.574 us |       1 B |
-| Pathfinding |          50 |          False |              50 |            BFS |  20,857.442 us |    57.3558 us |    47.8947 us |  20,855.471 us |      26 B |
-| Pathfinding |          50 |          False |              50 |       Dijkstra |  37,938.707 us |   396.1959 us |   486.5641 us |  38,010.646 us |      68 B |
-| Pathfinding |          50 |          False |              50 |          AStar |   3,144.514 us |    61.8260 us |    68.7194 us |   3,191.002 us |       3 B |
-| Pathfinding |          50 |           True |               1 |            BFS |   1,222.268 us |     6.3542 us |     5.6328 us |   1,222.455 us |       2 B |
-| Pathfinding |          50 |           True |               1 |       Dijkstra |   2,941.100 us |     9.7403 us |     8.6345 us |   2,941.703 us |       3 B |
-| Pathfinding |          50 |           True |               1 |          AStar |     965.920 us |     7.7331 us |     7.2335 us |     965.637 us |      18 B |
-| Pathfinding |          50 |           True |              10 |            BFS |   1,790.751 us |    13.1503 us |    10.9811 us |   1,784.942 us |       3 B |
-| Pathfinding |          50 |           True |              10 |       Dijkstra |   4,155.120 us |    13.7839 us |    11.5102 us |   4,153.934 us |       6 B |
-| Pathfinding |          50 |           True |              10 |          AStar |   1,460.836 us |     5.1378 us |     4.5545 us |   1,461.115 us |       2 B |
-| Pathfinding |          50 |           True |              50 |            BFS |   4,558.160 us |    90.3630 us |   184.5877 us |   4,440.283 us |       6 B |
-| Pathfinding |          50 |           True |              50 |       Dijkstra |   9,871.654 us |   107.2216 us |   100.2952 us |   9,865.504 us |      13 B |
-| Pathfinding |          50 |           True |              50 |          AStar |   4,163.580 us |    27.3683 us |    25.6003 us |   4,163.484 us |       6 B |
-| Pathfinding |         100 |          False |               1 |            BFS |   2,483.591 us |    19.8876 us |    16.6070 us |   2,481.188 us |       3 B |
-| Pathfinding |         100 |          False |               1 |       Dijkstra |   3,894.520 us |     9.6774 us |     8.5788 us |   3,896.026 us |       3 B |
-| Pathfinding |         100 |          False |               1 |          AStar |     179.502 us |     0.9007 us |     0.8425 us |     179.322 us |         - |
-| Pathfinding |         100 |          False |              10 |            BFS |  22,589.469 us |   334.2733 us |   260.9786 us |  22,526.070 us |      26 B |
-| Pathfinding |         100 |          False |              10 |       Dijkstra |  41,341.992 us |   205.9528 us |   182.5718 us |  41,272.038 us |      68 B |
-| Pathfinding |         100 |          False |              10 |          AStar |   1,683.755 us |    24.5760 us |    21.7860 us |   1,691.098 us |       2 B |
-| Pathfinding |         100 |          False |              50 |            BFS | 125,735.818 us | 1,081.4026 us | 1,011.5447 us | 125,551.980 us |     540 B |
-| Pathfinding |         100 |          False |              50 |       Dijkstra | 188,074.048 us |   826.0569 us |   732.2779 us | 188,217.476 us |     475 B |
-| Pathfinding |         100 |          False |              50 |          AStar |   8,286.484 us |    81.2525 us |    86.9392 us |   8,289.346 us |      13 B |
-| Pathfinding |         100 |           True |               1 |            BFS |   5,259.559 us |    31.0538 us |    25.9313 us |   5,247.139 us |       6 B |
-| Pathfinding |         100 |           True |               1 |       Dijkstra |  14,986.735 us |   102.4844 us |    85.5791 us |  14,954.563 us |      26 B |
-| Pathfinding |         100 |           True |               1 |          AStar |   8,352.387 us |    43.8859 us |    41.0509 us |   8,354.614 us |      13 B |
-| Pathfinding |         100 |           True |              10 |            BFS |   6,765.001 us |    26.5032 us |    23.4944 us |   6,758.410 us |       6 B |
-| Pathfinding |         100 |           True |              10 |       Dijkstra |  18,232.532 us |    39.6492 us |    37.0879 us |  18,235.182 us |      28 B |
-| Pathfinding |         100 |           True |              10 |          AStar |  10,775.457 us |    68.2771 us |    63.8664 us |  10,760.647 us |      13 B |
-| Pathfinding |         100 |           True |              50 |            BFS |  13,345.381 us |    68.2701 us |    57.0086 us |  13,355.093 us |      13 B |
-| Pathfinding |         100 |           True |              50 |       Dijkstra |  34,759.267 us |   164.7298 us |   154.0884 us |  34,762.349 us |      54 B |
-| Pathfinding |         100 |           True |              50 |          AStar |  22,395.569 us |   447.8772 us |   697.2908 us |  21,999.400 us |      26 B |
+
+|      Method |   MapSize |   GraphType |  RunsCount | PathfinderType |          Mean |         Error |        StdDev |        Median | Allocated |
+|------------ |---------- |------------ |----------- |--------------- |--------------:|--------------:|--------------:|--------------:|----------:|
+| Pathfinding | Small_Map |        Grid | Single_Run |            BFS |     10.536 us |     0.0241 us |     0.0201 us |     10.534 us |         - |
+| Pathfinding | Small_Map |        Grid | Single_Run |       Dijkstra |     20.356 us |     0.0627 us |     0.0489 us |     20.354 us |         - |
+| Pathfinding | Small_Map |        Grid | Single_Run |          AStar |      6.304 us |     0.0296 us |     0.0262 us |      6.307 us |         - |
+| Pathfinding | Small_Map |        Grid |  Multi_Run |            BFS |    528.040 us |     1.4537 us |     1.2887 us |    528.158 us |       1 B |
+| Pathfinding | Small_Map |        Grid |  Multi_Run |       Dijkstra |  1,022.049 us |     1.2233 us |     1.0215 us |  1,021.768 us |       2 B |
+| Pathfinding | Small_Map |        Grid |  Multi_Run |          AStar |    315.511 us |     0.8892 us |     0.8317 us |    315.340 us |         - |
+| Pathfinding | Small_Map | StrightEdge | Single_Run |            BFS |      1.074 us |     0.0027 us |     0.0025 us |      1.074 us |         - |
+| Pathfinding | Small_Map | StrightEdge | Single_Run |       Dijkstra |      1.572 us |     0.0070 us |     0.0058 us |      1.573 us |         - |
+| Pathfinding | Small_Map | StrightEdge | Single_Run |          AStar |      1.116 us |     0.0099 us |     0.0083 us |      1.117 us |         - |
+| Pathfinding | Small_Map | StrightEdge |  Multi_Run |            BFS |     54.328 us |     1.0842 us |     1.8410 us |     53.257 us |         - |
+| Pathfinding | Small_Map | StrightEdge |  Multi_Run |       Dijkstra |     73.962 us |     0.3187 us |     0.2661 us |     73.982 us |         - |
+| Pathfinding | Small_Map | StrightEdge |  Multi_Run |          AStar |     56.830 us |     0.7733 us |     0.6037 us |     56.817 us |         - |
+| Pathfinding | Large_Map |        Grid | Single_Run |            BFS |    586.147 us |     2.0184 us |     1.7893 us |    586.383 us |       1 B |
+| Pathfinding | Large_Map |        Grid | Single_Run |       Dijkstra |  1,094.835 us |     7.8513 us |     7.3441 us |  1,092.305 us |       2 B |
+| Pathfinding | Large_Map |        Grid | Single_Run |          AStar |     82.236 us |     0.3322 us |     0.3107 us |     82.195 us |         - |
+| Pathfinding | Large_Map |        Grid |  Multi_Run |            BFS | 31,506.632 us |   153.7770 us |   136.3193 us | 31,463.148 us |      51 B |
+| Pathfinding | Large_Map |        Grid |  Multi_Run |       Dijkstra | 56,491.047 us | 1,119.2601 us | 1,960.2937 us | 55,324.941 us |      91 B |
+| Pathfinding | Large_Map |        Grid |  Multi_Run |          AStar |  4,025.165 us |    74.8224 us |    73.4856 us |  4,066.758 us |       7 B |
+| Pathfinding | Large_Map | StrightEdge | Single_Run |            BFS |     35.132 us |     0.4308 us |     0.4030 us |     35.294 us |         - |
+| Pathfinding | Large_Map | StrightEdge | Single_Run |       Dijkstra |    102.068 us |     0.4420 us |     0.3918 us |    102.098 us |         - |
+| Pathfinding | Large_Map | StrightEdge | Single_Run |          AStar |     35.200 us |     0.3344 us |     0.2792 us |     35.308 us |         - |
+| Pathfinding | Large_Map | StrightEdge |  Multi_Run |            BFS |  1,829.183 us |    35.8304 us |    59.8645 us |  1,796.778 us |       3 B |
+| Pathfinding | Large_Map | StrightEdge |  Multi_Run |       Dijkstra |  5,191.182 us |    15.9122 us |    14.1058 us |  5,189.956 us |       6 B |
+| Pathfinding | Large_Map | StrightEdge |  Multi_Run |          AStar |  1,838.879 us |    36.7060 us |    64.2876 us |  1,874.565 us |       2 B |
 
 Note those allocated bytes probably related to dotnet behavior: https://github.com/dotnet/BenchmarkDotNet/pull/1543
 
@@ -200,24 +171,74 @@ var path = new AstarPathfinder<Point>(graph).Search( new Point( 3, 4 ), new Poin
 
 Usage examples for `GridGraph`, `EdgesGraph` and `EdgesPointGraph` can be found above.
 
-Below is the usage example for `StrightEdgeGraph`
+`StrightEdgeGraph` is more complex and in some cases requires additional handling. Below is the usage example for `StrightEdgeGraph`
 
 ```csharp
 
+// Create a graph with 4 points of the single obstacle
 var graph = new StrightEdgeGraph();
-
-// Add 4 pointsof the same obstacle some obstacles
-graph.AddPoint(1, new Point( 200, 300));
+graph.AddPoint(1, new Point(200, 300));
 graph.AddPoint(1, new Point(1000, 300));
 graph.AddPoint(1, new Point(1000, 500));
-graph.AddPoint(1, new Point( 200, 500));
+graph.AddPoint(1, new Point(200, 500));
 
-// Calculate the path
-var start = graph.FindClosestVisiblePoint(new Point(100, 100));
-var end = graph.FindClosestVisiblePoint(new Point(900, 900));
+var pathData = DoSearch(graph, new Point(100, 100), new Point(900, 900));
 
-var path = new AstarPathfinder<Point>(graph).Search( start, end );
-// The result will be: 200x300, 200x500
+// The result will be: 100x100, 200x500, 900x900
+private List<Point> DoSearch_UsedInReadme(StrightEdgeGraph graph, Point start, Point end)
+{
+    // Check if end is visible from start.
+    if (graph.IsVisible(start, end))
+    {
+        return new List<Point> { start, end };
+    }
+
+    // Find closest visible start point to start from.
+    var starts = graph.FindVisiblePoints(start).OrderBy(a => (a - start).LengthQuad).ToList();
+    // Find all visible nodes to end point.
+    var ends = new HashSet<Point>(graph.FindVisiblePoints(end));
+    if (!starts.Any() || !ends.Any())
+    {
+        // It might happen that there are no visible points for the following reasons:
+        // 1. Graph is empty. In this case start and end are directly connected.
+        // 2. If the rounding walls looks like well (all visible points are concave).
+        return null;
+    }
+
+    // Do the search.
+    // WARNING: Do not use Astar here as AStar is not really multigoal search as it have a heuristics calculations based on a single target. Instead it took first goal from set and tries to get to it. 
+    // If you want to use AStar here - please provide the exact end goal point (e.g. find the closest points from all the visible points and use it).
+    var pathData = new WeightedPathfinder<Point>(graph).Search(starts.First(), ends);
+    if (pathData == null)
+    {
+        // Path not found.
+        return null;
+    }
+
+    // As we start from closest start point it might happen that some further points are also visible and we can remove them from the list.
+    var found = false;
+    for (var i = pathData.Count; i > 0; i--)
+    {
+        if (found)
+        {
+            pathData.RemoveAt(i - 1);
+            continue;
+        }
+        found = starts.Contains(pathData[i - 1]);
+    }
+
+    // Add start and end points if they are not on the graph.
+    if (pathData[pathData.Count - 1] != end)
+    {
+        pathData.Add(end);
+    }
+    if (pathData[0] != start)
+    {
+        pathData.Insert(0, start);
+    }
+    return pathData;
+}
+
 ```
 
 It is also possible to create `StrightEdgeGraph` from `GridGraph` as all the necessary information is available there:

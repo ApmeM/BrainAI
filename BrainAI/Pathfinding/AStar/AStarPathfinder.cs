@@ -37,6 +37,9 @@
             return ContinueSearch();
         }
 
+        /// AStar is not really multigoal search as it have a heuristics calculations based on a single target.
+        /// Instead it took first goal from set and tries to get to it. 
+        /// Each ContinueSearch will select next goal from set if previous was reached.
         public List<T> Search(T start, HashSet<T> goals)
         {
             this.PrepareSearch();
@@ -50,9 +53,6 @@
             return ContinueSearch();
         }
 
-        /// AStar is not really multigoal search as it have a heuristics calculations based on a single target.
-        /// Instead it took first goal from set and tries to get to it. 
-        /// Each ContinueSearch will select next goal from set if previous was reached.
         public List<T> Search(T start, T goal, int additionalDepth)
         {
             this.PrepareSearch();

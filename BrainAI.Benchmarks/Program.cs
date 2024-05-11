@@ -18,60 +18,81 @@ public class Program
         AStar,
     }
 
-    [Params(10, 50, 100)]
-    public int ArrayLength { get; set; } = 50;
+    public enum GraphTypes
+    {
+        Grid,
+        StrightEdge,
+    }
 
-    [Params(false, true)]
-    public bool UseStrightEdge { get; set; } = true;
+    public enum RunsCountType
+    {
+        Single_Run = 1,
+        Multi_Run = 50,
+    }
 
-    [Params(1, 10, 50)]
-    public int PathFindingRuns { get; set; } = 10;
+    public enum MapSizeType
+    {
+        Small_Map = 8,
+        Large_Map = 60,
+    }
+
+    [Params(MapSizeType.Small_Map, MapSizeType.Large_Map)]
+    public MapSizeType MapSize { get; set; } = MapSizeType.Small_Map;
+
+    [Params(GraphTypes.Grid, GraphTypes.StrightEdge)]
+    public GraphTypes GraphType { get; set; } = GraphTypes.StrightEdge;
+
+    [Params(RunsCountType.Single_Run, RunsCountType.Multi_Run)]
+    public RunsCountType RunsCount { get; set; } = RunsCountType.Multi_Run;
 
     [Params(PathfinderTypes.BFS, PathfinderTypes.Dijkstra, PathfinderTypes.AStar)]
     public PathfinderTypes PathfinderType { get; set; } = PathfinderTypes.AStar;
 
     private IPathfinder<Point>? pathfinder;
-    private GridGraph? graph;
-    private StrightEdgeGraph strightEdge = new StrightEdgeGraph();
+    private GridGraph? gridGraph;
+    private StrightEdgeGraph strightEdgeGraph = new StrightEdgeGraph();
 
     [GlobalSetup]
     public void Setup()
     {
-        this.graph = new GridGraph(ArrayLength, ArrayLength, true);
+        this.gridGraph = new GridGraph((int)this.MapSize, (int)this.MapSize, true);
         int x;
         int y;
-        for (var step = 0; step < ArrayLength / 4 - 1; step++)
+        for (var step = 0; step < (int)this.MapSize / 4 - 1; step++)
         {
             x = step * 4;
-            for (y = x + 1; y < ArrayLength - 1; y++)
+            for (y = x + 1; y < (int)this.MapSize - 1; y++)
             {
-                graph.Walls.Add(new Point(x, y));
-                graph.Walls.Add(new Point(x + 1, y));
+                gridGraph.Walls.Add(new Point(x, y));
+                gridGraph.Walls.Add(new Point(x + 1, y));
             }
 
             y = step * 4 + 2;
-            for (x = y + 1; x < ArrayLength - 1; x++)
+            for (x = y + 1; x < (int)this.MapSize - 1; x++)
             {
-                graph.Walls.Add(new Point(x, y));
-                graph.Walls.Add(new Point(x, y + 1));
+                gridGraph.Walls.Add(new Point(x, y));
+                gridGraph.Walls.Add(new Point(x, y + 1));
             }
         }
+        GridToStrightEdgeConverter.Default.BuildGraph(gridGraph!, strightEdgeGraph);
+
+        var graph = GraphType == GraphTypes.Grid ? (IAstarGraph<Point>)gridGraph : (IAstarGraph<Point>)strightEdgeGraph;
 
         switch (this.PathfinderType)
         {
             case PathfinderTypes.BFS:
                 {
-                    this.pathfinder = new BreadthFirstPathfinder<Point>(UseStrightEdge ? strightEdge : graph);
+                    this.pathfinder = new BreadthFirstPathfinder<Point>(graph);
                 }
                 break;
             case PathfinderTypes.Dijkstra:
                 {
-                    this.pathfinder = new WeightedPathfinder<Point>(UseStrightEdge ? strightEdge : graph);
+                    this.pathfinder = new WeightedPathfinder<Point>(graph);
                 }
                 break;
             case PathfinderTypes.AStar:
                 {
-                    this.pathfinder = new AStarPathfinder<Point>(UseStrightEdge ? strightEdge : graph);
+                    this.pathfinder = new AStarPathfinder<Point>(graph);
                 }
                 break;
             default:
@@ -82,14 +103,11 @@ public class Program
     [Benchmark]
     public void Pathfinding()
     {
-        if (UseStrightEdge)
+        var start = this.GraphType == GraphTypes.Grid ? new Point(0, 0) : new Point(0, 1);
+        var end = this.GraphType == GraphTypes.Grid ? new Point((int)MapSize - 1, (int)MapSize - 1) : new Point((int)MapSize - 5, (int)MapSize - 4);
+        for (var i = 0; i < (int)this.RunsCount; i++)
         {
-            GridToStrightEdgeConverter.Default.BuildGraph(graph!, strightEdge);
-        }
-
-        for (var i = 0; i < this.PathFindingRuns; i++)
-        {
-            var pathData = this.pathfinder!.Search(new Point(0, 0), new Point(ArrayLength - 1, ArrayLength - 1));
+            var pathData = this.pathfinder!.Search(start, end);
             if (pathData == null)
             {
                 throw new System.Exception("Path not found.");
