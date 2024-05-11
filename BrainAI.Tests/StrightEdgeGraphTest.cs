@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
@@ -241,9 +240,11 @@ namespace BrainAI.Pathfinding
             }
 
             // Find closest visible start point to start from.
-            var starts = graph.FindVisiblePoints(start).OrderBy(a => (a - start).LengthQuad).ToList();
+            HashSet<Point> starts = null;
+            graph.FindVisiblePoints(start, ref starts);
             // Find all visible nodes to end point.
-            var ends = new HashSet<Point>(graph.FindVisiblePoints(end));
+            HashSet<Point> ends = null;
+            graph.FindVisiblePoints(end, ref ends);
             if (!starts.Any() || !ends.Any())
             {
                 // It might happen that there are no visible points for the following reasons:
@@ -255,7 +256,7 @@ namespace BrainAI.Pathfinding
             // Do the search.
             // WARNING: Do not use Astar here as AStar is not really multigoal search as it have a heuristics calculations based on a single target. Instead it took first goal from set and tries to get to it. 
             // If you want to use AStar here - please provide the exact end goal point (e.g. find the closest points from all the visible points and use it).
-            var pathData = new WeightedPathfinder<Point>(graph).Search(starts.First(), ends);
+            var pathData = new WeightedPathfinder<Point>(graph).Search(starts.OrderBy(a => (a - start).LengthQuad).First(), ends);
             if (pathData == null)
             {
                 // Path not found.

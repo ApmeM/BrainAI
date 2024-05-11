@@ -21,7 +21,6 @@ namespace BrainAI.Pathfinding
 
         // Following temp* fields are temporal and are cleared before usage.
         private readonly Lookup<Point, Point> tempConnections = new Lookup<Point, Point>(true);
-        private readonly HashSet<Point> tempList = new HashSet<Point>();
         private PointWrapper wrapper = new PointWrapper();
         private Comparison<(int, Point)> sortByAngleFromPoint;
 
@@ -121,20 +120,22 @@ namespace BrainAI.Pathfinding
             this.connections.Clear();
         }
 
-        public HashSet<Point> FindVisiblePoints(Point p)
+        public void FindVisiblePoints(Point p, ref HashSet<Point> result)
         {
             this.ApplyChanges();
             this.tempConnections.Clear();
             this.FindConnections(p, tempConnections);
 
-            tempList.Clear();
+            if (result == null)
+            {
+                result = new HashSet<Point>();
+            }
+            result.Clear();
 
             foreach (var connect in tempConnections[p])
             {
-                tempList.Add(connect);
+                result.Add(connect);
             }
-
-            return tempList;
         }
 
         private void FindConnections(Point p, Lookup<Point, Point> reachablepoints)
