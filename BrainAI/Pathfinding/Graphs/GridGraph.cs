@@ -34,7 +34,6 @@
         public readonly int Width, Height;
 
         private readonly Point[] dirs;
-        private readonly List<Point> neighbors = new List<Point>(4);
 
         public GridGraph(int width, int height, bool allowDiagonalSearch = false)
         {
@@ -43,18 +42,22 @@
             this.dirs = allowDiagonalSearch ? CompassDirs : CardinalDirs;
         }
 
-        public List<Point> GetNeighbors(Point node)
+        public void GetNeighbors(Point node, ref List<Point> result)
         {
-            this.neighbors.Clear();
+            if (result == null)
+            {
+                result = new List<Point>();
+            }
+            result.Clear();
 
             foreach (var dir in this.dirs)
             {
                 var next = new Point(node.X + dir.X, node.Y + dir.Y);
                 if (this.IsNodeInBounds(next) && this.IsNodePassable(next))
-                    this.neighbors.Add(next);
+                {
+                    result.Add(next);
+                }
             }
-
-            return this.neighbors;
         }
 
         public int Cost(Point from, Point to)

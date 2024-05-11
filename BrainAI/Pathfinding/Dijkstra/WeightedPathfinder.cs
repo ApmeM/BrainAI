@@ -22,7 +22,7 @@
 
         private readonly PriorityQueue<(int, T), int> frontier = new PriorityQueue<(int, T), int>();
 
-        private static readonly Comparison<(int, T)> Comparison = (x, y) => x.Item1 - y.Item1;
+        private List<T> neighbours;
 
         public WeightedPathfinder(IWeightedGraph<T> graph)
         {
@@ -114,7 +114,9 @@
 
                 frontier.Dequeue();
 
-                foreach (var next in graph.GetNeighbors(current.Item2))
+                graph.GetNeighbors(current.Item2, ref neighbours);
+
+                foreach (var next in neighbours)
                 {
                     var newCost = costSoFar[current.Item2] + graph.Cost(current.Item2, next);
                     if (!costSoFar.ContainsKey(next) || newCost < costSoFar[next])

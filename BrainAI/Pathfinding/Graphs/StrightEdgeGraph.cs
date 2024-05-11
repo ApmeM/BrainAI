@@ -21,7 +21,6 @@ namespace BrainAI.Pathfinding
 
         // Following temp* fields are temporal and are cleared before usage.
         private readonly Lookup<Point, Point> tempConnections = new Lookup<Point, Point>(true);
-        private readonly List<Point> tempNeighbors = new List<Point>();
         private readonly HashSet<Point> tempList = new HashSet<Point>();
         private PointWrapper wrapper = new PointWrapper();
         private Comparison<(int, Point)> sortByAngleFromPoint;
@@ -240,24 +239,27 @@ namespace BrainAI.Pathfinding
             return Math.Abs(from.X - to.X) + Math.Abs(from.Y - to.Y);
         }
 
-        public List<Point> GetNeighbors(Point point)
+        public void GetNeighbors(Point node, ref List<Point> result)
         {
             this.ApplyChanges();
 
-            this.tempNeighbors.Clear();
-
-            if (!connections.Contains(point))
+            if (result == null)
             {
-                FindConnections(point, connections);
+                result = new List<Point>();
+            }
+            result.Clear();
+
+            if (!connections.Contains(node))
+            {
+                FindConnections(node, connections);
             }
 
-            foreach (var p in connections[point])
+            foreach (var p in connections[node])
             {
-                this.tempNeighbors.Add(p);
+                result.Add(p);
             }
 
-            Log($"Neighbours for point {point}: {string.Join(", ", this.tempNeighbors)}");
-            return this.tempNeighbors;
+            Log($"Neighbours for point {node}: {string.Join(", ", result)}");
         }
 
         public bool needLog = false;

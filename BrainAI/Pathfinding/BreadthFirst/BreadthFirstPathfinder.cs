@@ -19,6 +19,7 @@
         private readonly List<T> resultPath = new List<T>();
 
         private readonly Queue<T> frontier = new Queue<T>();
+        private List<T> neighbours;
 
         public BreadthFirstPathfinder(IUnweightedGraph<T> graph)
         {
@@ -109,8 +110,10 @@
                 }
 
                 frontier.Dequeue();
-
-                foreach (var next in graph.GetNeighbors(current))
+                
+                graph.GetNeighbors(current, ref neighbours);
+                
+                foreach (var next in neighbours)
                 {
                     if (!VisitedNodes.ContainsKey(next))
                     {

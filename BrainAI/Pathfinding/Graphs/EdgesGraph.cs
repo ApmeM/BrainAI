@@ -13,9 +13,15 @@
 
         public int DefaultWeight = 1;
 
-        public List<T> GetNeighbors(T node)
+        public void GetNeighbors(T node, ref List<T> result)
         {
-            return this.Edges[node];
+            if (result == null)
+            {
+                result = new List<T>();
+            }
+            result.Clear();
+
+            result.AddRange(this.Edges[node]);
         }
 
         public int Cost(T from, T to)

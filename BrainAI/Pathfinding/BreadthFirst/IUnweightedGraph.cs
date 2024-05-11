@@ -12,7 +12,7 @@
         /// </summary>
         /// <returns>The neighbors.</returns>
         /// <param name="node">Node.</param>
-        List<T> GetNeighbors( T node );
+        void GetNeighbors( T node, ref List<T> result );
     }
 }
 

@@ -1,7 +1,5 @@
 ﻿namespace BrainAI.Pathfinding
 {
-    using System;
-
     /// <summary>
     /// Basic implementation Graph with edges for Point type. 
     /// In addition to basic EdgesGraph it can have a heuristic that helps in pathfinding
