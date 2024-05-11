@@ -27,8 +27,8 @@
             new Point( 1, 1 ),
         };
 
-        public HashSet<Point> Walls = new HashSet<Point>();
-        public Dictionary<Point, int> Weights = new Dictionary<Point, int>();
+        public readonly HashSet<Point> Walls = new HashSet<Point>();
+        public readonly Dictionary<Point, int> Weights = new Dictionary<Point, int>();
         public int DefaultWeight = 1;
 
         public readonly int Width, Height;

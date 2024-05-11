@@ -8,8 +8,8 @@
     /// </summary>
     public class EdgesGraph<T> : IWeightedGraph<T>
     {
-        public Dictionary<T, List<T>> Edges = new Dictionary<T, List<T>>();
-        public Dictionary<(T, T), int> Weights = new Dictionary<(T, T), int>();
+        public readonly Dictionary<T, List<T>> Edges = new Dictionary<T, List<T>>();
+        public readonly Dictionary<(T, T), int> Weights = new Dictionary<(T, T), int>();
 
         public int DefaultWeight = 1;
 

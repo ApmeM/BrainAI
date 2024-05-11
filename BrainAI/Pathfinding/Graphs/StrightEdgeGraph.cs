@@ -10,19 +10,18 @@ namespace BrainAI.Pathfinding
         private readonly List<(int, Point)> points = new List<(int, Point)>();
         private readonly Dictionary<(int, Point), (Point, Point)> obstacleConnections = new Dictionary<(int, Point), (Point, Point)>();
         private readonly HashSet<(int, Point)> isConcave = new HashSet<(int, Point)>();
-        private readonly HashSet<((int, Point), (int, Point))> unfinishedLines = new HashSet<((int, Point), (int, Point))>();
-        private readonly List<((int, Point), (int, Point))> finishedLines = new List<((int, Point), (int, Point))>();
-
-        private readonly List<(int, Point)> candidates = new List<(int, Point)>();
-
         internal readonly Lookup<int, Point> obstacles = new Lookup<int, Point>();
         private readonly HashSet<int> obstacleDirty = new HashSet<int>();
         private readonly Lookup<Point, Point> connections = new Lookup<Point, Point>(true);
 
-        // Following temp* fields are temporal and are cleared before usage.
-        private readonly Lookup<Point, Point> tempConnections = new Lookup<Point, Point>(true);
         private PointWrapper wrapper = new PointWrapper();
         private Comparison<(int, Point)> sortByAngleFromPoint;
+
+        // Following temp* fields are temporal and are cleared before usage.
+        private readonly HashSet<((int, Point), (int, Point))> tempUnfinishedLines = new HashSet<((int, Point), (int, Point))>();
+        private readonly List<((int, Point), (int, Point))> tempFinishedLines = new List<((int, Point), (int, Point))>();
+        private readonly Lookup<Point, Point> tempConnections = new Lookup<Point, Point>(true);
+        private readonly List<(int, Point)> tempCandidates = new List<(int, Point)>();
 
         private class PointWrapper
         {
@@ -143,8 +142,8 @@ namespace BrainAI.Pathfinding
             Log($"=-=-=-=-=-=-=-=");
             wrapper.p = p;
             points.Sort(sortByAngleFromPoint);
-            unfinishedLines.Clear();
-            candidates.Clear();
+            tempUnfinishedLines.Clear();
+            tempCandidates.Clear();
             Log($"Finding connections for point {p}. Sorted list of points around: {string.Join(", ", points.Select(a => a.Item2))}");
             foreach (var point2 in points)
             {
@@ -155,16 +154,16 @@ namespace BrainAI.Pathfinding
                 LogIf(invalidCandidate, $"-- {point2.Item2} is either same, concave or directed inside polygon.");
 
                 var nextPoint = PointMath.FindEndPoint(p, point2, obstacleConnections[point2].Item1, obstacleConnections[point2].Item2);
-                LogIf(nextPoint != null, $"-- {point2.Item2} is the starting point for segment {(point2.Item2, nextPoint?.Item2)}. Number of segments left: {unfinishedLines.Count}");
+                LogIf(nextPoint != null, $"-- {point2.Item2} is the starting point for segment {(point2.Item2, nextPoint?.Item2)}. Number of segments left: {tempUnfinishedLines.Count}");
 
-                finishedLines.Clear();
-                foreach (var segment in unfinishedLines)
+                tempFinishedLines.Clear();
+                foreach (var segment in tempUnfinishedLines)
                 {
                     if (segment.Item2 == point2)
                     {
                         // We found end of the unfinished line - remove line from hash.
                         // No need to check intersection of this point with this segment.
-                        finishedLines.Add(segment);
+                        tempFinishedLines.Add(segment);
                         continue;
                     }
 
@@ -183,29 +182,29 @@ namespace BrainAI.Pathfinding
                 if (!invalidCandidate)
                 {
                     Log($"-- {point2.Item2} is a new candidate. No intersection found between {p} and {point2.Item2}.");
-                    candidates.Add(point2);
+                    tempCandidates.Add(point2);
                 }
 
-                foreach (var lineToRemove in finishedLines)
+                foreach (var lineToRemove in tempFinishedLines)
                 {
-                    unfinishedLines.Remove(lineToRemove);
-                    Log($"-- {point2.Item2} is the final point for segment {(lineToRemove.Item1.Item2, lineToRemove.Item2.Item2)}. Number of segments left: {unfinishedLines.Count}");
+                    tempUnfinishedLines.Remove(lineToRemove);
+                    Log($"-- {point2.Item2} is the final point for segment {(lineToRemove.Item1.Item2, lineToRemove.Item2.Item2)}. Number of segments left: {tempUnfinishedLines.Count}");
                 }
 
                 if (nextPoint != null)
                 {
-                    unfinishedLines.Add((point2, nextPoint.Value));
+                    tempUnfinishedLines.Add((point2, nextPoint.Value));
                 }
             }
 
-            Log($"Found {candidates.Count} candidates:{string.Join(",", candidates)}");
+            Log($"Found {tempCandidates.Count} candidates:{string.Join(",", tempCandidates)}");
             // After loop through all points we might still have unfinished lines.
             // Need to check all potential connections for those lines.
             // Also check that those candidates are not directed inside polygon.
-            foreach (var point in candidates)
+            foreach (var point in tempCandidates)
             {
                 var intersectionFound = false;
-                foreach (var segment in unfinishedLines)
+                foreach (var segment in tempUnfinishedLines)
                 {
                     if (segment.Item2 == point || segment.Item1 == point)
                     {
