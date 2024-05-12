@@ -1,4 +1,5 @@
 ﻿using BrainAI.Pathfinding;
+using Microsoft.VisualBasic;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,16 +28,18 @@ namespace BrainAI.Tests
              _#1_
              ____
             */
-            var target = new GridGraph(10, 10, true);
-            target.Walls.Add(new Point(1, 2));
-            target.Walls.Add(new Point(2, 1));
-            target.Walls.Add(new Point(1, 0));
-            target.Walls.Add(new Point(0, 0));
-            var result = new WeightedPathfinder<Point>(target).Search(new Point(1, 1), new Point(2, 2));
+            this.graph = new GridGraph(10, 10, true);
+            this.pathfinder = new WeightedPathfinder<Point>(graph);
+
+            graph.Walls.Add(new Point(1, 2));
+            graph.Walls.Add(new Point(2, 1));
+            graph.Walls.Add(new Point(1, 0));
+            graph.Walls.Add(new Point(0, 0));
+            pathfinder.Search(new Point(1, 1), new Point(2, 2));
             CollectionAssert.AreEqual(new List<Point> {
                 new Point(1, 1),
                 new Point(2, 2)
-            }, result);
+            }, pathfinder.ResultPath);
         }
 
         [Test]
@@ -48,12 +51,12 @@ namespace BrainAI.Tests
              _#2_
             */
             graph.Walls.Add(new Point(1, 2));
-            var result = pathfinder.Search(new Point(1, 1), new Point(2, 2));
+            pathfinder.Search(new Point(1, 1), new Point(2, 2));
             CollectionAssert.AreEqual(new List<Point> {
                 new Point(1, 1),
                 new Point(2, 1),
                 new Point(2, 2)
-            }, result);
+            }, pathfinder.ResultPath);
         }
 
         [Test]
@@ -69,7 +72,7 @@ namespace BrainAI.Tests
             graph.Walls.Add(new Point(2, 1));
             graph.Walls.Add(new Point(1, 0));
             graph.Walls.Add(new Point(0, 0));
-            var result = pathfinder.Search(new Point(1, 1), new Point(2, 2));
+            pathfinder.Search(new Point(1, 1), new Point(2, 2));
             CollectionAssert.AreEqual(new List<Point> {
                 new Point(1, 1),
                 new Point(0, 1),
@@ -78,7 +81,7 @@ namespace BrainAI.Tests
                 new Point(1, 3),
                 new Point(2, 3),
                 new Point(2, 2)
-            }, result);
+            }, pathfinder.ResultPath);
         }
 
         [Test]
@@ -94,8 +97,8 @@ namespace BrainAI.Tests
             graph.Walls.Add(new Point(2, 1));
             graph.Walls.Add(new Point(1, 0));
             graph.Walls.Add(new Point(0, 1));
-            var result = pathfinder.Search(new Point(1, 1), new Point(2, 2));
-            Assert.AreEqual(null, result);
+            pathfinder.Search(new Point(1, 1), new Point(2, 2));
+            Assert.IsEmpty(pathfinder.ResultPath);
         }
 
         [Test]
@@ -164,12 +167,12 @@ namespace BrainAI.Tests
              _#2_
             */
             graph.Walls.Add(new Point(1, 2));
-            var result = pathfinder.Search(new Point(1, 1), new HashSet<Point> { new Point(3, 2), new Point(2, 2) });
+            pathfinder.Search(new Point(1, 1), new HashSet<Point> { new Point(3, 2), new Point(2, 2) });
             CollectionAssert.AreEqual(new List<Point> {
                 new Point(1, 1),
                 new Point(2, 1),
                 new Point(2, 2)
-            }, result);
+            }, pathfinder.ResultPath);
         }
 
         [Test]
@@ -182,19 +185,19 @@ namespace BrainAI.Tests
              __3_
             */
             graph.Walls.Add(new Point(1, 2));
-            var result = pathfinder.Search(new Point(1, 1), new HashSet<Point> { new Point(2, 3), new Point(2, 2) });
+            pathfinder.Search(new Point(1, 1), new HashSet<Point> { new Point(2, 3), new Point(2, 2) });
             CollectionAssert.AreEqual(new List<Point> {
                 new Point(1, 1),
                 new Point(2, 1),
                 new Point(2, 2)
-            }, result);
-            var secondResult = pathfinder.ContinueSearch();
+            }, pathfinder.ResultPath);
+            pathfinder.ContinueSearch();
             CollectionAssert.AreEqual(new List<Point> {
                 new Point(1, 1),
                 new Point(2, 1),
                 new Point(2, 2),
                 new Point(2, 3)
-            }, secondResult);
+            }, pathfinder.ResultPath);
         }
     }
 }

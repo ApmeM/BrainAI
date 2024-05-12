@@ -7,13 +7,13 @@
     {
         public Dictionary<T, T> VisitedNodes { get; } = new Dictionary<T, T>();
 
+        public List<T> ResultPath { get; set; } = new List<T>();
+
         private readonly HashSet<T> tmpGoals = new HashSet<T>();
 
         private T searchStart;
 
         private readonly IAstarGraph<T> graph;
-
-        private readonly List<T> resultPath = new List<T>();
 
         private readonly Dictionary<T, int> costSoFar = new Dictionary<T, int>();
 
@@ -26,20 +26,17 @@
             this.graph = graph;
         }
 
-        public List<T> Search(T start, T goal)
+        public void Search(T start, T goal)
         {
             this.PrepareSearch();
             this.StartNewSearch(start);
 
             tmpGoals.Add(goal);
 
-            return ContinueSearch();
+            ContinueSearch();
         }
 
-        /// AStar is not really multigoal search as it have a heuristics calculations based on a single target.
-        /// Instead it took first goal from set and tries to get to it. 
-        /// Each ContinueSearch will select next goal from set if previous was reached.
-        public List<T> Search(T start, HashSet<T> goals)
+        public void Search(T start, HashSet<T> goals)
         {
             this.PrepareSearch();
             this.StartNewSearch(start);
@@ -49,23 +46,28 @@
                 this.tmpGoals.Add(goal);
             }
 
-            return ContinueSearch();
+            ContinueSearch();
         }
 
-        public List<T> Search(T start, T goal, int additionalDepth)
+        public void Search(T start, int additionalDepth)
+        {
+            this.PrepareSearch();
+            this.StartNewSearch(start);
+
+            InternalSearch(additionalDepth);
+        }
+
+        public void Search(T start, T goal, int additionalDepth)
         {
             this.PrepareSearch();
             this.StartNewSearch(start);
 
             this.tmpGoals.Add(goal);
 
-            return ContinueSearch(additionalDepth);
+            ContinueSearch(additionalDepth);
         }
 
-        /// AStar is not really multigoal search as it have a heuristics calculations based on a single target.
-        /// Instead it took first goal from set and tries to get to it. 
-        /// Each ContinueSearch will select next goal from set if previous was reached.
-        public List<T> Search(T start, HashSet<T> goals, int additionalDepth)
+        public void Search(T start, HashSet<T> goals, int additionalDepth)
         {
             this.PrepareSearch();
             this.StartNewSearch(start);
@@ -75,23 +77,26 @@
                 this.tmpGoals.Add(goal);
             }
 
-            return ContinueSearch(additionalDepth);
+            ContinueSearch(additionalDepth);
         }
 
-        public List<T> ContinueSearch()
+        public void ContinueSearch()
         {
             if (tmpGoals.Count == 0)
             {
-                return null;
+                return;
             }
 
-            return ContinueSearch(int.MaxValue);
+            ContinueSearch(int.MaxValue);
         }
 
-        public List<T> ContinueSearch(int additionalDepth)
+        public void ContinueSearch(int additionalDepth)
         {
-            var (target, result) = InternalSearch(additionalDepth);
-            return this.BuildPath(target, result);
+            var (target, isFound) = InternalSearch(additionalDepth);
+            if (isFound)
+            {
+                PathConstructor.RecontructPath(VisitedNodes, searchStart, target, this.ResultPath);
+            }
         }
 
         private ValueTuple<T, bool> InternalSearch(int additionalDepth)
@@ -153,17 +158,6 @@
             this.VisitedNodes.Add(start, start);
             this.frontier.Enqueue(new ValueTuple<int, T>(0, start), 0);
             this.costSoFar[start] = 0;
-        }
-
-        private List<T> BuildPath(T target, bool result)
-        {
-            if (!result)
-            {
-                return null;
-            }
-
-            PathConstructor.RecontructPath(VisitedNodes, searchStart, target, resultPath);
-            return resultPath;
         }
     }
 }

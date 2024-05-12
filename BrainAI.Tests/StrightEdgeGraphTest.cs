@@ -233,18 +233,21 @@ namespace BrainAI.Pathfinding
 
         private List<Point> DoSearch_UsedInReadme(StrightEdgeGraph graph, Point start, Point end)
         {
+            var result = new List<Point>();
             // Check if end is visible from start.
             if (graph.IsVisible(start, end))
             {
-                return new List<Point> { start, end };
+                result.Add(start);
+                result.Add(end);
+                return result;
             }
 
             // Find closest visible start point to start from.
-            HashSet<Point> starts = null;
-            graph.FindVisiblePoints(start, ref starts);
+            HashSet<Point> starts = new HashSet<Point>();
+            graph.FindVisiblePoints(start, starts);
             // Find all visible nodes to end point.
-            HashSet<Point> ends = null;
-            graph.FindVisiblePoints(end, ref ends);
+            HashSet<Point> ends = new HashSet<Point>();
+            graph.FindVisiblePoints(end, ends);
             if (!starts.Any() || !ends.Any())
             {
                 // It might happen that there are no visible points for the following reasons:
@@ -256,8 +259,9 @@ namespace BrainAI.Pathfinding
             // Do the search.
             // WARNING: Do not use Astar here as AStar is not really multigoal search as it have a heuristics calculations based on a single target. Instead it took first goal from set and tries to get to it. 
             // If you want to use AStar here - please provide the exact end goal point (e.g. find the closest points from all the visible points and use it).
-            var pathData = new WeightedPathfinder<Point>(graph).Search(starts.OrderBy(a => (a - start).LengthQuad).First(), ends);
-            if (pathData == null)
+            var pathfinder = new WeightedPathfinder<Point>(graph);
+            pathfinder.Search(starts.OrderBy(a => (a - start).LengthQuad).First(), ends);
+            if (pathfinder.ResultPath.Count == 0)
             {
                 // Path not found.
                 return null;
@@ -265,26 +269,26 @@ namespace BrainAI.Pathfinding
 
             // As we start from closest start point it might happen that some further points are also visible and we can remove them from the list.
             var found = false;
-            for (var i = pathData.Count; i > 0; i--)
+            for (var i = pathfinder.ResultPath.Count; i > 0; i--)
             {
                 if (found)
                 {
-                    pathData.RemoveAt(i - 1);
+                    pathfinder.ResultPath.RemoveAt(i - 1);
                     continue;
                 }
-                found = starts.Contains(pathData[i - 1]);
+                found = starts.Contains(pathfinder.ResultPath[i - 1]);
             }
 
             // Add start and end points if they are not on the graph.
-            if (pathData[pathData.Count - 1] != end)
+            if (pathfinder.ResultPath[pathfinder.ResultPath.Count - 1] != end)
             {
-                pathData.Add(end);
+                pathfinder.ResultPath.Add(end);
             }
-            if (pathData[0] != start)
+            if (pathfinder.ResultPath[0] != start)
             {
-                pathData.Insert(0, start);
+                pathfinder.ResultPath.Insert(0, start);
             }
-            return pathData;
+            return new List<Point>(pathfinder.ResultPath);
         }
     }
 }

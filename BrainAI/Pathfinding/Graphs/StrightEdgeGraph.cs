@@ -119,16 +119,12 @@ namespace BrainAI.Pathfinding
             this.connections.Clear();
         }
 
-        public void FindVisiblePoints(Point p, ref HashSet<Point> result)
+        public void FindVisiblePoints(Point p, HashSet<Point> result)
         {
             this.ApplyChanges();
             this.tempConnections.Clear();
             this.FindConnections(p, tempConnections);
 
-            if (result == null)
-            {
-                result = new HashSet<Point>();
-            }
             result.Clear();
 
             foreach (var connect in tempConnections[p])

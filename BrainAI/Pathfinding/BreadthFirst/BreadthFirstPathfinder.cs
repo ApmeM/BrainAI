@@ -4,11 +4,13 @@
     using System.Collections.Generic;
 
     /// <summary>
-    /// calculates paths given an IUnweightedGraph and start/goal positions
+    /// Calculates paths given an IUnweightedGraph and start/goal positions
     /// </summary>
     public class BreadthFirstPathfinder<T> : IPathfinder<T>, ICoveragePathfinder<T>
     {
         public Dictionary<T, T> VisitedNodes { get; } = new Dictionary<T, T>();
+        
+        public List<T> ResultPath { get; set; } = new List<T>();
 
         private readonly HashSet<T> tmpGoals = new HashSet<T>();
 
@@ -16,27 +18,26 @@
 
         private readonly IUnweightedGraph<T> graph;
 
-        private readonly List<T> resultPath = new List<T>();
-
         private readonly Queue<T> frontier = new Queue<T>();
-        private List<T> neighbours = new List<T>();
+        
+        private readonly List<T> neighbours = new List<T>();
 
         public BreadthFirstPathfinder(IUnweightedGraph<T> graph)
         {
             this.graph = graph;
         }
 
-        public List<T> Search(T start, T goal)
+        public void Search(T start, T goal)
         {
             this.PrepareSearch();
             this.StartNewSearch(start);
 
             tmpGoals.Add(goal);
 
-            return ContinueSearch();
+            ContinueSearch();
         }
 
-        public List<T> Search(T start, HashSet<T> goals)
+        public void Search(T start, HashSet<T> goals)
         {
             this.PrepareSearch();
             this.StartNewSearch(start);
@@ -46,7 +47,7 @@
                 this.tmpGoals.Add(goal);
             }
 
-            return ContinueSearch();
+            ContinueSearch();
         }
 
         public void Search(T start, int additionalDepth)
@@ -57,17 +58,17 @@
             InternalSearch(additionalDepth);
         }
 
-        public List<T> Search(T start, T goal, int additionalDepth)
+        public void Search(T start, T goal, int additionalDepth)
         {
             this.PrepareSearch();
             this.StartNewSearch(start);
 
             this.tmpGoals.Add(goal);
 
-            return ContinueSearch(additionalDepth);
+            ContinueSearch(additionalDepth);
         }
 
-        public List<T> Search(T start, HashSet<T> goals, int additionalDepth)
+        public void Search(T start, HashSet<T> goals, int additionalDepth)
         {
             this.PrepareSearch();
             this.StartNewSearch(start);
@@ -77,25 +78,28 @@
                 this.tmpGoals.Add(goal);
             }
 
-            return ContinueSearch(additionalDepth);
+            ContinueSearch(additionalDepth);
         }
 
-        public List<T> ContinueSearch()
+        public void ContinueSearch()
         {
             if (tmpGoals.Count == 0)
             {
-                return null;
+                return;
             }
 
-            return ContinueSearch(int.MaxValue);
+            ContinueSearch(int.MaxValue);
         }
 
-        public List<T> ContinueSearch(int additionalDepth)
+        public void ContinueSearch(int additionalDepth)
         {
-            var (target, result) = InternalSearch(additionalDepth);
-            return this.BuildPath(target, result);
+            var (target, isFound) = InternalSearch(additionalDepth);
+            if (isFound)
+            {
+                PathConstructor.RecontructPath(VisitedNodes, searchStart, target, this.ResultPath);
+            }
         }
-
+        
         private ValueTuple<T, bool> InternalSearch(int additionalDepth)
         {
             while (frontier.Count > 0 && additionalDepth > 0)
@@ -138,17 +142,6 @@
             this.searchStart = start;
             this.frontier.Enqueue(start);
             this.VisitedNodes.Add(start, start);
-        }
-
-        private List<T> BuildPath(T target, bool result)
-        {
-            if (!result)
-            {
-                return null;
-            }
-
-            PathConstructor.RecontructPath(VisitedNodes, searchStart, target, resultPath);
-            return resultPath;
         }
     }
 }
