@@ -4,23 +4,26 @@
 
     public class PathConstructor
     {
-        public static void RecontructPath<T>(Dictionary<T, T> cameFrom, T start, T goal, List<T> path)
+        /// <summary>
+        /// Construct path from start to goal using visited nodes. The result is cleared and set with the constructed path.
+        /// </summary>
+        public static void RecontructPath<T>(Dictionary<T, T> visitedNodes, T start, T goal, List<T> result)
         {
-            path.Clear();
-            if (!cameFrom.ContainsKey(goal))
+            result.Clear();
+            if (!visitedNodes.ContainsKey(goal))
             {
                 return;
             }
 
             var current = goal;
-            path.Add(goal);
+            result.Add(goal);
 
             while (!EqualityComparer<T>.Default.Equals(current, start))
             {
-                current = cameFrom[current];
-                path.Add(current);
+                current = visitedNodes[current];
+                result.Add(current);
             }
-            path.Reverse();
+            result.Reverse();
         }
     }
 }
