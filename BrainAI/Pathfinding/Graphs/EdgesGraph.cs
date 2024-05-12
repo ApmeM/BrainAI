@@ -13,15 +13,14 @@
 
         public int DefaultWeight = 1;
 
-        public void GetNeighbors(T node, ref List<T> result)
+        public void GetNeighbors(T node, ICollection<T> result)
         {
-            if (result == null)
-            {
-                result = new List<T>();
-            }
             result.Clear();
 
-            result.AddRange(this.Edges[node]);
+            foreach(var edge in this.Edges[node])
+            {
+                result.Add(edge);
+            }
         }
 
         public int Cost(T from, T to)

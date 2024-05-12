@@ -22,7 +22,7 @@
 
         private readonly PriorityQueue<(int, T), int> frontier = new PriorityQueue<(int, T), int>();
 
-        private List<T> neighbours;
+        private List<T> neighbours = new List<T>();
 
         public WeightedPathfinder(IWeightedGraph<T> graph)
         {
@@ -114,7 +114,7 @@
 
                 frontier.Dequeue();
 
-                graph.GetNeighbors(current.Item2, ref neighbours);
+                graph.GetNeighbors(current.Item2, neighbours);
 
                 foreach (var next in neighbours)
                 {

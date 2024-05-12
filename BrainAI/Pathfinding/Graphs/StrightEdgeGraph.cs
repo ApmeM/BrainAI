@@ -239,14 +239,10 @@ namespace BrainAI.Pathfinding
             return Math.Abs(from.X - to.X) + Math.Abs(from.Y - to.Y);
         }
 
-        public void GetNeighbors(Point node, ref List<Point> result)
+        public void GetNeighbors(Point node, ICollection<Point> result)
         {
             this.ApplyChanges();
 
-            if (result == null)
-            {
-                result = new List<Point>();
-            }
             result.Clear();
 
             if (!connections.Contains(node))

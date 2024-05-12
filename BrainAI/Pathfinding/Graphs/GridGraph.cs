@@ -42,12 +42,8 @@
             this.dirs = allowDiagonalSearch ? CompassDirs : CardinalDirs;
         }
 
-        public void GetNeighbors(Point node, ref List<Point> result)
+        public void GetNeighbors(Point node, ICollection<Point> result)
         {
-            if (result == null)
-            {
-                result = new List<Point>();
-            }
             result.Clear();
 
             foreach (var dir in this.dirs)

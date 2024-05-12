@@ -3,16 +3,14 @@
     using System.Collections.Generic;
 
     /// <summary>
-    /// interface for a graph that can be fed to the BreadthFirstPathfinder.search method
+    /// Interface for a graph that can be fed to the BreadthFirstPathfinder.search method
     /// </summary>
     public interface IUnweightedGraph<T>
     {
         /// <summary>
-        /// The GetNeighbors method should return any neighbor nodes that can be reached from the passed in node.
+        /// The GetNeighbors method should clear the result collection and set any neighbor nodes that can be reached from the input node to the result list.
         /// </summary>
-        /// <returns>The neighbors.</returns>
-        /// <param name="node">Node.</param>
-        void GetNeighbors( T node, ref List<T> result );
+        void GetNeighbors( T node, ICollection<T> result );
     }
 }
 
