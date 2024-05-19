@@ -31,14 +31,20 @@
         public readonly Dictionary<Point, int> Weights = new Dictionary<Point, int>();
         public int DefaultWeight = 1;
 
-        public readonly int Width, Height;
+        public readonly int Left, Top, Right, Bottom;
 
         private readonly Point[] dirs;
 
-        public GridGraph(int width, int height, bool allowDiagonalSearch = false)
+        public GridGraph(int width, int height, bool allowDiagonalSearch = false) : this(0, 0, width - 1, height - 1, allowDiagonalSearch)
         {
-            this.Width = width;
-            this.Height = height;
+        }
+
+        public GridGraph(int left, int top, int right, int bottom, bool allowDiagonalSearch = false)
+        {
+            this.Left = Math.Min(left, right);
+            this.Top = Math.Min(top, bottom);
+            this.Right = Math.Max(left, right);
+            this.Bottom = Math.Max(top, bottom);
             this.dirs = allowDiagonalSearch ? CompassDirs : CardinalDirs;
         }
 
@@ -68,7 +74,7 @@
 
         private bool IsNodeInBounds(Point node)
         {
-            return 0 <= node.X && node.X < this.Width && 0 <= node.Y && node.Y < this.Height;
+            return this.Left <= node.X && node.X <= this.Right && this.Top <= node.Y && node.Y <= this.Bottom;
         }
 
         private bool IsNodePassable(Point node)
@@ -82,9 +88,9 @@
         {
             sb.Clear();
 
-            for (var y = 0; y < this.Height; y++)
+            for (var y = Left; y <= this.Right; y++)
             {
-                for (var x = 0; x < this.Width; x++)
+                for (var x = Top; x <= this.Bottom; x++)
                 {
                     var pos = new Point(x, y);
                     var isWall = this.Walls.Contains(pos);
