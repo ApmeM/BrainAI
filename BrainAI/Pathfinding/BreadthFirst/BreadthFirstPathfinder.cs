@@ -83,6 +83,7 @@
 
         public void ContinueSearch()
         {
+            this.ResultPath.Clear();
             if (tmpGoals.Count == 0)
             {
                 return;
@@ -93,6 +94,7 @@
 
         public void ContinueSearch(int additionalDepth)
         {
+            this.ResultPath.Clear();
             var (target, isFound) = InternalSearch(additionalDepth);
             if (isFound)
             {
