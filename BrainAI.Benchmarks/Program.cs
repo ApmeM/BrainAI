@@ -107,8 +107,9 @@ public class Program
         var end = this.GraphType == GraphTypes.Grid ? new Point((int)MapSize - 1, (int)MapSize - 1) : new Point((int)MapSize - 5, (int)MapSize - 4);
         for (var i = 0; i < (int)this.RunsCount; i++)
         {
-            var pathData = this.pathfinder!.Search(start, end);
-            if (pathData == null)
+            this.pathfinder!.Search(start, end);
+            var pathData = this.pathfinder!.ResultPath;
+            if (pathData.Count == 0)
             {
                 throw new System.Exception("Path not found.");
             }

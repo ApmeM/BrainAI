@@ -36,30 +36,30 @@ With the following result:
 
 |      Method |   MapSize |   GraphType |  RunsCount | PathfinderType |          Mean |         Error |        StdDev |        Median | Allocated |
 |------------ |---------- |------------ |----------- |--------------- |--------------:|--------------:|--------------:|--------------:|----------:|
-| Pathfinding | Small_Map |        Grid | Single_Run |            BFS |     10.536 us |     0.0241 us |     0.0201 us |     10.534 us |         - |
-| Pathfinding | Small_Map |        Grid | Single_Run |       Dijkstra |     20.356 us |     0.0627 us |     0.0489 us |     20.354 us |         - |
-| Pathfinding | Small_Map |        Grid | Single_Run |          AStar |      6.304 us |     0.0296 us |     0.0262 us |      6.307 us |         - |
-| Pathfinding | Small_Map |        Grid |  Multi_Run |            BFS |    528.040 us |     1.4537 us |     1.2887 us |    528.158 us |       1 B |
-| Pathfinding | Small_Map |        Grid |  Multi_Run |       Dijkstra |  1,022.049 us |     1.2233 us |     1.0215 us |  1,021.768 us |       2 B |
-| Pathfinding | Small_Map |        Grid |  Multi_Run |          AStar |    315.511 us |     0.8892 us |     0.8317 us |    315.340 us |         - |
-| Pathfinding | Small_Map | StrightEdge | Single_Run |            BFS |      1.074 us |     0.0027 us |     0.0025 us |      1.074 us |         - |
-| Pathfinding | Small_Map | StrightEdge | Single_Run |       Dijkstra |      1.572 us |     0.0070 us |     0.0058 us |      1.573 us |         - |
-| Pathfinding | Small_Map | StrightEdge | Single_Run |          AStar |      1.116 us |     0.0099 us |     0.0083 us |      1.117 us |         - |
-| Pathfinding | Small_Map | StrightEdge |  Multi_Run |            BFS |     54.328 us |     1.0842 us |     1.8410 us |     53.257 us |         - |
-| Pathfinding | Small_Map | StrightEdge |  Multi_Run |       Dijkstra |     73.962 us |     0.3187 us |     0.2661 us |     73.982 us |         - |
-| Pathfinding | Small_Map | StrightEdge |  Multi_Run |          AStar |     56.830 us |     0.7733 us |     0.6037 us |     56.817 us |         - |
-| Pathfinding | Large_Map |        Grid | Single_Run |            BFS |    586.147 us |     2.0184 us |     1.7893 us |    586.383 us |       1 B |
-| Pathfinding | Large_Map |        Grid | Single_Run |       Dijkstra |  1,094.835 us |     7.8513 us |     7.3441 us |  1,092.305 us |       2 B |
-| Pathfinding | Large_Map |        Grid | Single_Run |          AStar |     82.236 us |     0.3322 us |     0.3107 us |     82.195 us |         - |
-| Pathfinding | Large_Map |        Grid |  Multi_Run |            BFS | 31,506.632 us |   153.7770 us |   136.3193 us | 31,463.148 us |      51 B |
-| Pathfinding | Large_Map |        Grid |  Multi_Run |       Dijkstra | 56,491.047 us | 1,119.2601 us | 1,960.2937 us | 55,324.941 us |      91 B |
-| Pathfinding | Large_Map |        Grid |  Multi_Run |          AStar |  4,025.165 us |    74.8224 us |    73.4856 us |  4,066.758 us |       7 B |
-| Pathfinding | Large_Map | StrightEdge | Single_Run |            BFS |     35.132 us |     0.4308 us |     0.4030 us |     35.294 us |         - |
-| Pathfinding | Large_Map | StrightEdge | Single_Run |       Dijkstra |    102.068 us |     0.4420 us |     0.3918 us |    102.098 us |         - |
-| Pathfinding | Large_Map | StrightEdge | Single_Run |          AStar |     35.200 us |     0.3344 us |     0.2792 us |     35.308 us |         - |
-| Pathfinding | Large_Map | StrightEdge |  Multi_Run |            BFS |  1,829.183 us |    35.8304 us |    59.8645 us |  1,796.778 us |       3 B |
-| Pathfinding | Large_Map | StrightEdge |  Multi_Run |       Dijkstra |  5,191.182 us |    15.9122 us |    14.1058 us |  5,189.956 us |       6 B |
-| Pathfinding | Large_Map | StrightEdge |  Multi_Run |          AStar |  1,838.879 us |    36.7060 us |    64.2876 us |  1,874.565 us |       2 B |
+| Pathfinding | Small_Map |        Grid | Single_Run |            BFS |     24.442 us |     0.4845 us |     1.1230 us |     24.892 us |         - |
+| Pathfinding | Small_Map |        Grid | Single_Run |       Dijkstra |     29.843 us |     0.5968 us |     0.6634 us |     29.878 us |         - |
+| Pathfinding | Small_Map |        Grid | Single_Run |          AStar |      9.008 us |     0.1802 us |     0.3878 us |      9.164 us |         - |
+| Pathfinding | Small_Map |        Grid |  Multi_Run |            BFS |  1,280.551 us |    25.5894 us |    64.1988 us |  1,303.727 us |       2 B |
+| Pathfinding | Small_Map |        Grid |  Multi_Run |       Dijkstra |  1,501.176 us |    29.5683 us |    54.0673 us |  1,512.843 us |       2 B |
+| Pathfinding | Small_Map |        Grid |  Multi_Run |          AStar |    452.570 us |     9.0116 us |    19.7808 us |    461.432 us |         - |
+| Pathfinding | Small_Map | StrightEdge | Single_Run |            BFS |      3.234 us |     0.0276 us |     0.0245 us |      3.233 us |         - |
+| Pathfinding | Small_Map | StrightEdge | Single_Run |       Dijkstra |      2.269 us |     0.0450 us |     0.1034 us |      2.290 us |         - |
+| Pathfinding | Small_Map | StrightEdge | Single_Run |          AStar |      1.793 us |     0.0159 us |     0.0149 us |      1.789 us |         - |
+| Pathfinding | Small_Map | StrightEdge |  Multi_Run |            BFS |    160.997 us |     3.1973 us |     4.5855 us |    162.271 us |         - |
+| Pathfinding | Small_Map | StrightEdge |  Multi_Run |       Dijkstra |    118.141 us |     1.1586 us |     1.0271 us |    118.236 us |         - |
+| Pathfinding | Small_Map | StrightEdge |  Multi_Run |          AStar |     88.516 us |     1.7495 us |     4.4532 us |     90.549 us |         - |
+| Pathfinding | Large_Map |        Grid | Single_Run |            BFS |  1,374.749 us |    12.4010 us |    10.9932 us |  1,375.848 us |       2 B |
+| Pathfinding | Large_Map |        Grid | Single_Run |       Dijkstra |  1,714.988 us |    16.7163 us |    14.8186 us |  1,717.076 us |       2 B |
+| Pathfinding | Large_Map |        Grid | Single_Run |          AStar |    112.336 us |     2.2112 us |     4.8535 us |    110.592 us |         - |
+| Pathfinding | Large_Map |        Grid |  Multi_Run |            BFS | 72,733.293 us | 1,454.2995 us | 3,130.5332 us | 71,047.618 us |     117 B |
+| Pathfinding | Large_Map |        Grid |  Multi_Run |       Dijkstra | 78,872.639 us |   494.4383 us |   462.4979 us | 78,849.505 us |     624 B |
+| Pathfinding | Large_Map |        Grid |  Multi_Run |          AStar |  5,539.623 us |    43.8150 us |    36.5875 us |  5,526.731 us |       7 B |
+| Pathfinding | Large_Map | StrightEdge | Single_Run |            BFS |    109.160 us |     2.0753 us |     1.9412 us |    109.801 us |         - |
+| Pathfinding | Large_Map | StrightEdge | Single_Run |       Dijkstra |    173.351 us |     1.0684 us |     0.9994 us |    173.621 us |       1 B |
+| Pathfinding | Large_Map | StrightEdge | Single_Run |          AStar |     59.632 us |     1.1753 us |     2.0584 us |     60.111 us |         - |
+| Pathfinding | Large_Map | StrightEdge |  Multi_Run |            BFS |  5,818.599 us |   114.3515 us |   225.7188 us |  5,891.887 us |       6 B |
+| Pathfinding | Large_Map | StrightEdge |  Multi_Run |       Dijkstra |  9,080.278 us |   103.1797 us |    91.4661 us |  9,077.030 us |      13 B |
+| Pathfinding | Large_Map | StrightEdge |  Multi_Run |          AStar |  2,756.823 us |    15.9156 us |    14.8875 us |  2,756.441 us |       3 B |
 
 Note those allocated bytes probably related to dotnet behavior: https://github.com/dotnet/BenchmarkDotNet/pull/1543
 

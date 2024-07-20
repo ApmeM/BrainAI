@@ -1,107 +1,17 @@
 ﻿namespace BrainAI.Pathfinding
 {
     using System;
-    using System.Collections.Generic;
 
-    public class AStarPathfinder<T> : IPathfinder<T>
+    public class AStarPathfinder<T> : Pathfinder<T>
     {
-        public Dictionary<T, T> VisitedNodes { get; } = new Dictionary<T, T>();
-
-        public List<T> ResultPath { get; set; } = new List<T>();
-
-        private readonly HashSet<T> tmpGoals = new HashSet<T>();
-
-        private T searchStart;
-
         private readonly IAstarGraph<T> graph;
-
-        private readonly Dictionary<T, int> costSoFar = new Dictionary<T, int>();
-
-        private readonly PriorityQueue<(int, T), int> frontier = new PriorityQueue<(int, T), int>();
-
-        private List<T> neighbours = new List<T>();
 
         public AStarPathfinder(IAstarGraph<T> graph)
         {
             this.graph = graph;
         }
 
-        public void Search(T start, T goal)
-        {
-            this.PrepareSearch();
-            this.StartNewSearch(start);
-
-            tmpGoals.Add(goal);
-
-            ContinueSearch();
-        }
-
-        public void Search(T start, HashSet<T> goals)
-        {
-            this.PrepareSearch();
-            this.StartNewSearch(start);
-
-            foreach (var goal in goals)
-            {
-                this.tmpGoals.Add(goal);
-            }
-
-            ContinueSearch();
-        }
-
-        public void Search(T start, int additionalDepth)
-        {
-            this.PrepareSearch();
-            this.StartNewSearch(start);
-
-            InternalSearch(additionalDepth);
-        }
-
-        public void Search(T start, T goal, int additionalDepth)
-        {
-            this.PrepareSearch();
-            this.StartNewSearch(start);
-
-            this.tmpGoals.Add(goal);
-
-            ContinueSearch(additionalDepth);
-        }
-
-        public void Search(T start, HashSet<T> goals, int additionalDepth)
-        {
-            this.PrepareSearch();
-            this.StartNewSearch(start);
-
-            foreach (var goal in goals)
-            {
-                this.tmpGoals.Add(goal);
-            }
-
-            ContinueSearch(additionalDepth);
-        }
-
-        public void ContinueSearch()
-        {
-            this.ResultPath.Clear();
-            if (tmpGoals.Count == 0)
-            {
-                return;
-            }
-
-            ContinueSearch(int.MaxValue);
-        }
-
-        public void ContinueSearch(int additionalDepth)
-        {
-            this.ResultPath.Clear();
-            var (target, isFound) = InternalSearch(additionalDepth);
-            if (isFound)
-            {
-                PathConstructor.RecontructPath(VisitedNodes, searchStart, target, this.ResultPath);
-            }
-        }
-
-        private ValueTuple<T, bool> InternalSearch(int additionalDepth)
+        internal override ValueTuple<T, bool> InternalSearch(int additionalDepth)
         {
             var goal = this.GetFirstGoal();
 
@@ -144,23 +54,6 @@
             }
 
             throw new Exception("No goals found.");
-        }
-
-        private void PrepareSearch()
-        {
-            this.ResultPath.Clear();
-            this.frontier.Clear();
-            this.VisitedNodes.Clear();
-            this.tmpGoals.Clear();
-            this.costSoFar.Clear();
-        }
-
-        private void StartNewSearch(T start)
-        {
-            this.searchStart = start;
-            this.VisitedNodes.Add(start, start);
-            this.frontier.Enqueue(new ValueTuple<int, T>(0, start), 0);
-            this.costSoFar[start] = 0;
         }
     }
 }
