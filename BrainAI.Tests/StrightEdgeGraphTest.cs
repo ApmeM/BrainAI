@@ -260,8 +260,8 @@ namespace BrainAI.Pathfinding
             // WARNING: Do not use Astar here as AStar is not really multigoal search as it have a heuristics calculations based on a single target. Instead it took first goal from set and tries to get to it. 
             // If you want to use AStar here - please provide the exact end goal point (e.g. find the closest points from all the visible points and use it).
             var pathfinder = new WeightedPathfinder<Point>(graph);
-            pathfinder.Search(starts.OrderBy(a => (a - start).LengthQuad).First(), ends);
-            if (pathfinder.ResultPath.Count == 0)
+            pathfinder.Search(starts.OrderBy(a => (a - start).LengthQuad).First(), ends, result);
+            if (result.Count == 0)
             {
                 // Path not found.
                 return null;
@@ -269,26 +269,26 @@ namespace BrainAI.Pathfinding
 
             // As we start from closest start point it might happen that some further points are also visible and we can remove them from the list.
             var found = false;
-            for (var i = pathfinder.ResultPath.Count; i > 0; i--)
+            for (var i = result.Count; i > 0; i--)
             {
                 if (found)
                 {
-                    pathfinder.ResultPath.RemoveAt(i - 1);
+                    result.RemoveAt(i - 1);
                     continue;
                 }
-                found = starts.Contains(pathfinder.ResultPath[i - 1]);
+                found = starts.Contains(result[i - 1]);
             }
 
             // Add start and end points if they are not on the graph.
-            if (pathfinder.ResultPath[pathfinder.ResultPath.Count - 1] != end)
+            if (result[result.Count - 1] != end)
             {
-                pathfinder.ResultPath.Add(end);
+                result.Add(end);
             }
-            if (pathfinder.ResultPath[0] != start)
+            if (result[0] != start)
             {
-                pathfinder.ResultPath.Insert(0, start);
+                result.Insert(0, start);
             }
-            return new List<Point>(pathfinder.ResultPath);
+            return new List<Point>(result);
         }
     }
 }

@@ -10,12 +10,14 @@ namespace BrainAI.Tests
     {
         private GridGraph graph;
         private ICoveragePathfinder<Point> pathfinder;
+        private List<Point> result = new List<Point>();
 
         [SetUp]
         public void Setup()
         {
             this.graph = new GridGraph(10, 10);
             this.pathfinder = new WeightedPathfinder<Point>(graph);
+            this.result.Clear();
         }
 
         [Test]
@@ -34,11 +36,11 @@ namespace BrainAI.Tests
             graph.Walls.Add(new Point(2, 1));
             graph.Walls.Add(new Point(1, 0));
             graph.Walls.Add(new Point(0, 0));
-            pathfinder.Search(new Point(1, 1), new Point(2, 2));
+            pathfinder.Search(new Point(1, 1), new Point(2, 2), result);
             CollectionAssert.AreEqual(new List<Point> {
                 new Point(1, 1),
                 new Point(2, 2)
-            }, pathfinder.ResultPath);
+            }, result);
         }
 
         [Test]
@@ -50,12 +52,12 @@ namespace BrainAI.Tests
              _#2_
             */
             graph.Walls.Add(new Point(1, 2));
-            pathfinder.Search(new Point(1, 1), new Point(2, 2));
+            pathfinder.Search(new Point(1, 1), new Point(2, 2), result);
             CollectionAssert.AreEqual(new List<Point> {
                 new Point(1, 1),
                 new Point(2, 1),
                 new Point(2, 2)
-            }, pathfinder.ResultPath);
+            }, result);
         }
 
         [Test]
@@ -71,7 +73,7 @@ namespace BrainAI.Tests
             graph.Walls.Add(new Point(2, 1));
             graph.Walls.Add(new Point(1, 0));
             graph.Walls.Add(new Point(0, 0));
-            pathfinder.Search(new Point(1, 1), new Point(2, 2));
+            pathfinder.Search(new Point(1, 1), new Point(2, 2), result);
             CollectionAssert.AreEqual(new List<Point> {
                 new Point(1, 1),
                 new Point(0, 1),
@@ -80,7 +82,7 @@ namespace BrainAI.Tests
                 new Point(1, 3),
                 new Point(2, 3),
                 new Point(2, 2)
-            }, pathfinder.ResultPath);
+            }, result);
         }
 
         [Test]
@@ -96,8 +98,8 @@ namespace BrainAI.Tests
             graph.Walls.Add(new Point(2, 1));
             graph.Walls.Add(new Point(1, 0));
             graph.Walls.Add(new Point(0, 1));
-            pathfinder.Search(new Point(1, 1), new Point(2, 2));
-            Assert.IsEmpty(pathfinder.ResultPath);
+            pathfinder.Search(new Point(1, 1), new Point(2, 2), result);
+            Assert.IsEmpty(result);
         }
 
         [Test]
@@ -166,12 +168,12 @@ namespace BrainAI.Tests
              _#2_
             */
             graph.Walls.Add(new Point(1, 2));
-            pathfinder.Search(new Point(1, 1), new HashSet<Point> { new Point(3, 2), new Point(2, 2) });
+            pathfinder.Search(new Point(1, 1), new HashSet<Point> { new Point(3, 2), new Point(2, 2) }, result);
             CollectionAssert.AreEqual(new List<Point> {
                 new Point(1, 1),
                 new Point(2, 1),
                 new Point(2, 2)
-            }, pathfinder.ResultPath);
+            }, result);
         }
 
         [Test]
@@ -184,19 +186,19 @@ namespace BrainAI.Tests
              __3_
             */
             graph.Walls.Add(new Point(1, 2));
-            pathfinder.Search(new Point(1, 1), new HashSet<Point> { new Point(2, 3), new Point(2, 2) });
+            pathfinder.Search(new Point(1, 1), new HashSet<Point> { new Point(2, 3), new Point(2, 2) }, result);
             CollectionAssert.AreEqual(new List<Point> {
                 new Point(1, 1),
                 new Point(2, 1),
                 new Point(2, 2)
-            }, pathfinder.ResultPath);
-            pathfinder.ContinueSearch();
+            }, result);
+            pathfinder.ContinueSearch(result);
             CollectionAssert.AreEqual(new List<Point> {
                 new Point(1, 1),
                 new Point(2, 1),
                 new Point(2, 2),
                 new Point(2, 3)
-            }, pathfinder.ResultPath);
+            }, result);
         }
         
         [Test]
@@ -209,20 +211,20 @@ namespace BrainAI.Tests
              __3_
             */
             graph.Walls.Add(new Point(1, 2));
-            pathfinder.Search(new Point(1, 1), new Point(2, 3));
+            pathfinder.Search(new Point(1, 1), new Point(2, 3), result);
             CollectionAssert.AreEqual(new List<Point> {
                 new Point(1, 1),
                 new Point(2, 1),
                 new Point(2, 2),
                 new Point(2, 3)
-            }, pathfinder.ResultPath);
-            pathfinder.Search(new Point(1, 1), new Point(2, 3));
+            }, result);
+            pathfinder.Search(new Point(1, 1), new Point(2, 3), result);
             CollectionAssert.AreEqual(new List<Point> {
                 new Point(1, 1),
                 new Point(2, 1),
                 new Point(2, 2),
                 new Point(2, 3)
-            }, pathfinder.ResultPath);
+            }, result);
         }
 
         [Test]
@@ -241,12 +243,12 @@ namespace BrainAI.Tests
             graph.Walls.Add(new Point(2, 0));
             graph.Walls.Add(new Point(2, 1));
             graph.Walls.Add(new Point(2, 2));
-            pathfinder.Search(new Point(1, 1), new Point(1, 3));
+            pathfinder.Search(new Point(1, 1), new Point(1, 3), result);
             CollectionAssert.AreEqual(new List<Point> {
                 new Point(1, 1),
                 new Point(1, 2),
                 new Point(1, 3)
-            }, pathfinder.ResultPath);
+            }, result);
 
             
             /*
@@ -256,8 +258,8 @@ namespace BrainAI.Tests
              ____
             */
             graph.Walls.Add(new Point(1, 2));
-            pathfinder.Search(new Point(1, 1), new Point(1, 3));
-            CollectionAssert.IsEmpty(pathfinder.ResultPath);
+            pathfinder.Search(new Point(1, 1), new Point(1, 3), result);
+            CollectionAssert.IsEmpty(result);
         }
 
         [Test]
@@ -270,12 +272,12 @@ namespace BrainAI.Tests
              __3_
             */
             graph.Walls.Add(new Point(1, 2));
-            pathfinder.Search(new Point(1, 2), new Point(2, 3));
+            pathfinder.Search(new Point(1, 2), new Point(2, 3), result);
             CollectionAssert.AreEqual(new List<Point> {
                 new Point(1, 2),
                 new Point(2, 2),
                 new Point(2, 3)
-            }, pathfinder.ResultPath);
+            }, result);
         }
     }
 }

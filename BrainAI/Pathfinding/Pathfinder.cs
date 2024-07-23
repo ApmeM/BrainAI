@@ -7,8 +7,6 @@ namespace BrainAI.Pathfinding
     {
         public Dictionary<T, T> VisitedNodes { get; } = new Dictionary<T, T>();
 
-        public List<T> ResultPath { get; set; } = new List<T>();
-
         protected readonly HashSet<T> tmpGoals = new HashSet<T>();
 
         protected T searchStart;
@@ -19,17 +17,17 @@ namespace BrainAI.Pathfinding
 
         protected List<T> neighbours = new List<T>();
 
-        public void Search(T start, T goal)
+        public void Search(T start, T goal, ICollection<T> resultPath)
         {
             this.PrepareSearch();
             this.StartNewSearch(start);
 
             tmpGoals.Add(goal);
 
-            ContinueSearch();
+            ContinueSearch(resultPath);
         }
 
-        public void Search(T start, HashSet<T> goals)
+        public void Search(T start, HashSet<T> goals, ICollection<T> resultPath)
         {
             this.PrepareSearch();
             this.StartNewSearch(start);
@@ -39,20 +37,20 @@ namespace BrainAI.Pathfinding
                 this.tmpGoals.Add(goal);
             }
 
-            ContinueSearch();
+            ContinueSearch(resultPath);
         }
 
-        public void Search(T start, T goal, int additionalDepth)
+        public void Search(T start, T goal, int additionalDepth, ICollection<T> resultPath)
         {
             this.PrepareSearch();
             this.StartNewSearch(start);
 
             this.tmpGoals.Add(goal);
 
-            ContinueSearch(additionalDepth);
+            ContinueSearch(additionalDepth, resultPath);
         }
 
-        public void Search(T start, HashSet<T> goals, int additionalDepth)
+        public void Search(T start, HashSet<T> goals, int additionalDepth, ICollection<T> resultPath)
         {
             this.PrepareSearch();
             this.StartNewSearch(start);
@@ -62,33 +60,32 @@ namespace BrainAI.Pathfinding
                 this.tmpGoals.Add(goal);
             }
 
-            ContinueSearch(additionalDepth);
+            ContinueSearch(additionalDepth, resultPath);
         }
 
-        public void ContinueSearch()
+        public void ContinueSearch(ICollection<T> resultPath)
         {
-            this.ResultPath.Clear();
+            resultPath.Clear();
             if (tmpGoals.Count == 0)
             {
                 return;
             }
 
-            ContinueSearch(int.MaxValue);
+            ContinueSearch(int.MaxValue, resultPath);
         }
 
-        public void ContinueSearch(int additionalDepth)
+        public void ContinueSearch(int additionalDepth, ICollection<T> resultPath)
         {
-            this.ResultPath.Clear();
+            resultPath.Clear();
             var (target, isFound) = InternalSearch(additionalDepth);
             if (isFound)
             {
-                PathConstructor.RecontructPath(VisitedNodes, searchStart, target, this.ResultPath);
+                PathConstructor.RecontructPath(VisitedNodes, searchStart, target, resultPath);
             }
         }
 
         protected void PrepareSearch()
         {
-            this.ResultPath.Clear();
             this.frontier.Clear();
             this.VisitedNodes.Clear();
             this.tmpGoals.Clear();

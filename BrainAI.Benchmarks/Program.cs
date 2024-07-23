@@ -51,6 +51,7 @@ public class Program
     private IPathfinder<Point>? pathfinder;
     private GridGraph? gridGraph;
     private StrightEdgeGraph strightEdgeGraph = new StrightEdgeGraph();
+    private List<Point> result = new List<Point>();
 
     [GlobalSetup]
     public void Setup()
@@ -105,11 +106,11 @@ public class Program
     {
         var start = this.GraphType == GraphTypes.Grid ? new Point(0, 0) : new Point(0, 1);
         var end = this.GraphType == GraphTypes.Grid ? new Point((int)MapSize - 1, (int)MapSize - 1) : new Point((int)MapSize - 5, (int)MapSize - 4);
+        
         for (var i = 0; i < (int)this.RunsCount; i++)
         {
-            this.pathfinder!.Search(start, end);
-            var pathData = this.pathfinder!.ResultPath;
-            if (pathData.Count == 0)
+            this.pathfinder!.Search(start, end, result);
+            if (result.Count == 0)
             {
                 throw new System.Exception("Path not found.");
             }
