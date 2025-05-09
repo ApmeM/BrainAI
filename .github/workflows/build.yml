@@ -26,14 +26,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 2.2.108
           source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
         env:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -56,7 +55,7 @@ jobs:
         run: dotnet pack -c Release -p:PackageVersion=1.0.0.0
 
       - name: Upload windows artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: nuget
           path: ./BrainAI/bin/Release/BrainAI.*.nupkg
@@ -65,17 +64,16 @@ jobs:
   godot:
     needs: build
     runs-on: ubuntu-latest
-    name: Build artifacts
+    name: Build godot artifacts
     steps:
       - name: Checkout
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 2.2.108
           source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
         env:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -86,18 +84,19 @@ jobs:
 
       - name: Export game
         id: export
-        uses: firebelley/godot-export@v4.4.0
+        uses: firebelley/godot-export@v6.0.0
         with:
-          godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/3.5.1/mono/Godot_v3.5.1-stable_mono_linux_headless_64.zip
-          godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/3.5.1/mono/Godot_v3.5.1-stable_mono_export_templates.tpz
+          godot_executable_download_url: https://github.com/godotengine/godot/releases/download/3.6-stable/Godot_v3.6-stable_mono_linux_headless_64.zip
+          godot_export_templates_download_url: https://github.com/godotengine/godot/releases/download/3.6-stable/Godot_v3.6-stable_mono_export_templates.tpz
           relative_project_path: ./BrainAI.Demo/
           export_debug: false
           use_preset_export_path: true
+          use_godot_3: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Upload pages artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ${{ steps.export.outputs.build_directory }}/HTML5
 
@@ -111,10 +110,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Pages
-        uses: actions/configure-pages@v2
+        uses: actions/configure-pages@v5
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4
 
   pack:
     needs: build
@@ -123,13 +122,13 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v4
         with:
           name: nuget
           path: ./artifacts
 
       - name: Setup nuget
-        uses: nuget/setup-nuget@v1
+        uses: nuget/setup-nuget@v2
         with:
           nuget-version: 'latest'
 
