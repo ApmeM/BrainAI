@@ -148,6 +148,20 @@ namespace BrainAI.Tests
         }
 
         [Test]
+        public void Search_EmptyGoals_NothingVisited()
+        {
+            /*
+             ____
+             _0__
+             _#__
+             ____
+            */
+            graph.Walls.Add(new Point(1, 2));
+            pathfinder.Search(new Point(1, 1), new HashSet<Point> { }, result);
+            Assert.AreEqual(1, pathfinder.VisitedNodes.Count);
+        }
+
+        [Test]
         public void Search_TwiceWithSuccess_PathCleared()
         {
             /*
