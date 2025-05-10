@@ -162,6 +162,8 @@ var path = new AstarPathfinder<Point>(graph).Search( new Point( 3, 4 ), new Poin
 
 # Graphs
 
+## Predefined graphs
+
 4 types of graphs available out of the box:
 
 - GridGraph - Graph represents a 2d array (not really implemented this way). Each point is connected to its neighbours to the left/right/up/down and diagonals (if enabled). Have a natural borders of 0 x 0 to Width x Height. Walls are specified in a HashSet.
@@ -280,3 +282,14 @@ GridToStrightEdgeConverter.Default.BuildGraph(grid, graph, 10);
 var pathData = new AStarPathfinder<Point>(graph).Search(new Point(15, 15), new Point(35, 15));
 // The result will be: 15x15, 20x20, 30x200, 35x15
 ```
+
+## Custom graphs
+
+It is also possible to create a custom graph based on a class you already have.
+To be able to use the graph in pathfinding it should implement one of the following interfaces:
+
+- IUnweightedGraph<T> GetNeighbors method
+- IWeightedGraph<T>: IUnweightedGraph<T> + Cost method and 
+- IAstarGraph<T>: IWeightedGraph<T> + Heuristic method
+
+This implementation is useful n case you already have a map representation in your classes and do not want to copy its data to one of the predefined graphs.

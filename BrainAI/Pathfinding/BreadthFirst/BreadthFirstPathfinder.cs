@@ -29,6 +29,7 @@
 
                 frontier.Dequeue();
 
+                neighbours.Clear();
                 graph.GetNeighbors(current.Item2, neighbours);
 
                 foreach (var next in neighbours)

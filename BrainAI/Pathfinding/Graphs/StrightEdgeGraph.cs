@@ -239,8 +239,6 @@ namespace BrainAI.Pathfinding
         {
             this.ApplyChanges();
 
-            result.Clear();
-
             if (!connections.Contains(node))
             {
                 FindConnections(node, connections);

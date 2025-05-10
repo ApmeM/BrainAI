@@ -15,8 +15,6 @@
 
         public void GetNeighbors(T node, ICollection<T> result)
         {
-            result.Clear();
-
             foreach(var edge in this.Edges[node])
             {
                 result.Add(edge);

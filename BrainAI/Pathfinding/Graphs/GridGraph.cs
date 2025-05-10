@@ -50,8 +50,6 @@
 
         public void GetNeighbors(Point node, ICollection<Point> result)
         {
-            result.Clear();
-
             foreach (var dir in this.dirs)
             {
                 var next = new Point(node.X + dir.X, node.Y + dir.Y);
