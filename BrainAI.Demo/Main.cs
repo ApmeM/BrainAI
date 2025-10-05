@@ -3,6 +3,7 @@ using System;
 using MazeGenerators;
 using MazeGenerators.Utils;
 using BrainAI.Pathfinding;
+using System.Collections.Generic;
 
 public class Main : Node2D
 {
@@ -13,6 +14,7 @@ public class Main : Node2D
         Random = new Random(0),
     };
     IPathfinder<Point> pathfinder;
+    List<Point> paths;
 
     public override void _Ready()
     {
@@ -38,8 +40,8 @@ public class Main : Node2D
             tileMap.SetCellv(new Godot.Vector2(x, y), 0, autotileCoord: new Godot.Vector2(0, 0));
         }
 
-        var result = pathfinder.ContinueSearch(1);
-        if (result != null)
+        pathfinder.ContinueSearch(1, this.paths);
+        if (this.paths.Count > 0)
         {
             pathfinder = null;
         }
@@ -49,21 +51,24 @@ public class Main : Node2D
     {
         var (graph, start, end) = BuildGraph();
         this.pathfinder = new BreadthFirstPathfinder<Point>(graph);
-        pathfinder.Search(start, end, 1);
+        this.paths = new List<Point>();
+        pathfinder.Search(start, end, 1, this.paths);
     }
 
     private void DijkstraPressed()
     {
         var (graph, start, end) = BuildGraph();
         this.pathfinder = new WeightedPathfinder<Point>(graph);
-        pathfinder.Search(start, end, 1);
+        this.paths = new List<Point>();
+        pathfinder.Search(start, end, 1, this.paths);
     }
 
     private void AStarPressed()
     {
         var (graph, start, end) = BuildGraph();
         this.pathfinder = new AStarPathfinder<Point>(graph);
-        pathfinder.Search(start, end, 1);
+        this.paths = new List<Point>();
+        pathfinder.Search(start, end, 1, this.paths);
     }
 
     private (GridGraph, Point, Point) BuildGraph()
