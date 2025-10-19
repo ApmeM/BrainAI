@@ -133,23 +133,74 @@ Selects the best Action from a list of Actions and its Appraisals attached to th
 - **LowestScoreReasoner<T>:** Selects action with minimum score
 - **Reasoner<T>:** Base class for custom implementations
 
-
 ## Appraisal
 Appraisals calculate and return a score which is used by the Reasoner to determine the action.
 
+- **IAppraisal<T>:** Base interface for custom implementations
 - **ActionAppraisal<T>:** Func wrapper for use as an Appraisal without having to create a subclass.
 - **FirstAppraisal<T>:** Returns first score that is above then threshold.
 - **FixedAppraisal<T>:** Always returns a fixed score.
 - **MaxAppraisal<T>:**  Return max score of child appraisals. For binary child appraisals (that returns 1 or 0) can be used as boolean 'OR' operator.
 - **MultiAppraisal<T>:** Scores by multiplying the score of all child Appraisals. For binary child appraisals (that returns 1 or 0) can be used as boolean 'AND' operator if threshold is set to 0.
 - **SumAppraisal<T>:** Scores if all child Appraisals score above the threshold. If threshold not specified - float.MinValue is used.
-- **IAppraisal<T>:** Base interface for custom implementations
 
+Additionaly there are a few helper Appraisals for binary operations. As an input those Appraisals take child's appraisals score and comparing them to 0 - treat it as false, other values treated as true:
+
+- **AndAppraisal** - return true(1) if all child appraisal scores treated as true, othervise false(0)
+- **OrAppraisal** - return true(1) if any child appraisal scores treated as true, othervise false(0)
+- **NotAppraisal** - return true(1) if child appraisal score treated as false, othervise false(0)
 
 ## Action
 The action that the AI executes when a specific consideration is selected.
 
-- **FirstScoreReasoner<T>:** Selects first action with score above the threshold
+- **FirstScoreReasoner<T>:** Selects first action with score above the threshold.
 - **HighestScoreReasoner<T>:** Selects the action with the highest score.
 - **LowestScoreReasoner<T>:** Selects the action with the lowest score.
 
+## Intents
+To execute lower level actions (like move to the point, or wait for attack animation) that is not eally related to decision making intents can be used.
+
+Example usecase:
+UtilityAI decide to move to specific point. But the move itself may take time, and during this time no other decisions should be made (unless something more urgent happens).
+
+To use intents the Context should implement **IIntentContainer<T>** and any low level action should implement **IIntent**
+
+To simplify integration with UtilityAI a few classes can be used:
+- **SetIntentAction** an action that sets specified IIntent to IIntentContainer.
+- **HasIntentAppraisal** checks that containser has Intent set, if yes - score is returned, othervise 0.
+- **UseIntentAction** an action that executes specified IIntent. Intent is cleared on Exit or when IIntent.Execute return true (finished).
+
+Example usage:
+
+``` csharp
+var reasoner = new FirstScoreReasoner<Unit>(1);
+// Intent phase. If there is an intent to act - intent will be executed.
+reasoner.Add(new HasIntentAppraisal<Unit>(2), new UseIntentAction<Unit>());
+// Decision phase. If there is no intent (previous one is finished, or not yet set) - find target to attack or move.
+reasoner.Add(new CanAttackAppraisal(), new SetIntentAction<Unit, AttackOpponentIntent>(new AttackIntent()));
+reasoner.Add(new CantAttackAppraisal(), new SetIntentAction<Unit, MoveIntent>(new MoveIntent()));
+```
+
+And MoveIntent can be like:
+
+``` csharp
+public class MoveIntent : IIntent<Unit>
+{
+    public void Enter(Unit unit)
+    {
+        unit.StartMoveAnimation();
+    }
+
+    public bool Execute(Unit unit)
+    {
+        // Recalculate unit position. It is done every tick.
+        unit.Position = unit.CalculateNewPosition();
+        // Finish move intent when unit at a target position.
+        return unit.Position == unit.MoveTarget;
+    }
+
+    public void Exit(Unit unit)
+    {
+    }
+}
+```
