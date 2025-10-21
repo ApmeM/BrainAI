@@ -153,9 +153,10 @@ Additionaly there are a few helper Appraisals for binary operations. As an input
 ## Action
 The action that the AI executes when a specific consideration is selected.
 
-- **FirstScoreReasoner<T>:** Selects first action with score above the threshold.
-- **HighestScoreReasoner<T>:** Selects the action with the highest score.
-- **LowestScoreReasoner<T>:** Selects the action with the lowest score.
+- **ActionAction<T>:** Func wrapper for use as an Appraisal without having to create a subclass.
+- **CompositeAction<T>:** Executes multiple sub actions at a moment.
+- **ReasonerAction<T>:** Exectes another reasoner with subset of considerations.
+- **NoAction<T>:** Empty implementation. Do nothing.
 
 ## Intents
 To execute lower level actions (like move to the point, or wait for attack animation) that is not eally related to decision making intents can be used.
@@ -163,12 +164,18 @@ To execute lower level actions (like move to the point, or wait for attack anima
 Example usecase:
 UtilityAI decide to move to specific point. But the move itself may take time, and during this time no other decisions should be made (unless something more urgent happens).
 
-To use intents the Context should implement **IIntentContainer<T>** and any low level action should implement **IIntent**
+Each low level action should implement **IIntent**
+There are a few common intents:
+- **CompositeIntent:** Executes multiple sub intents. Returns true when all sub intents returns true at least once. NOTE: it has its own inner state to not execute finished sub intents.
+- **ActionIntent:** Func wrapper for use as an Appraisal without having to create a subclass.
 
 To simplify integration with UtilityAI a few classes can be used:
-- **SetIntentAction** an action that sets specified IIntent to IIntentContainer.
-- **HasIntentAppraisal** checks that containser has Intent set, if yes - score is returned, othervise 0.
+
+- **SetIntentAction:** an action that sets specified IIntent to IIntentContainer.
+- **HasIntentAppraisal:** checks that containser has Intent set, if yes - score is returned, othervise 0.
 - **UseIntentAction** an action that executes specified IIntent. Intent is cleared on Exit or when IIntent.Execute return true (finished).
+
+To use those classes the Context should implement **IIntentContainer<T>** 
 
 Example usage:
 
@@ -177,8 +184,8 @@ var reasoner = new FirstScoreReasoner<Unit>(1);
 // Intent phase. If there is an intent to act - intent will be executed.
 reasoner.Add(new HasIntentAppraisal<Unit>(2), new UseIntentAction<Unit>());
 // Decision phase. If there is no intent (previous one is finished, or not yet set) - find target to attack or move.
-reasoner.Add(new CanAttackAppraisal(), new SetIntentAction<Unit, AttackOpponentIntent>(new AttackIntent()));
-reasoner.Add(new CantAttackAppraisal(), new SetIntentAction<Unit, MoveIntent>(new MoveIntent()));
+reasoner.Add(new CanAttackAppraisal(), new SetIntentAction<Unit, AttackOpponentIntent>((context) => new AttackIntent(context.opponent)));
+reasoner.Add(new CantAttackAppraisal(), new SetIntentAction<Unit, MoveIntent>((context) => new MoveIntent(context.opponent.Position)));
 ```
 
 And MoveIntent can be like:
