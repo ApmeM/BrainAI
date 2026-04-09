@@ -7,6 +7,17 @@ BrainAI is a set of helper classes to add AI to your game.
 - [InfluenceMap](BrainAI/InfluenceMap/README.md)
 - [Simulations](BrainAI/Simulations/README.md)
 
+Installing
+==========
+Install this repository as a source for nuget for dotnet:
+```
+dotnet nuget add source https://nuget.pkg.github.com/ApmeM/index.json -n nuget.org
+```
+Install package from new source:
+```
+dotnet add package BrainAI
+```
+
 Example
 ==========
 
