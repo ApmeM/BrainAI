@@ -56,5 +56,15 @@
                 ai.Tick();
             }
         }
+
+        [Test]
+        public void Coroutine_Test()
+        {
+            var ai = CoroutineMiner.BuildAI();
+            for (var i = 0; i < 100; i++)
+            {
+                ai.Tick();
+            }
+        }
     }
 }
